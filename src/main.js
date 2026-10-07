@@ -1,308 +1,301 @@
-import * as THREE from 'three';
-import { CLASS_WISHES, TREE_WISHES, STAGES } from './config.js';
+(() => {
+  'use strict';
 
-const canvas = document.querySelector('#game');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
-renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.08;
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+  const ui = {
+    action: document.getElementById('actionBtn'),
+    actionLabel: document.getElementById('actionLabel'),
+    stageNumber: document.getElementById('stageNumber'),
+    objectiveTitle: document.getElementById('objectiveTitle'),
+    objectiveText: document.getElementById('objectiveText'),
+    dialogue: document.getElementById('dialogue'),
+    dialogueName: document.getElementById('dialogueName'),
+    dialogueText: document.getElementById('dialogueText'),
+    classPanel: document.getElementById('classroomPanel'),
+    classWishes: document.getElementById('classWishes'),
+    dismissClass: document.getElementById('dismissClass'),
+    finalPanel: document.getElementById('finalPanel'),
+    replay: document.getElementById('replayBtn'),
+    fade: document.getElementById('fade'),
+    loading: document.getElementById('loading')
+  };
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#b9dcff');
-scene.fog = new THREE.Fog('#bfdfff', 18, 78);
+  const CLASS_WISHES = [
+    'Chúc cô luôn mạnh khỏe 💗','Chúc mẹ 20/11 thật vui vẻ 💗','Cảm ơn cô vì tất cả!',
+    'Chúc cô luôn hạnh phúc','Biết ơn cô rất nhiều','Chúc cô luôn thành công',
+    'Chúc cô luôn bình an','Cảm ơn cô đã luôn kiên nhẫn','Cảm ơn cô vì đã truyền cảm hứng',
+    'Chúc cô giữ mãi nụ cười','Chúc cô luôn trẻ trung','Cảm ơn cô đã luôn tin tưởng chúng em',
+    'Chúc cô thật nhiều sức khỏe','Chúc cô luôn an yên','Chúc cô mãi là người thầy tuyệt vời',
+    'Chúc cô gặp thật nhiều may mắn','Cảm ơn cô vì những bài học quý giá','Chúc cô luôn vững tin',
+    'Chúc cô nhiều niềm vui mỗi ngày','Chúc cô luôn được yêu thương','Cảm ơn cô đã dìu dắt chúng em',
+    'Chúc cô luôn tỏa sáng','Chúc cô thật nhiều điều tốt đẹp','Chúc cô luôn đủ đầy yêu thương',
+    'Chúc cô mãi hạnh phúc bên gia đình'
+  ];
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 400);
-camera.position.set(0, 4.8, 10);
+  const STAGES = [
+    ['Gặp Mầm Nhỏ','Chạm để bắt đầu hành trình đặc biệt.','Bắt đầu'],
+    ['Khu vườn trên mây','Theo Mầm Nhỏ qua khu vườn và con đường hoa.','Đi tiếp'],
+    ['Đến trường của mẹ','Đi theo con đường hoa đến cổng trường.','Đến trường'],
+    ['Bước qua cánh cổng','Đi qua hành lang và tìm lớp học của mẹ.','Vào lớp'],
+    ['Những lời chúc','Lắng nghe những lời chúc học trò dành tặng cô.','Mở lời chúc'],
+    ['Về nhà thôi','Tan học rồi. Cùng Mầm Nhỏ trở về tổ ấm.','Lên xe'],
+    ['Tổ ấm của mẹ','Gặp gia đình và đi lên tầng cao nhất.','Lên tầng 3'],
+    ['Cây điều ước','Chạm để tất cả lời chúc nở thành hoa trên cây.','Nở hoa']
+  ];
 
-const root = new THREE.Group();
-scene.add(root);
-
-const hemi = new THREE.HemisphereLight(0xffffff, 0x9b7b70, 2.1);
-scene.add(hemi);
-const sun = new THREE.DirectionalLight(0xfff0d2, 3.1);
-sun.position.set(-12, 22, 14);
-sun.castShadow = true;
-sun.shadow.mapSize.set(1536,1536);
-sun.shadow.camera.left = -25; sun.shadow.camera.right = 25; sun.shadow.camera.top = 25; sun.shadow.camera.bottom = -25;
-scene.add(sun);
-
-const clock = new THREE.Clock();
-let stage = 0;
-let busy = false;
-let mascot;
-let car;
-let activeMotion = null;
-let treeBloomers = [];
-let portal;
-let floatingObjects = [];
-let cameraLook = new THREE.Vector3(0,1.6,0);
-let mouseYaw = 0;
-
-const ui = {
-  action: document.querySelector('#actionBtn'),
-  actionLabel: document.querySelector('#actionLabel'),
-  stageNumber: document.querySelector('#stageNumber'),
-  objectiveTitle: document.querySelector('#objectiveTitle'),
-  objectiveText: document.querySelector('#objectiveText'),
-  dialogue: document.querySelector('#dialogue'),
-  dialogueName: document.querySelector('#dialogueName'),
-  dialogueText: document.querySelector('#dialogueText'),
-  classPanel: document.querySelector('#classroomPanel'),
-  classWishes: document.querySelector('#classWishes'),
-  dismissClass: document.querySelector('#dismissClass'),
-  finalPanel: document.querySelector('#finalPanel'),
-  replay: document.querySelector('#replayBtn'),
-  fade: document.querySelector('#fade'),
-  loading: document.querySelector('#loading')
-};
-
-CLASS_WISHES.forEach(w => {
-  const el = document.createElement('div');
-  el.className = 'wish-card';
-  el.textContent = w;
-  ui.classWishes.append(el);
-});
-
-function mat(color, rough=.72, metal=.02) { return new THREE.MeshStandardMaterial({ color, roughness:rough, metalness:metal }); }
-function mesh(geo, material, cast=true, receive=true) {
-  const m = new THREE.Mesh(geo, material); m.castShadow=cast; m.receiveShadow=receive; return m;
-}
-function addBox(group, size, pos, color, round=false) {
-  const g = new THREE.BoxGeometry(size[0],size[1],size[2], round ? 3 : 1, round ? 3 : 1, round ? 3 : 1);
-  const m = mesh(g,mat(color)); m.position.set(...pos); group.add(m); return m;
-}
-function addSphere(group, r, pos, color, scale=[1,1,1]) {
-  const m=mesh(new THREE.SphereGeometry(r,24,16),mat(color)); m.position.set(...pos); m.scale.set(...scale); group.add(m); return m;
-}
-function addCylinder(group, rt, rb, h, pos, color, seg=18) {
-  const m=mesh(new THREE.CylinderGeometry(rt,rb,h,seg),mat(color)); m.position.set(...pos); group.add(m); return m;
-}
-function cloud(group,x,y,z,s=1){
-  const c=new THREE.Group();
-  [[0,0,0,1.2],[1.1,.15,.1,.95],[-1,.1,.15,.9],[.35,.55,0,.85],[-.35,.45,.05,.75]].forEach(([px,py,pz,sc])=>addSphere(c,.9,[px,py,pz],'#fffaf7',[1.25*sc,.75*sc,sc]));
-  c.position.set(x,y,z); c.scale.setScalar(s); group.add(c); return c;
-}
-function flower(group,x,y,z,scale=1,color='#ff8eb2'){
-  const f=new THREE.Group();
-  addCylinder(f,.05,.06,.65,[0,.3,0],'#5f9b56',7);
-  for(let i=0;i<5;i++){ const a=i*Math.PI*2/5; const p=addSphere(f,.16,[Math.cos(a)*.18,.72,Math.sin(a)*.18],color,[1.15,.72,.8]); p.rotation.z=-a; }
-  addSphere(f,.11,[0,.72,0],'#ffd66d'); f.position.set(x,y,z); f.scale.setScalar(scale); group.add(f); return f;
-}
-function textPlane(text, width=6, height=1.5, fontSize=54, bg='rgba(255,255,255,.92)', fg='#7a4b55'){
-  const c=document.createElement('canvas'); c.width=1024; c.height=256; const ctx=c.getContext('2d');
-  ctx.fillStyle=bg; roundRect(ctx,18,18,988,220,46); ctx.fill();
-  ctx.fillStyle=fg; ctx.font=`800 ${fontSize}px system-ui`; ctx.textAlign='center'; ctx.textBaseline='middle';
-  const lines=String(text).split('\n'); lines.forEach((ln,i)=>ctx.fillText(ln,512,128+(i-(lines.length-1)/2)*(fontSize+8)));
-  const tx=new THREE.CanvasTexture(c); tx.colorSpace=THREE.SRGBColorSpace;
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(width,height),new THREE.MeshBasicMaterial({map:tx,transparent:true,depthWrite:false})); return m;
-}
-function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r);}
-
-function makeMascot(){
-  const g=new THREE.Group(); g.name='mascot';
-  addSphere(g,1.08,[0,1.35,0],'#fff6ed',[1,1.02,.9]);
-  addSphere(g,.83,[0,2.45,.02],'#fff8f0',[1.05,.95,.92]);
-  addSphere(g,.09,[-.28,2.55,.72],'#2d2424'); addSphere(g,.09,[.28,2.55,.72],'#2d2424');
-  addSphere(g,.13,[-.49,2.35,.72],'#ff9eab',[1.25,.65,.4]); addSphere(g,.13,[.49,2.35,.72],'#ff9eab',[1.25,.65,.4]);
-  const smile=mesh(new THREE.TorusGeometry(.16,.035,8,20,Math.PI),mat('#5b343a')); smile.position.set(0,2.34,.76); smile.rotation.z=Math.PI; g.add(smile);
-  addCylinder(g,.04,.05,.35,[0,3.15,0],'#5f9c55',8).rotation.z=.1;
-  const l=addSphere(g,.24,[-.18,3.36,0],'#72b764',[1.25,.55,.7]); l.rotation.z=.45;
-  const r=addSphere(g,.24,[.2,3.36,0],'#72b764',[1.25,.55,.7]); r.rotation.z=-.45;
-  addSphere(g,.28,[-1.02,1.56,.02],'#fff6ed',[.7,1.2,.7]); addSphere(g,.28,[1.02,1.56,.02],'#fff6ed',[.7,1.2,.7]);
-  addSphere(g,.32,[-.48,.43,.04],'#fff1e6',[1.25,.55,1]); addSphere(g,.32,[.48,.43,.04],'#fff1e6',[1.25,.55,1]);
-  addBox(g,[1.0,1.0,.45],[0,1.55,-.82],'#825a3e');
-  addBox(g,[.86,.16,.13],[0,1.53,-1.07],'#d5a46f');
-  g.scale.setScalar(.78); return g;
-}
-
-function clearRoot(){ while(root.children.length) root.remove(root.children[0]); floatingObjects=[]; treeBloomers=[]; portal=null; car=null; }
-function addMascot(pos=[0,0,0],rotY=0){ mascot=makeMascot(); mascot.position.set(...pos); mascot.rotation.y=rotY; root.add(mascot); return mascot; }
-function groundPlane(group,w,d,z=0,color='#dff1d1'){ const p=mesh(new THREE.BoxGeometry(w,.4,d),mat(color),false,true); p.position.set(0,-.2,z); group.add(p); return p; }
-
-function buildIntro(){
-  scene.background.set('#b7d9ff'); scene.fog.color.set('#bedfff'); scene.fog.near=20; scene.fog.far=75;
-  for(let i=0;i<13;i++) cloud(root,(Math.random()-.5)*34,Math.random()*10-1,-Math.random()*42+10,Math.random()*1.8+.8);
-  const portalG=new THREE.Group();
-  const tor=mesh(new THREE.TorusGeometry(3.2,.28,18,80),new THREE.MeshStandardMaterial({color:'#8b6cff',emissive:'#8b6cff',emissiveIntensity:3,roughness:.25})); portalG.add(tor);
-  const inner=mesh(new THREE.CircleGeometry(2.95,64),new THREE.MeshBasicMaterial({color:'#120d2a'}),false,false); inner.position.z=-.04; portalG.add(inner);
-  for(let i=0;i<3;i++){ const t=mesh(new THREE.TorusGeometry(3.45+i*.34,.045,8,80),new THREE.MeshBasicMaterial({color:i%2?'#ffd5a6':'#c5a6ff',transparent:true,opacity:.8})); t.rotation.z=i*.4; portalG.add(t); }
-  portalG.position.set(0,6,-4); root.add(portalG); portal=portalG;
-  cloud(root,0,0,-3,2.25);
-  addMascot([0,5.7,-3.2],0);
-  mascot.scale.setScalar(.15);
-  const title=textPlane('Chúc mừng mẹ ngày Nhà giáo Việt Nam 20/11',10,1.6,40,'rgba(255,248,248,.90)','#d95682'); title.position.set(0,7.3,-8); root.add(title);
-  camera.position.set(0,5,13); cameraLook.set(0,2,-3);
-  setTimeout(()=>{ tween(1.8,t=>{ const e=easeOutBack(t); mascot.position.y=5.7-(5.7-1.05)*e; mascot.scale.setScalar(.15+(.78-.15)*e; }); },350);
-  showDialogue('Mầm Nhỏ','Xin chào! Mình sẽ dẫn bạn đi qua một hành trình đặc biệt dành tặng mẹ.');
-}
-
-function buildGarden(){
-  scene.background.set('#b9ddff'); scene.fog.color.set('#bfe2ff'); scene.fog.near=18; scene.fog.far=74;
-  for(let i=0;i<18;i++) cloud(root,(Math.random()-.5)*42,Math.random()*8-3,-Math.random()*65+18,Math.random()*1.4+.6);
-  const island=new THREE.Group(); root.add(island);
-  addCylinder(island,8,3.2,2,[0,-1,-5],'#d5c3a4',28); groundPlane(island,16,26,-13,'#d9efc4');
-  for(let z=-3;z>-27;z-=2.4){ flower(island,-3.4+Math.sin(z)*.6,.2,z,.9,['#ff8eb2','#ffd77d','#b98cff'][Math.abs(Math.round(z))%3]); flower(island,3.4+Math.cos(z)*.6,.2,z,.9,['#ff8eb2','#ffd77d','#b98cff'][Math.abs(Math.round(z+1))%3]); }
-  addMascot([0,10,2],0);
-  camera.position.set(0,8,12); cameraLook.set(0,3,-4);
-  setTimeout(()=>tween(1.7,t=>{const e=easeInOut(t); mascot.position.y=10-9*e; mascot.position.z=2-7*e; mascot.rotation.x=Math.sin(t*Math.PI)*.5;},()=>{mascot.rotation.x=0;}),120);
-  showDialogue('Mầm Nhỏ','Woa! Khu vườn trên mây đây rồi. Con đường hoa sẽ dẫn chúng ta tới trường của mẹ.');
-}
-
-function buildRoad(){
-  scene.background.set('#c8e8ff'); scene.fog.color.set('#d7ebff'); scene.fog.near=22; scene.fog.far=95;
-  groundPlane(root,14,90,-38,'#d9efc9');
-  const road=mesh(new THREE.BoxGeometry(5,.22,88),mat('#f4d9c3'),false,true); road.position.set(0,.02,-38); root.add(road);
-  for(let z=4;z>-82;z-=2){ flower(root,-3.5,.25,z,.75,(Math.floor(Math.abs(z))%4===0?'#f8cf70':'#ff8aae')); flower(root,3.5,.25,z,.75,(Math.floor(Math.abs(z))%5===0?'#a993ff':'#ff8aae')); }
-  for(let z=-5;z>-82;z-=12){ const post=addCylinder(root,.09,.11,2.7,[-5.3,1.35,z],'#6a5043',10); const lamp=addSphere(root,.25,[-5.3,2.82,z],'#fff3b7'); lamp.material.emissive=new THREE.Color('#ffd975'); lamp.material.emissiveIntensity=1.5; const post2=post.clone(); post2.position.x=5.3; root.add(post2); const lamp2=lamp.clone(); lamp2.position.x=5.3; root.add(lamp2); }
-  addBox(root,[24,7,5],[0,3.5,-88],'#f3d2a5'); addBox(root,[9,4,2],[0,6.7,-84.7],'#f2c48c');
-  addBox(root,[6,5,.6],[-7,2.5,-84.8],'#d9ecff'); addBox(root,[6,5,.6],[7,2.5,-84.8],'#d9ecff');
-  addBox(root,[1.2,6,1.2],[-5.4,3,-78.7],'#efd7af'); addBox(root,[1.2,6,1.2],[5.4,3,-78.7],'#efd7af');
-  addBox(root,[12,1.1,1],[0,6,-78.7],'#f0d7ae');
-  const sign=textPlane('TRƯỜNG TIỂU HỌC HOA MÂY',9.5,1.1,48,'rgba(255,252,239,.96)','#376b93'); sign.position.set(0,6.1,-78.05); root.add(sign);
-  addMascot([0,0.2,5],Math.PI);
-  camera.position.set(0,4.3,11); cameraLook.set(0,1.7,0);
-}
-
-function buildGateAndHall(){
-  scene.background.set('#e4eff9'); scene.fog.color.set('#f4eee7'); scene.fog.near=16; scene.fog.far=58;
-  groundPlane(root,18,34,-10,'#e8dccd');
-  for(let i=0;i<8;i++){ addBox(root,[.6,4,.6],[-7.4,2,-i*4],'#efe0cc'); addBox(root,[.6,4,.6],[7.4,2,-i*4],'#efe0cc'); }
-  addBox(root,[16,.5,34],[0,4.25,-10],'#f5e8d8');
-  addBox(root,[.4,3.2,30],[-7.8,1.6,-10],'#fff8ed'); addBox(root,[.4,3.2,30],[7.8,1.6,-10],'#fff8ed');
-  for(let z=0;z>-28;z-=6){ addSphere(root,.22,[-6.5,3.6,z],'#fff1a3').material.emissive=new THREE.Color('#ffd76a'); addSphere(root,.22,[6.5,3.6,z],'#fff1a3').material.emissive=new THREE.Color('#ffd76a'); }
-  addBox(root,[8,5,.4],[0,2.5,-28],'#8db4b8');
-  const sign=textPlane('LỚP HỌC YÊU THƯƠNG',6.5,1,42,'rgba(255,255,255,.96)','#5a7773'); sign.position.set(0,5.5,-27.7); root.add(sign);
-  addMascot([0,.2,5],Math.PI);
-  camera.position.set(0,4.2,11); cameraLook.set(0,1.7,0);
-}
-
-function stylizedPerson(group,x,z,shirt='#fff',hair='#3e2c27',scale=.72){
-  const p=new THREE.Group(); addCylinder(p,.38,.48,1.15,[0,.95,0],shirt,14); addSphere(p,.42,[0,1.8,0],'#f3c7a8'); addSphere(p,.44,[0,2.04,-.07],hair,[1,.5,1]); addCylinder(p,.12,.13,.8,[-.2,.25,0],'#e0b18e',10); addCylinder(p,.12,.13,.8,[.2,.25,0],'#e0b18e',10); p.position.set(x,0,z); p.scale.setScalar(scale); group.add(p); return p;
-}
-function buildClassroom(){
-  scene.background.set('#f4dfc8'); scene.fog.color.set('#f4dfc8'); scene.fog.near=28; scene.fog.far=65;
-  groundPlane(root,22,28,-5,'#d8b98e');
-  addBox(root,[22,9,.6],[0,4.5,-18],'#e4c3a1'); addBox(root,[.5,9,28],[-11,4.5,-5],'#f1dac0'); addBox(root,[.5,9,28],[11,4.5,-5],'#f1dac0');
-  addBox(root,[12,4,.35],[0,4.5,-17.55],'#3d6d5a');
-  const boardText=textPlane('Cảm ơn cô\nvì đã luôn ở đây!',8,2.4,46,'rgba(0,0,0,0)','#fff5df'); boardText.position.set(0,4.4,-17.3); root.add(boardText);
-  const teacher=new THREE.Group(); stylizedPerson(teacher,0,0,'#f29db4','#352826',1.2); teacher.position.set(0,0,-14.4); root.add(teacher);
-  for(let r=0;r<4;r++) for(let c=0;c<5;c++){ const x=(c-2)*3.3, z=-2-r*3.1; addBox(root,[2.5,.18,1.3],[x,1.05,z],'#b98258'); stylizedPerson(root,x,z-.1,c%2?'#f8f8f4':'#e8f3ff','#382820',.66); }
-  addMascot([0,.2,3],Math.PI); camera.position.set(0,5,12); cameraLook.set(0,2,-8);
-  showDialogue('Mầm Nhỏ','Có rất nhiều lời chúc đang chờ mẹ. Hãy mở chúng nhé!');
-}
-
-function makeCar(){
-  const g=new THREE.Group();
-  addBox(g,[3.4,.9,5],[0,.9,0],'#ed8b91');
-  addBox(g,[2.7,1.4,2.4],[0,1.75,-.25],'#f0a0a2');
-  addBox(g,[2.25,.85,.08],[0,1.85,1.0],'#9cc8d7');
-  [[-1.45,.55,1.6],[1.45,.55,1.6],[-1.45,.55,-1.55],[1.45,.55,-1.55]].forEach(p=>addCylinder(g,.44,.44,.35,p,'#3b3436',18).rotation.z=Math.PI/2);
-  g.scale.setScalar(.8); return g;
-}
-function buildDrive(){
-  scene.background.set('#f4b47f'); scene.fog.color.set('#f5c19a'); scene.fog.near=28; scene.fog.far=105;
-  groundPlane(root,22,120,-50,'#98b97f');
-  const road=mesh(new THREE.BoxGeometry(8,.22,118),mat('#756e6d'),false,true); road.position.set(0,.03,-50); root.add(road);
-  for(let z=5;z>-110;z-=7){ flower(root,-5,.3,z,.8,z%14===0?'#ffcf70':'#ff89aa'); flower(root,5,.3,z,.8,'#ff9fbd'); }
-  for(let i=0;i<12;i++) cloud(root,(Math.random()-.5)*34,7+Math.random()*8,-Math.random()*100,Math.random()+.7);
-  car=makeCar(); car.position.set(0,0,6); root.add(car); mascot=makeMascot(); mascot.scale.setScalar(.42); mascot.position.set(0,1.95,.35); mascot.rotation.y=Math.PI; car.add(mascot);
-  camera.position.set(0,5.5,15); cameraLook.set(0,2.0,0);
-}
-
-function buildHome(){
-  scene.background.set('#82658b'); scene.fog.color.set('#9a7a92'); scene.fog.near=28; scene.fog.far=80;
-  groundPlane(root,28,28,-4,'#668054');
-  for(let floor=0;floor<3;floor++){
-    const y=floor*4.5; addBox(root,[18,.35,12],[0,y,-7],'#cda77d'); addBox(root,[.4,4.5,12],[-9,y+2.25,-7],'#f5e5d1'); addBox(root,[.4,4.5,12],[9,y+2.25,-7],'#f5e5d1'); addBox(root,[18,4.5,.35],[0,y+2.25,-13],'#f0ddc8');
-  }
-  addBox(root,[18,.45,12],[0,13.5,-7],'#cda77d');
-  for(let floor=0;floor<3;floor++) for(let x=-6;x<=6;x+=6){ const lamp=addSphere(root,.18,[x,floor*4.5+3.8,-9],'#ffe7a3'); lamp.material.emissive=new THREE.Color('#ffcf71'); lamp.material.emissiveIntensity=2.4; }
-  stylizedPerson(root,0,-7,'#90a4b7','#2f2b2a',1.0).position.y=.25;
-  stylizedPerson(root,-2.2,-7,'#6aa6df','#342c29',.82).position.y=4.7;
-  stylizedPerson(root,2.2,-7,'#78b9e3','#342c29',.82).position.y=4.7;
-  const l1=textPlane('Tầng 1 · Bố luôn chờ về',6.6,.8,38,'rgba(77,49,47,.75)','#fff'); l1.position.set(-5.2,2.2,0); root.add(l1);
-  const l2=textPlane('Tầng 2 · Hai cậu con trai',6.6,.8,38,'rgba(77,49,47,.75)','#fff'); l2.position.set(-5.2,6.7,0); root.add(l2);
-  const l3=textPlane('Tầng 3 · Cây điều ước',6.6,.8,38,'rgba(77,49,47,.75)','#fff'); l3.position.set(-5.2,11.2,0); root.add(l3);
-  addMascot([0,.2,6],Math.PI); camera.position.set(0,5.2,15); cameraLook.set(0,4,-7);
-}
-
-function branch(group,a,b,r1=.28,r2=.08){
-  const start=new THREE.Vector3(...a), end=new THREE.Vector3(...b); const dir=end.clone().sub(start); const len=dir.length(); const m=mesh(new THREE.CylinderGeometry(r2,r1,len,10),mat('#7d5138')); m.position.copy(start.clone().add(end).multiplyScalar(.5)); m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize()); group.add(m); return m;
-}
-function buildTree(){
-  scene.background.set('#cf9db1'); scene.fog.color.set('#e3b7c4'); scene.fog.near=34; scene.fog.far=110;
-  groundPlane(root,34,34,-4,'#6f8d5f');
-  const tree=new THREE.Group(); root.add(tree);
-  branch(tree,[0,0,-8],[0,10,-8],1.25,.7);
-  branch(tree,[0,7,-8],[-5,14,-8],.55,.18); branch(tree,[0,8,-8],[5,14,-8],.55,.18); branch(tree,[0,9,-8],[-2,17,-8],.45,.12); branch(tree,[0,9,-8],[2.5,17,-8],.45,.12);
-  branch(tree,[-2.5,11,-8],[-8,15,-8],.3,.08); branch(tree,[2.5,11,-8],[8,15,-8],.3,.08);
-  const clusters=[[-6,14],[-3,16],[0,14],[3,16],[6,14],[-1,18],[1,18],[-8,15],[8,15]];
-  clusters.forEach(([x,y],i)=>{
-    const leaf=addSphere(tree,2.35,[x,y,-8],'#b86f84',[1.2,.85,1]); leaf.material.roughness=.9;
-    for(let j=0;j<7;j++){ const f=flower(tree,x+(Math.random()-.5)*3.2,y+(Math.random()-.5)*2.5,-6.2+(Math.random()-.5)*2,.55,['#ffabc4','#ffd3df','#fff0c7'][j%3]); f.scale.setScalar(.02); treeBloomers.push({obj:f,delay:(i*7+j)*.035}); }
+  CLASS_WISHES.forEach((w) => {
+    const el = document.createElement('div');
+    el.className = 'wish-card';
+    el.textContent = w;
+    ui.classWishes.appendChild(el);
   });
-  TREE_WISHES.slice(0,12).forEach((w,i)=>{ const a=i/12*Math.PI*2; const sign=textPlane(w,3.6,.75,32,'rgba(255,244,248,.94)','#b85679'); sign.position.set(Math.cos(a)*(6.5+(i%3)),12+(i%4)*1.5,-7+Math.sin(a)*3); sign.lookAt(camera.position); sign.scale.setScalar(.001); root.add(sign); treeBloomers.push({obj:sign,delay:.6+i*.06,sign:true}); });
-  addMascot([0,.2,5],Math.PI); camera.position.set(0,8.5,20); cameraLook.set(0,10,-8);
-}
 
-function setUI(){ const s=STAGES[stage]; ui.stageNumber.textContent=stage+1; ui.objectiveTitle.textContent=s.title; ui.objectiveText.textContent=s.text; ui.actionLabel.textContent=s.action; ui.action.disabled=busy; }
-function showDialogue(name,text){ ui.dialogueName.textContent=name; ui.dialogueText.textContent=text; ui.dialogue.classList.remove('hidden'); setTimeout(()=>ui.dialogue.classList.add('hidden'),4200); }
-function hidePanels(){ ui.classPanel.classList.add('hidden'); ui.finalPanel.classList.add('hidden'); }
-function fadeTransition(build, after){ busy=true; ui.action.disabled=true; ui.fade.classList.add('on'); setTimeout(()=>{ clearRoot(); build(); ui.fade.classList.remove('on'); setTimeout(()=>{busy=false; setUI(); after?.();},480); },470); }
-function tween(duration, update, done){ const start=performance.now(); const fn=(now)=>{ const t=Math.min(1,(now-start)/(duration*1000)); update(t); if(t<1)requestAnimationFrame(fn); else done?.();}; requestAnimationFrame(fn); }
-function easeInOut(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;}
-function easeOutBack(x){const c1=1.70158,c3=c1+1;return 1+c3*Math.pow(x-1,3)+c1*Math.pow(x-1,2);}
-function moveObject(obj, points, speed, done){ activeMotion={obj,points:points.map(p=>new THREE.Vector3(...p)),speed,index:0,done}; busy=true; ui.action.disabled=true; }
+  let W = 0, H = 0, DPR = 1;
+  let stage = 0;
+  let transition = 0;
+  let transitionDir = 0;
+  let nextStage = null;
+  let mouseX = 0;
+  let last = performance.now();
+  let time = 0;
+  let bloom = 0;
 
-function completeMotion(){ const d=activeMotion.done; activeMotion=null; busy=false; d?.(); setUI(); }
-function updateMotion(dt){ if(!activeMotion) return; const {obj,points,speed}=activeMotion; const target=points[activeMotion.index]; const delta=target.clone().sub(obj.position); const dist=delta.length(); if(dist<.18){ activeMotion.index++; if(activeMotion.index>=points.length){ completeMotion(); return; } } else { const dir=delta.normalize(); obj.position.addScaledVector(dir,Math.min(dist,speed*dt)); obj.rotation.y=Math.atan2(dir.x,dir.z); const bob=Math.sin(performance.now()*.014)*.05; obj.position.y=Math.max(obj.position.y,bob+.2); } }
+  const rnd = (n) => {
+    const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453;
+    return x - Math.floor(x);
+  };
 
-function advance(){
-  if(busy) return;
-  if(stage===0){ stage=1; fadeTransition(buildGarden); }
-  else if(stage===1){ stage=2; fadeTransition(buildRoad,()=>{ showDialogue('Mầm Nhỏ','Đi thôi! Chỉ cần chạm, mình sẽ chạy theo con đường hoa đến trường.'); }); }
-  else if(stage===2){ moveObject(mascot,[[0,.2,-18],[0,.2,-42],[0,.2,-67],[0,.2,-77]],6.2,()=>{stage=3; setUI(); showDialogue('Mầm Nhỏ','Đến cổng trường rồi. Bước vào nơi mẹ đã gieo bao hạt mầm tri thức nhé!');}); }
-  else if(stage===3){ stage=3; fadeTransition(buildGateAndHall,()=>{ moveObject(mascot,[[0,.2,-7],[0,.2,-18],[0,.2,-26]],4.8,()=>{ stage=4; setUI(); }); }); }
-  else if(stage===4){ stage=4; fadeTransition(buildClassroom,()=>{ setTimeout(()=>ui.classPanel.classList.remove('hidden'),700); ui.action.style.display='none'; }); }
-  else if(stage===5){ stage=5; fadeTransition(buildDrive,()=>{ setTimeout(()=>moveObject(car,[[0,0,-20],[0,0,-48],[0,0,-76],[0,0,-104]],12,()=>{stage=6; setUI(); showDialogue('Mầm Nhỏ','Về đến nhà rồi! Bố và hai anh đang chờ chúng ta bên trong.');}),500); }); }
-  else if(stage===6){ stage=6; fadeTransition(buildHome,()=>{ tween(4.6,t=>{ const e=easeInOut(t); mascot.position.y=.2+9.1*e; cameraLook.set(0,3+8*e,-7); camera.position.y=5.2+7*e; },()=>{stage=7; setUI(); showDialogue('Mầm Nhỏ','Trên tầng cao nhất là điều bất ngờ cuối cùng. Hãy làm cây điều ước nở hoa!');}); }); }
-  else if(stage===7){ stage=7; fadeTransition(buildTree,()=>{ busy=true; ui.action.disabled=true; tween(3.2,t=>{ treeBloomers.forEach(b=>{ const lt=Math.max(0,Math.min(1,(t-b.delay)/(1-b.delay))); const s=b.sign?Math.min(1,lt*1.35):easeOutBack(lt); b.obj.scale.setScalar(Math.max(.001,s*(b.sign?1:.55))); if(b.sign)b.obj.lookAt(camera.position); }); },()=>{ busy=false; ui.action.style.display='none'; ui.finalPanel.classList.remove('hidden'); }); }); }
-}
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 1.5);
+    W = Math.max(1, window.innerWidth);
+    H = Math.max(1, window.innerHeight);
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
 
-ui.action.addEventListener('click',advance);
-canvas.addEventListener('pointerdown',()=>{
-  const classroomOpen=!ui.classPanel.classList.contains('hidden');
-  const finalOpen=!ui.finalPanel.classList.contains('hidden');
-  if(!busy && !classroomOpen && !finalOpen && ui.action.style.display!=='none') advance();
-});
-ui.dismissClass.addEventListener('click',()=>{ ui.classPanel.classList.add('hidden'); ui.action.style.display='flex'; stage=5; setUI(); showDialogue('Mầm Nhỏ','Tan lớp rồi. Cùng mình đưa mẹ về nhà nhé!'); });
-ui.replay.addEventListener('click',()=>{ hidePanels(); ui.action.style.display='flex'; stage=0; fadeTransition(buildIntro); });
+  function roundedRect(x, y, w, h, r) {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
+  }
 
-window.addEventListener('pointermove',e=>{ mouseYaw=((e.clientX/innerWidth)-.5)*.45; });
-window.addEventListener('keydown',e=>{ if((e.key==='Enter'||e.key===' ')&&!busy) advance(); });
-window.addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); renderer.setPixelRatio(Math.min(devicePixelRatio,1.8)); });
+  function gradient(top, bottom) {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, top); g.addColorStop(1, bottom);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  }
 
-function updateCamera(dt){
-  if(!mascot && !car) return;
-  if(stage===2 || stage===3){ const p=mascot.position; const desired=new THREE.Vector3(p.x+Math.sin(mouseYaw)*5,p.y+4.2,p.z+9.2); camera.position.lerp(desired,1-Math.pow(.001,dt)); cameraLook.lerp(new THREE.Vector3(p.x,p.y+1.5,p.z-4),1-Math.pow(.003,dt)); }
-  else if(stage===5 && car){ const p=car.position; const desired=new THREE.Vector3(p.x+Math.sin(mouseYaw)*6,5.4,p.z+13); camera.position.lerp(desired,1-Math.pow(.0015,dt)); cameraLook.lerp(new THREE.Vector3(p.x,1.8,p.z-6),1-Math.pow(.003,dt)); }
-  else if(stage===1){ cameraLook.lerp(new THREE.Vector3(0,2,-7),.02); }
-  else if(stage===7){ cameraLook.lerp(new THREE.Vector3(0,10,-8),.015); }
-  camera.lookAt(cameraLook);
-}
+  function cloud(x, y, s = 1, a = 0.8) {
+    ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = '#fffdf9';
+    [[0,0,28],[28,6,22],[-27,7,21],[8,-15,23]].forEach(([dx,dy,r]) => {
+      ctx.beginPath(); ctx.arc(x + dx*s, y + dy*s, r*s, 0, Math.PI*2); ctx.fill();
+    });
+    ctx.restore();
+  }
 
-function animate(){
-  requestAnimationFrame(animate); const dt=Math.min(clock.getDelta(),.04); const t=performance.now()*.001;
-  updateMotion(dt); updateCamera(dt);
-  if(mascot && !activeMotion){ mascot.rotation.z=Math.sin(t*2.4)*.018; }
-  if(portal) portal.rotation.z+=dt*.28;
-  floatingObjects.forEach((o,i)=>o.position.y+=Math.sin(t*1.2+i)*.0008);
-  renderer.render(scene,camera);
-}
+  function flower(x, y, s = 1, color = '#ff8eb2') {
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+    ctx.strokeStyle = '#5f9b56'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, 10); ctx.lineTo(0, 34); ctx.stroke();
+    for (let i=0;i<5;i++) {
+      const a = i*Math.PI*2/5; ctx.fillStyle=color; ctx.beginPath(); ctx.ellipse(Math.cos(a)*9, Math.sin(a)*9, 7, 10, a, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.fillStyle='#ffd66d'; ctx.beginPath(); ctx.arc(0,0,5,0,Math.PI*2); ctx.fill(); ctx.restore();
+  }
 
-buildIntro(); setUI(); animate();
-setTimeout(()=>ui.loading.classList.add('done'),950);
+  function mascot(x, y, s = 1, bob = 0) {
+    ctx.save(); ctx.translate(x, y + bob); ctx.scale(s,s);
+    ctx.fillStyle='rgba(70,43,45,.16)'; ctx.beginPath(); ctx.ellipse(0,42,33,9,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#825a3e'; roundedRect(-24,-2,48,36,8); ctx.fill();
+    ctx.fillStyle='#fff6ed'; ctx.beginPath(); ctx.ellipse(0,-2,31,38,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0,-43,28,25,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='#2d2424'; ctx.beginPath(); ctx.arc(-9,-47,3,0,Math.PI*2); ctx.arc(9,-47,3,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#5b343a'; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(0,-39,7,0,Math.PI); ctx.stroke();
+    ctx.fillStyle='#ff9eab'; ctx.beginPath(); ctx.ellipse(-17,-38,6,3,0,0,Math.PI*2); ctx.ellipse(17,-38,6,3,0,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#5f9c55'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(0,-68); ctx.lineTo(1,-82); ctx.stroke();
+    ctx.fillStyle='#72b764'; ctx.beginPath(); ctx.ellipse(-7,-83,10,5,-.4,0,Math.PI*2); ctx.ellipse(9,-83,10,5,.4,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+
+  function sign(text, x, y, w, h, fs = 18, color = '#b85679') {
+    ctx.save(); ctx.fillStyle='rgba(255,250,250,.90)'; ctx.strokeStyle='rgba(255,255,255,.95)'; ctx.lineWidth=2;
+    roundedRect(x-w/2,y-h/2,w,h,18); ctx.fill(); ctx.stroke();
+    ctx.fillStyle=color; ctx.font=`800 ${fs}px system-ui`; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(text, x, y); ctx.restore();
+  }
+
+  function perspectiveRoad(horizonY, leftBottom, rightBottom, topHalf, color='#f2d8c4') {
+    const cx=W/2 + mouseX*18;
+    ctx.fillStyle=color; ctx.beginPath();
+    ctx.moveTo(cx-topHalf,horizonY); ctx.lineTo(cx+topHalf,horizonY); ctx.lineTo(cx+rightBottom,H); ctx.lineTo(cx-leftBottom,H); ctx.closePath(); ctx.fill();
+  }
+
+  function drawIntro(t) {
+    gradient('#a9d4ff','#ffd3dc');
+    for(let i=0;i<10;i++) cloud((rnd(i)*1.2-.1)*W, 80+rnd(i+9)*H*.45, .7+rnd(i+20)*1.1, .45+.4*rnd(i+30));
+    const cx=W/2 + mouseX*14, cy=H*.42;
+    ctx.save(); ctx.translate(cx,cy); ctx.rotate(t*.25);
+    ctx.strokeStyle='#8b6cff'; ctx.lineWidth=18; ctx.shadowBlur=28; ctx.shadowColor='#8b6cff'; ctx.beginPath(); ctx.arc(0,0,Math.min(W,H)*.16,0,Math.PI*2); ctx.stroke();
+    ctx.strokeStyle='#ffd5a6'; ctx.lineWidth=4; ctx.beginPath(); ctx.arc(0,0,Math.min(W,H)*.20,0,Math.PI*2); ctx.stroke(); ctx.restore();
+    mascot(cx, cy+Math.min(W,H)*.19, .9, Math.sin(t*2.3)*5);
+    sign('Chúc mừng mẹ ngày Nhà giáo Việt Nam 20/11', W/2, H*.15, Math.min(650,W*.8), 58, Math.min(22,W*.035));
+  }
+
+  function drawGarden(t) {
+    gradient('#b6ddff','#eaf4d7');
+    const horizon=H*.37;
+    cloud(W*.17,H*.2,1.1,.65); cloud(W*.8,H*.23,.9,.6);
+    perspectiveRoad(horizon, W*.42,W*.42,28,'#f5ead4');
+    for(let i=0;i<14;i++) {
+      const p=i/13, yy=horizon+(H-horizon)*Math.pow(p,.72), spread=(W*.05)+(W*.42)*p;
+      const s=.25+1.2*p; flower(W/2-spread,yy,s,i%3===0?'#ffd77d':'#ff8eb2'); flower(W/2+spread,yy,s,i%4===0?'#b98cff':'#ff8eb2');
+    }
+    mascot(W/2+mouseX*10,H*.69,.9,Math.sin(t*3)*4);
+  }
+
+  function drawSchoolRoad(t) {
+    gradient('#c6e8ff','#d9efc9'); const horizon=H*.31;
+    perspectiveRoad(horizon,W*.28,W*.28,18,'#efd2bd');
+    for(let i=0;i<18;i++) { const p=i/17, yy=horizon+(H-horizon)*p, sp=W*.08+W*.31*p; flower(W/2-sp,yy,.2+p*.8,i%2?'#ff8aae':'#f8cf70'); flower(W/2+sp,yy,.2+p*.8,i%3?'#ff8aae':'#a993ff'); }
+    const bw=Math.min(W*.52,560), bh=Math.min(H*.24,210), bx=W/2-bw/2, by=horizon-bh*.72;
+    ctx.fillStyle='#f3d2a5'; roundedRect(bx,by,bw,bh,12); ctx.fill();
+    ctx.fillStyle='#d9ecff'; for(let i=0;i<4;i++){roundedRect(bx+35+i*(bw-70)/4,by+50,42,58,5);ctx.fill();}
+    sign('TRƯỜNG TIỂU HỌC HOA MÂY',W/2,by+28,Math.min(bw*.78,380),40,16,'#376b93');
+    const move=(Math.sin(t*.7)*.5+.5); mascot(W/2,H*.72-move*8,.82,Math.sin(t*3)*3);
+  }
+
+  function drawHall(t) {
+    gradient('#eaf3fa','#f2e6d8');
+    const horizon=H*.28, cx=W/2+mouseX*20;
+    ctx.fillStyle='#eadccb'; ctx.beginPath(); ctx.moveTo(cx-W*.1,horizon);ctx.lineTo(cx+W*.1,horizon);ctx.lineTo(W*.86,H);ctx.lineTo(W*.14,H);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='rgba(96,75,69,.18)'; ctx.lineWidth=4;
+    for(let i=0;i<7;i++){const p=i/6, y=horizon+(H-horizon)*p; const span=W*.13+W*.34*p;ctx.beginPath();ctx.moveTo(cx-span,y);ctx.lineTo(cx+span,y);ctx.stroke();}
+    for(let side of [-1,1]) for(let i=0;i<5;i++){const p=i/4, y=horizon+70+p*(H-horizon-120), x=cx+side*(W*.16+W*.28*p);ctx.fillStyle='#fff8ed';roundedRect(x-side*55,y-45,110,90,5);ctx.fill();}
+    sign('LỚP HỌC YÊU THƯƠNG',W/2,H*.18,Math.min(W*.55,420),48,18,'#5a7773');
+    mascot(W/2,H*.74,.84,Math.sin(t*3)*3);
+  }
+
+  function person(x,y,s,shirt,hair='#382820') {
+    ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.fillStyle=shirt;ctx.beginPath();ctx.ellipse(0,0,16,25,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f3c7a8';ctx.beginPath();ctx.arc(0,-28,12,0,Math.PI*2);ctx.fill();ctx.fillStyle=hair;ctx.beginPath();ctx.arc(0,-33,12,Math.PI,0);ctx.fill();ctx.restore();
+  }
+
+  function drawClassroom(t) {
+    gradient('#f3dfca','#d8b98e');
+    ctx.fillStyle='#e4c3a1';ctx.fillRect(W*.08,H*.14,W*.84,H*.34);
+    ctx.fillStyle='#3d6d5a';roundedRect(W*.25,H*.18,W*.5,H*.22,8);ctx.fill();
+    ctx.fillStyle='#fff5df';ctx.font=`800 ${Math.min(30,W*.04)}px system-ui`;ctx.textAlign='center';ctx.fillText('Cảm ơn cô vì đã luôn ở đây!',W/2,H*.30);
+    person(W/2,H*.54,1.7,'#f29db4');
+    for(let r=0;r<3;r++) for(let c=0;c<5;c++){const x=W*.18+c*(W*.64/4), y=H*.66+r*68;ctx.fillStyle='#b98258';roundedRect(x-35,y-10,70,18,5);ctx.fill();person(x,y-20,.72,c%2?'#e8f3ff':'#fff');}
+    mascot(W*.1,H*.80,.62,Math.sin(t*3)*2);
+  }
+
+  function drawDrive(t) {
+    gradient('#f4b47f','#87686f'); const horizon=H*.32;
+    perspectiveRoad(horizon,W*.24,W*.24,18,'#756e6d');
+    ctx.strokeStyle='#f6e7a7';ctx.lineWidth=5;ctx.setLineDash([18,22]);ctx.beginPath();ctx.moveTo(W/2,horizon);ctx.lineTo(W/2,H);ctx.stroke();ctx.setLineDash([]);
+    for(let i=0;i<10;i++) cloud(rnd(i+40)*W,60+rnd(i+50)*H*.25,.5+rnd(i+60),.4);
+    const carY=H*.69+Math.sin(t*3)*2, cx=W/2+mouseX*18;
+    ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(cx,carY+62,75,17,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#ed8b91';roundedRect(cx-62,carY-5,124,68,14);ctx.fill();ctx.fillStyle='#9cc8d7';roundedRect(cx-40,carY-30,80,42,12);ctx.fill();
+    ctx.fillStyle='#3b3436';for(const dx of [-48,48]){ctx.beginPath();ctx.arc(cx+dx,carY+55,16,0,Math.PI*2);ctx.fill();}
+    mascot(cx,carY-35,.42,0);
+  }
+
+  function drawHome(t) {
+    gradient('#82658b','#5c7652');
+    const bw=Math.min(W*.62,650), bh=Math.min(H*.62,520), x=W/2-bw/2, y=H*.18;
+    ctx.fillStyle='#f0ddc8';roundedRect(x,y,bw,bh,14);ctx.fill();
+    ctx.fillStyle='#cda77d'; for(let f=1;f<3;f++) ctx.fillRect(x,y+f*bh/3,bw,9);
+    for(let f=0;f<3;f++) for(let c=0;c<3;c++){ctx.fillStyle='#ffe7a3';roundedRect(x+55+c*(bw-110)/3,y+45+f*bh/3,54,48,7);ctx.fill();}
+    person(W/2,H*.68,1.1,'#90a4b7');person(W/2-90,H*.49,.9,'#6aa6df');person(W/2+90,H*.49,.9,'#78b9e3');
+    sign('Tầng 3 · Cây điều ước',W/2,H*.24,Math.min(320,W*.55),42,16,'#fff');
+    mascot(W*.16,H*.78,.58,Math.sin(t*3)*3);
+  }
+
+  function branch(x1,y1,x2,y2,w) {ctx.strokeStyle='#7d5138';ctx.lineCap='round';ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+  function drawTree(t) {
+    gradient('#cf9db1','#6f8d5f');
+    const cx=W/2, base=H*.84, top=H*.18;
+    branch(cx,base,cx,top+100,28);branch(cx,top+180,cx-W*.20,top+20,16);branch(cx,top+170,cx+W*.20,top+20,16);branch(cx,top+160,cx-W*.08,top-5,12);branch(cx,top+160,cx+W*.08,top-5,12);
+    const clusters=[[-.26,.16],[-.13,.08],[0,.15],[.13,.08],[.26,.16],[-.06,.01],[.06,.01],[-.34,.19],[.34,.19]];
+    clusters.forEach((p,i)=>{const x=cx+p[0]*W,y=top+p[1]*H;ctx.fillStyle='#b86f84';ctx.beginPath();ctx.ellipse(x,y,55,38,0,0,Math.PI*2);ctx.fill();if(bloom>0){for(let j=0;j<5;j++){const a=(j+i)*1.7;flower(x+Math.cos(a)*34,y+Math.sin(a)*22,.25+.35*bloom,['#ffabc4','#ffd3df','#fff0c7'][j%3]);}}});
+    const wishes=['Sức khỏe dồi dào','Luôn hạnh phúc','Bình an mỗi ngày','Mãi luôn xinh đẹp'];
+    wishes.forEach((w,i)=>{if(bloom>.35+i*.12){const a=i*Math.PI/2+.3;sign(w,cx+Math.cos(a)*Math.min(W*.31,270),H*.43+Math.sin(a)*100,180,38,13);}});
+    mascot(W*.12,H*.80,.58,Math.sin(t*3)*2);
+  }
+
+  const drawers=[drawIntro,drawGarden,drawSchoolRoad,drawHall,drawClassroom,drawDrive,drawHome,drawTree];
+
+  function setUI() {
+    const s=STAGES[stage];
+    ui.stageNumber.textContent=String(stage+1);
+    ui.objectiveTitle.textContent=s[0]; ui.objectiveText.textContent=s[1]; ui.actionLabel.textContent=s[2];
+  }
+
+  let dialogueTimer=0;
+  function showDialogue(name,text){
+    ui.dialogueName.textContent=name;ui.dialogueText.textContent=text;ui.dialogue.classList.remove('hidden');
+    clearTimeout(dialogueTimer);dialogueTimer=setTimeout(()=>ui.dialogue.classList.add('hidden'),3500);
+  }
+
+  function go(to) {
+    if(transitionDir) return;
+    nextStage=to; transitionDir=1; transition=0;
+  }
+
+  function advance() {
+    if (transitionDir) return;
+    if(stage===0){go(1);showDialogue('Mầm Nhỏ','Khu vườn trên mây đang chờ phía trước!');}
+    else if(stage===1){go(2);showDialogue('Mầm Nhỏ','Theo con đường hoa nhé, trường của mẹ ở cuối đường.');}
+    else if(stage===2){go(3);showDialogue('Mầm Nhỏ','Đến cổng trường rồi! Mình vào hành lang thôi.');}
+    else if(stage===3){go(4);}
+    else if(stage===4){ui.classPanel.classList.remove('hidden');ui.action.style.display='none';showDialogue('Mầm Nhỏ','Có rất nhiều lời chúc dành cho mẹ ở đây.');}
+    else if(stage===5){go(6);showDialogue('Mầm Nhỏ','Về đến nhà rồi. Mọi người đang chờ mẹ!');}
+    else if(stage===6){go(7);showDialogue('Mầm Nhỏ','Điều bất ngờ cuối cùng đang ở trên tầng 3.');}
+    else if(stage===7){bloom=0.01;ui.action.disabled=true;}
+  }
+
+  ui.action.addEventListener('click',advance);
+  canvas.addEventListener('pointerdown',()=>{if(ui.classPanel.classList.contains('hidden')&&ui.finalPanel.classList.contains('hidden')) advance();});
+  ui.dismissClass.addEventListener('click',()=>{ui.classPanel.classList.add('hidden');ui.action.style.display='flex';stage=5;setUI();showDialogue('Mầm Nhỏ','Tan lớp rồi. Cùng mẹ về nhà nhé!');});
+  ui.replay.addEventListener('click',()=>{ui.finalPanel.classList.add('hidden');ui.action.style.display='flex';ui.action.disabled=false;bloom=0;stage=0;setUI();showDialogue('Mầm Nhỏ','Mình bắt đầu lại nhé!');});
+  window.addEventListener('pointermove',(e)=>{mouseX=(e.clientX/W-.5)*2;});
+  window.addEventListener('resize',resize,{passive:true});
+  window.addEventListener('keydown',(e)=>{if(e.key==='Enter'||e.key===' ') advance();});
+
+  function frame(now) {
+    const dt=Math.min(.05,(now-last)/1000); last=now; time+=dt;
+    drawers[stage](time);
+
+    if(transitionDir){
+      transition += dt*2.5;
+      const a=Math.min(1,transition);
+      ctx.fillStyle=`rgba(255,249,244,${a})`;ctx.fillRect(0,0,W,H);
+      if(transition>=1 && transitionDir===1){stage=nextStage;setUI();transition=1;transitionDir=-1;}
+      else if(transitionDir===-1){transition-=dt*5;if(transition<=0){transition=0;transitionDir=0;nextStage=null;}}
+    }
+
+    if(stage===7 && bloom>0 && bloom<1){
+      bloom=Math.min(1,bloom+dt*.34);
+      if(bloom>=1){ui.action.style.display='none';ui.finalPanel.classList.remove('hidden');}
+    }
+
+    requestAnimationFrame(frame);
+  }
+
+  resize(); setUI();
+  window.__APP_READY__=true;
+  requestAnimationFrame(() => {
+    ui.loading.classList.add('done');
+    showDialogue('Mầm Nhỏ','Xin chào! Bản này dùng Canvas nhẹ, không còn phụ thuộc WebGL hay CDN 3D.');
+    requestAnimationFrame(frame);
+  });
+})();
