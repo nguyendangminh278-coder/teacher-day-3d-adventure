@@ -105,7 +105,7 @@ jobs:
             echo "Chrome not available on runner; route/collider QA already passed."
           else
             for STAGE in 0 4 6 7 8 9; do
-              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=6500 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}"
+              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=7000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=10"
               test -s "qa/stage-${STAGE}.png"
             done
           fi
@@ -114,7 +114,7 @@ jobs:
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: visual-qa-v9
+          name: visual-qa-v10
           path: site/qa
           if-no-files-found: warn
           retention-days: 7
@@ -131,6 +131,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish"
           else
-            git commit -m "feat: camera 360, cloud paths, gait animation and route-safe QA"
+            git commit -m "fix: isolated house world, clean camera and finale UI"
             git push origin HEAD:gh-pages
           fi
