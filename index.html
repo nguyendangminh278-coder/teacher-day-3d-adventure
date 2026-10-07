@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6b7c5" />
+  <meta name="description" content="Hành trình 3D tương tác chúc mừng mẹ ngày Nhà giáo Việt Nam 20/11." />
+  <title>Hành trình 20/11 dành tặng Mẹ</title>
+  <link rel="stylesheet" href="./src/styles.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <canvas id="game"></canvas>
+
+    <header class="hud top-hud" aria-live="polite">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <div>
+          <strong>Hành trình 20/11</strong>
+          <small>Dành tặng Mẹ</small>
+        </div>
+      </div>
+      <div class="stage-pill"><span id="stageNumber">1</span>/8</div>
+    </header>
+
+    <aside id="objective" class="hud objective-card">
+      <span class="objective-kicker">NHIỆM VỤ</span>
+      <strong id="objectiveTitle">Gặp Mầm Nhỏ</strong>
+      <p id="objectiveText">Chạm để bắt đầu hành trình đặc biệt.</p>
+    </aside>
+
+    <div id="dialogue" class="dialogue hidden" role="dialog" aria-live="polite">
+      <div class="portrait">🌱</div>
+      <div>
+        <strong id="dialogueName">Mầm Nhỏ</strong>
+        <p id="dialogueText">Xin chào!</p>
+      </div>
+    </div>
+
+    <section id="classroomPanel" class="panel classroom-panel hidden" aria-label="Lời chúc trong lớp học">
+      <div class="panel-heading">
+        <span>💌 25 lời chúc từ học trò</span>
+        <small>Có thể thay nội dung sau</small>
+      </div>
+      <div id="classWishes" class="wish-grid"></div>
+      <button id="dismissClass" class="primary-btn">Tan lớp <span>→</span></button>
+    </section>
+
+    <section id="finalPanel" class="panel final-panel hidden" aria-label="Cây điều ước">
+      <span class="final-kicker">CÂY ĐIỀU ƯỚC CỦA MẸ</span>
+      <h1>Cảm ơn mẹ vì vừa là mẹ,<br />vừa là người thầy tuyệt vời nhất.</h1>
+      <p>Mỗi bông hoa là một lời chúc dành cho mẹ. Chúc mẹ 20/11 thật nhiều niềm vui và luôn được yêu thương.</p>
+      <button id="replayBtn" class="primary-btn secondary">Chơi lại hành trình ↻</button>
+    </section>
+
+    <button id="actionBtn" class="action-btn" aria-label="Tiếp tục">
+      <span id="actionLabel">Bắt đầu</span>
+      <span class="action-icon">➜</span>
+    </button>
+
+    <div class="controls-hint hud">
+      <span>🖱️ Chạm / click để tiếp tục</span>
+      <span>↔ Di chuột để ngắm cảnh</span>
+    </div>
+
+    <div id="fade" class="fade"></div>
+    <div id="loading" class="loading-screen">
+      <div class="loader-orbit"><span></span></div>
+      <strong>Đang mở cánh cổng trên mây...</strong>
+      <small>Đang khởi tạo thế giới 3D</small>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
