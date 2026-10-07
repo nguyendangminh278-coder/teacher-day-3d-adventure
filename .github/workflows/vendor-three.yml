@@ -28,14 +28,14 @@ jobs:
         with:
           path: source
 
-      - name: Checkout published branch
+      - name: Checkout published branch with existing CC0 assets
         uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: site
           fetch-depth: 0
 
-      - name: Install local web 3D build dependencies
+      - name: Install local web build dependencies
         working-directory: source
         run: npm install --no-save --no-package-lock three@0.168.0 esbuild@0.24.0
 
@@ -43,98 +43,35 @@ jobs:
         working-directory: source
         run: node tools/qa_routes.mjs
 
-      - name: Install Blender for personalized chibi and stylized nature
+      - name: Verify existing local game assets
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y blender python3-numpy
-          blender --version
+          test -s site/assets/models/teacher_mom_chibi.glb
+          test -s site/assets/models/sedan.glb
+          test -s site/assets/models/v11/quaternius/tree_common.glb
+          test -s site/assets/models/v11/quaternius/tree_twisted.glb
+          test -s site/assets/models/v11/quaternius/birch.glb
+          test -s site/assets/models/v11/quaternius/bush_flowers.glb
+          test -s site/assets/models/v11/quaternius/bush_ultimate.glb
+          test -s site/assets/models/v11/quaternius/fern.glb
+          test -s site/assets/models/v11/quaternius/flower_pink.glb
+          test -s site/assets/models/v11/quaternius/rock.glb
+          test -s site/assets/models/v11/kenney/bench.glb
 
-      - name: Prepare clean published site
+      - name: Refresh source files while preserving optimized assets
         run: |
-          find site -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
-          mkdir -p site/src site/dist site/assets/models/v11/quaternius site/assets/models/v11/kenney site/docs
+          mkdir -p site/src site/dist site/docs
           cp source/index.html site/index.html
           cp source/src/styles.css site/src/styles.css
           cp source/ASSET_CREDITS.md site/ASSET_CREDITS.md
           cp source/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md site/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md
           touch site/.nojekyll
 
-      - name: Build personalized mother-teacher chibi in Blender
-        working-directory: source
-        env:
-          PYTHONPATH: /usr/lib/python3/dist-packages
-        run: |
-          blender -b --python tools/build_teacher_mom.py -- --output ../site/assets/models/teacher_mom_chibi.glb
-          test -s ../site/assets/models/teacher_mom_chibi.glb
-
-      - name: Fetch Quaternius CC0 nature packs
-        working-directory: source
-        run: |
-          rm -rf build/quaternius
-          git clone --depth 1 --filter=blob:none --sparse https://github.com/agentkaerf/FreeModels.git build/quaternius
-          git -C build/quaternius sparse-checkout set --skip-checks "Stylized Nature MegaKit[Standard]/glTF" "Ultimate Stylized Nature - May 2022/glTF"
-          test -s "build/quaternius/Stylized Nature MegaKit[Standard]/glTF/Flower_3_Group.gltf"
-          test -s "build/quaternius/Ultimate Stylized Nature - May 2022/glTF/Bush_Large_Flowers.gltf"
-          test -s "build/quaternius/Ultimate Stylized Nature - May 2022/glTF/Grass_Large_Extruded.gltf"
-
-      - name: Pack curated Quaternius CC0 assets to local GLB
-        working-directory: source
-        env:
-          PYTHONPATH: /usr/lib/python3/dist-packages
-        run: |
-          MEGA="build/quaternius/Stylized Nature MegaKit[Standard]/glTF"
-          ULT="build/quaternius/Ultimate Stylized Nature - May 2022/glTF"
-          OUT="../site/assets/models/v11/quaternius"
-          pack(){ blender -b --python tools/convert_gltf_to_glb.py -- --input "$1" --output "$OUT/$2"; test -s "$OUT/$2"; }
-          pack "$MEGA/Flower_3_Group.gltf" flower_pink.glb
-          pack "$MEGA/Flower_4_Group.gltf" flower_yellow.glb
-          pack "$MEGA/Bush_Common_Flowers.gltf" bush_flowers.glb
-          pack "$MEGA/CommonTree_2.gltf" tree_common.glb
-          pack "$MEGA/TwistedTree_2.gltf" tree_twisted.glb
-          pack "$MEGA/Fern_1.gltf" fern.glb
-          pack "$MEGA/Mushroom_Common.gltf" mushroom.glb
-          pack "$MEGA/Rock_Medium_2.gltf" rock.glb
-          pack "$ULT/Bush_Large_Flowers.gltf" bush_ultimate.glb
-          pack "$ULT/BirchTree_2.gltf" birch.glb
-          pack "$ULT/Grass_Large_Extruded.gltf" grass_large.glb
-          pack "$ULT/Grass_Small.gltf" grass_small.glb
-          pack "$ULT/Bush_Small_Flowers.gltf" bush_small_flowers.glb
-          pack "$ULT/Flower_1_Clump.gltf" flower_clump.glb
-          ls -lh "$OUT"
-
-      - name: Add curated Kenney CC0 furniture and environment props
-        run: |
-          OUT="site/assets/models/v11/kenney"
-          BASE="https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs"
-          get(){ curl -L --fail --retry 3 "$BASE/$1" -o "$OUT/$2"; test -s "$OUT/$2"; }
-          get furniture-kit/bench.glb bench.glb
-          get nature-kit/fence-simple.glb fence.glb
-          get furniture-kit/books.glb books.glb
-          get furniture-kit/bookcaseopen.glb bookcase.glb
-          get furniture-kit/pottedplant.glb pottedplant.glb
-          get furniture-kit/laptop.glb laptop.glb
-          get furniture-kit/ceilingfan.glb ceilingfan.glb
-          get furniture-kit/loungesofa.glb sofa.glb
-          get furniture-kit/tablecoffee.glb coffee-table.glb
-          get furniture-kit/rugrectangle.glb rug.glb
-          get furniture-kit/lamproundfloor.glb floor-lamp.glb
-          get furniture-kit/televisionmodern.glb tv.glb
-          get furniture-kit/sidetable.glb side-table.glb
-          get furniture-kit/desk.glb desk.glb
-          get furniture-kit/chair.glb chair.glb
-          get furniture-kit/loungechair.glb lounge-chair.glb
-          ls -lh "$OUT"
-
-      - name: Add CC0 vehicle asset
-        run: |
-          curl -L --fail --retry 3 "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/sedan.glb" -o site/assets/models/sedan.glb
-          test -s site/assets/models/sedan.glb
-
-      - name: Inject V11 polish plus V12 dense world and bundle locally
+      - name: Inject V11 polish and V12 dense living world
         working-directory: source
         run: |
           python3 tools/inject_premium_flowers.py src/main.js
           python3 tools/inject_dense_world_v12.py src/main.js
+          python3 tools/v12_reuse_existing_assets.py src/main.js
           grep -q "V11_VISUAL_POLISH" src/main.js
           grep -q "V12_DENSE_WORLD" src/main.js
           npx esbuild src/main.js --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=../site/dist/game.min.js
