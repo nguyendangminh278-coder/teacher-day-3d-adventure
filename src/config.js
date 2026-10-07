@@ -40,22 +40,28 @@ export const TREE_WISHES = [
 export const DIALOGUES = {
   intro:{name:'Mẹ',text:'Xin chào… hôm nay mẹ sẽ bước vào một hành trình rất đặc biệt.'},
   garden:{name:'Mẹ',text:'Con đường hôm nay đẹp quá. Không biết phía trước đang chờ điều gì nhỉ?'},
-  school:{name:'Mẹ',text:'Ngôi trường này đã lưu giữ thật nhiều kỷ niệm, tiếng cười và những thế hệ học trò.'},
+  school:{name:'Mẹ',text:'Cổng trường đang mở rồi. Từ đây đã có thể nhìn thấy lớp học thân quen ở phía trước.'},
   classroom:{name:'Mẹ',text:'Nhìn các con trưởng thành chính là một trong những niềm hạnh phúc lớn nhất của cô.'},
-  afterClass:{name:'Mẹ',text:'Một ngày đứng lớp khép lại rồi. Giờ mình về nhà thôi.'},
+  afterClass:{name:'Mẹ',text:'Tan lớp rồi. Mình sẽ đi qua cửa bên phải và theo con đường này để về nhà.'},
   home:{name:'Mẹ',text:'Dù một ngày có dài đến đâu, trở về nhà vẫn luôn là khoảnh khắc ấm áp nhất.'},
+  father:{name:'Bố',text:'Chúc em ngày 20/11 thật vui. Cảm ơn em vì luôn chăm lo cho gia đình và tận tâm với học trò. Anh luôn ở bên em.'},
+  olderBrother:{name:'Anh trai',text:'Con chúc mẹ luôn mạnh khỏe, vui vẻ và thật nhiều bình an. Cảm ơn mẹ vì luôn tin tưởng và đồng hành cùng con.'},
+  youngerBrother:{name:'Em trai',text:'Con chúc mẹ 20/11 thật hạnh phúc. Mong mẹ luôn cười thật nhiều và ngày nào cũng có những điều dễ thương tìm đến.'},
+  upstairs:{name:'Mẹ',text:'Còn một tầng nữa… hình như trên đó đang có một điều rất đặc biệt chờ mẹ.'},
   finale:{name:'Gia đình',text:'Cảm ơn mẹ vì đã luôn là cô giáo tận tâm và là người mẹ tuyệt vời của gia đình mình.'}
 };
 
 export const STAGES = [
   {title:'Mẹ xuất hiện',text:'Cô giáo của câu chuyện bước ra từ cánh cổng trên mây.',action:'Bắt đầu hành trình'},
   {title:'Khu vườn trên mây',text:'Mẹ đáp xuống khu vườn và tiếp tục đi về phía con đường hoa.',action:'Đi qua khu vườn'},
-  {title:'Con đường đến trường',text:'Camera bám sau mẹ khi cô đi giữa hai hàng hoa về ngôi trường thân thương.',action:'Đi đến trường'},
-  {title:'Những bước chân quen thuộc',text:'Mẹ đi qua cổng, sân trường và hành lang để trở về lớp học của mình.',action:'Vào lớp'},
+  {title:'Con đường đến trường',text:'Camera bám sau mẹ khi cô đi giữa hai hàng hoa về ngôi trường thân thương.',action:'Đi đến cổng trường'},
+  {title:'Cổng trường mở ra',text:'Hai cánh cổng sẽ mở thật sự. Lối giữa trường thông thẳng đến cửa lớp nên mẹ không đi xuyên qua bất kỳ bức tường nào.',action:'Mở cổng và vào lớp'},
   {title:'Những lời chúc từ học trò',text:'Mẹ đứng trên bục giảng và nhận 25 lời chúc từ những học sinh xung quanh.',action:'Lắng nghe lời chúc'},
-  {title:'Tan lớp rồi, về nhà thôi',text:'Mẹ rời lớp, đi ra bãi xe và bắt đầu hành trình trở về tổ ấm.',action:'Về nhà'},
-  {title:'Nơi có những người yêu mẹ nhất',text:'Mẹ gặp bố ở tầng 1, hai con trai ở tầng 2 rồi tiếp tục lên tầng 3.',action:'Lên tầng 3'},
-  {title:'Cây điều ước dành cho mẹ',text:'Mỗi bông hoa trên cây là một điều gia đình và học trò muốn gửi đến mẹ.',action:'Nở hoa'}
+  {title:'Tan lớp rồi, rẽ phải về nhà',text:'Mẹ đi qua cửa bên phải của lớp, ra đường và lên xe về nhà.',action:'Đang về nhà…'},
+  {title:'Tầng 1 · Lời chúc của Bố',text:'Mẹ bước vào nhà và đến gặp bố ở tầng 1.',action:'Đến gặp Bố'},
+  {title:'Tầng 2 · Lời chúc của Anh trai',text:'Mẹ đi đúng cầu thang lên tầng 2 để gặp anh trai.',action:'Lên gặp Anh trai'},
+  {title:'Tầng 2 · Lời chúc của Em trai',text:'Sau anh trai, mẹ đi tiếp trong tầng 2 để gặp em trai.',action:'Đến gặp Em trai'},
+  {title:'Tầng 3 · Cây điều ước',text:'Mẹ đi cầu thang thứ hai lên tầng 3, nơi cây điều ước và những bông hoa đang chờ.',action:'Lên tầng 3'}
 ];
 
 export const TEACHER_MOM_CHARACTER = {
