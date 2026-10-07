@@ -7,11 +7,13 @@
   <meta name="description" content="Hành trình 3D tương tác chúc mừng mẹ ngày Nhà giáo Việt Nam 20/11." />
   <title>Hành trình 20/11 dành tặng Mẹ</title>
   <link rel="stylesheet" href="./src/styles.css" />
+  <link rel="preconnect" href="https://unpkg.com" crossorigin />
+  <link rel="modulepreload" href="https://unpkg.com/three@0.168.0/build/three.module.min.js" crossorigin />
   <script type="importmap">
   {
     "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+      "three": "https://unpkg.com/three@0.168.0/build/three.module.min.js",
+      "three/addons/": "https://unpkg.com/three@0.168.0/examples/jsm/"
     }
   }
   </script>
@@ -79,6 +81,26 @@
     </div>
   </div>
 
+  <script>
+    setTimeout(() => {
+      const loading = document.querySelector('#loading');
+      if (loading && !loading.classList.contains('done')) {
+        const small = loading.querySelector('small');
+        const strong = loading.querySelector('strong');
+        if (strong) strong.textContent = 'Kết nối thế giới 3D đang chậm hơn dự kiến…';
+        if (small) small.textContent = 'Nếu quá 10 giây, hãy tải lại trang. Mình đã chuyển sang CDN nhẹ hơn.';
+      }
+    }, 5000);
+    window.addEventListener('error', (event) => {
+      const loading = document.querySelector('#loading');
+      if (!loading || loading.classList.contains('done')) return;
+      const small = loading.querySelector('small');
+      const strong = loading.querySelector('strong');
+      if (strong) strong.textContent = 'Không tải được thư viện 3D';
+      if (small) small.textContent = 'Hãy tải lại trang hoặc kiểm tra kết nối mạng.';
+      console.error('3D boot error:', event.error || event.message);
+    });
+  </script>
   <script type="module" src="./src/main.js"></script>
 </body>
 </html>
