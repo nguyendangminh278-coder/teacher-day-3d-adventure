@@ -66,14 +66,16 @@ jobs:
           cp source/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md site/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md
           touch site/.nojekyll
 
-      - name: Inject V11 polish and V12 dense living world
+      - name: Inject V11 polish, V12 density and V13 cloud forest
         working-directory: source
         run: |
           python3 tools/inject_premium_flowers.py src/main.js
           python3 tools/inject_dense_world_v12.py src/main.js
           python3 tools/v12_reuse_existing_assets.py src/main.js
+          python3 tools/inject_cloud_forest_v13.py src/main.js
           grep -q "V11_VISUAL_POLISH" src/main.js
           grep -q "V12_DENSE_WORLD" src/main.js
+          grep -q "V13_CLOUD_FOREST" src/main.js
           npx esbuild src/main.js --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=../site/dist/game.min.js
           test -s ../site/dist/game.min.js
 
@@ -88,8 +90,8 @@ jobs:
           if [ -z "$CHROME" ]; then
             echo "Chrome not available on runner; route/collider QA already passed."
           else
-            for STAGE in 0 1 2 4 6 7 8 9; do
-              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=15000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=12"
+            for STAGE in 0 1 2 3 4 6 7 8 9; do
+              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=17000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=13"
               test -s "qa/stage-${STAGE}.png"
             done
           fi
@@ -98,7 +100,7 @@ jobs:
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: visual-qa-v12
+          name: visual-qa-v13
           path: site/qa
           if-no-files-found: warn
           retention-days: 7
@@ -115,6 +117,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish"
           else
-            git commit -m "feat: v12 dense floating garden with birds and layered foliage"
+            git commit -m "feat: v13 cloud forest trail with wind and joyful movement"
             git push origin HEAD:gh-pages
           fi
