@@ -7,22 +7,37 @@ The design is an original stylized chibi interpretation guided by reference phot
 
 The generated model is not extracted from any commercial game and does not depend on a third-party character asset.
 
-## Premium 4K flower garden
-- Asset: **Flower Empodium** (`flower_empodium`)
-- Source: **Poly Haven** — https://polyhaven.com/a/flower_empodium
-- Creators: **Jenelle van Heerden** (photography), **Rico Cilliers** (modeling)
-- License: **CC0 1.0 / Public Domain dedication**
-- Source quality: 4K PBR glTF with real scanned botanical textures.
-- Integration: downloaded only during GitHub Actions through the official Poly Haven public API, converted to a local GLB with Blender, and then cloned throughout the cloud garden, school road, and home/finale areas. The live game does not hotlink the Poly Haven model at runtime.
+## V11 stylized nature
+The main flowers, bushes, trees, ferns, mushrooms and rocks in V11 come from Quaternius and are packed into local GLB files during GitHub Actions.
 
-Powered by Poly Haven for the build-time asset retrieval pipeline.
+### Quaternius — Stylized Nature MegaKit
+- Creator: **Quaternius**
+- Official page: https://quaternius.com/packs/stylizednaturemegakit.html
+- Assets used: flower groups, flowering bush, common tree, twisted tree, fern, mushroom and rock.
+- License: **CC0 1.0 Universal / Public Domain dedication**.
+- Build source: the public CC0 `agentkaerf/FreeModels` mirror is sparse-checked out in CI, then selected glTF models are repacked as local GLB files with Blender.
 
-## Car
-- Model: `sedan.glb` from the **Car Kit**
+### Quaternius — Ultimate Stylized Nature
+- Creator: **Quaternius**
+- Official page: https://quaternius.com/packs/ultimatestylizednature.html
+- Assets used: large flowering bush and birch tree.
+- License: **CC0 1.0 Universal / Public Domain dedication**.
+- Build source: the public CC0 `agentkaerf/FreeModels` mirror, packed locally during CI.
+
+## Low-poly cloud art direction
+- Reference: **7 Free Low Poly Clouds** by Chadderbox — https://chadderbox.itch.io/low-poly-clouds-free
+- The project does not redistribute the paid 50-cloud pack.
+- V11 clouds are original procedural low-poly cloud meshes created in Three.js, following the free pack author's recommended visual approach: unlit materials, reusable stretched/rotated silhouettes, and gentle movement.
+
+## Furniture, school props and vehicle
 - Original creator: **Kenney**
-- Repository mirror: `Hidencod/tge-assets`
 - License: **CC0 1.0 Universal**
-- Purpose: vehicle for the continuous school-to-home driving sequence.
+- Public GLB mirror used in CI: `Hidencod/tge-assets`
+- Furniture Kit assets used include benches, books, bookcase, potted plants, laptop, ceiling fan, sofa, coffee table, rug, floor lamp, TV, side table, desk, chair and lounge chair.
+- Nature Kit asset used: simple fence.
+- Car Kit asset used: sedan.
+
+These assets are downloaded only during GitHub Actions and are served locally from the deployed site; the game does not hotlink them at runtime.
 
 ## Runtime
-Three.js and GLTFLoader are bundled into the local `dist/game.min.js` during GitHub Actions. The public site does not require a third-party JavaScript CDN at runtime. The personalized chibi GLB and the Poly Haven flower GLB are generated/packed during CI and published locally under `assets/models/`.
+Three.js and GLTFLoader are bundled into the local `dist/game.min.js` during GitHub Actions. The public site does not require a third-party JavaScript CDN at runtime. V11 nature and furniture assets are stored under `assets/models/v11/` in the deployed `gh-pages` build.
