@@ -19,12 +19,12 @@ export const TREE_WISHES = [
 ];
 
 export const STAGES = [
-  { title:'Gặp Mầm Nhỏ', text:'Chạm để bắt đầu hành trình đặc biệt.', action:'Bắt đầu' },
-  { title:'Khu vườn trên mây', text:'Theo Mầm Nhỏ đáp xuống khu vườn và tìm con đường phía trước.', action:'Hạ cánh' },
-  { title:'Đến trường của mẹ', text:'Đi theo con đường hoa. Camera sẽ theo sau như một game góc nhìn thứ 3.', action:'Đi đến trường' },
-  { title:'Bước qua cánh cổng', text:'Đi qua sân trường, hành lang và tìm lớp học của mẹ.', action:'Vào lớp' },
-  { title:'Những lời chúc', text:'Lắng nghe những lời chúc học trò dành tặng cô.', action:'Mở lời chúc' },
-  { title:'Về nhà thôi', text:'Tan học rồi. Cùng Mầm Nhỏ lái xe trở về tổ ấm.', action:'Lên xe' },
-  { title:'Tổ ấm của mẹ', text:'Gặp bố ở tầng 1, hai con trai ở tầng 2 và tìm điều bất ngờ trên tầng 3.', action:'Khám phá nhà' },
-  { title:'Cây điều ước', text:'Chạm để tất cả lời chúc nở thành hoa trên cây.', action:'Nở hoa' }
+  { title:'Gặp Mầm Nhỏ', text:'Mầm Nhỏ vừa nhảy ra khỏi cánh cổng. Chạm để nhảy xuống khu vườn.', action:'Nhảy xuống vườn' },
+  { title:'Khu vườn trên mây', text:'Chạy xuyên qua khu vườn và nhập vào con đường hoa.', action:'Chạy theo đường hoa' },
+  { title:'Đến trường của mẹ', text:'Camera bám sau Mầm Nhỏ khi chạy thẳng tới cổng trường.', action:'Chạy đến cổng' },
+  { title:'Bước qua cánh cổng', text:'Tiếp tục chạy qua cổng, sân trường và hành lang để vào lớp.', action:'Đi vào lớp' },
+  { title:'Những lời chúc', text:'Lắng nghe 25 lời chúc học trò dành tặng cô.', action:'Mở lời chúc' },
+  { title:'Về nhà thôi', text:'Mầm Nhỏ sẽ chạy ra bãi xe rồi lái xe xuyên suốt về nhà.', action:'Đang về nhà…' },
+  { title:'Tổ ấm của mẹ', text:'Gặp bố ở tầng 1, hai con trai ở tầng 2 rồi chạy lên tầng 3.', action:'Lên tầng 3' },
+  { title:'Cây điều ước', text:'Chạm để cây cổ thụ nở rộ và biến từng lời chúc thành hoa.', action:'Nở hoa' }
 ];
