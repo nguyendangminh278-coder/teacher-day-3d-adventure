@@ -66,16 +66,18 @@ jobs:
           cp source/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md site/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md
           touch site/.nojekyll
 
-      - name: Inject V11 polish, V12 density and V13 cloud forest
+      - name: Inject V11 polish, V12 density and refined V13 cloud forest
         working-directory: source
         run: |
           python3 tools/inject_premium_flowers.py src/main.js
           python3 tools/inject_dense_world_v12.py src/main.js
           python3 tools/v12_reuse_existing_assets.py src/main.js
           python3 tools/inject_cloud_forest_v13.py src/main.js
+          python3 tools/refine_cloud_forest_v13.py src/main.js
           grep -q "V11_VISUAL_POLISH" src/main.js
           grep -q "V12_DENSE_WORLD" src/main.js
           grep -q "V13_CLOUD_FOREST" src/main.js
+          grep -q "V13_REFINED_FOREST" src/main.js
           npx esbuild src/main.js --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=../site/dist/game.min.js
           test -s ../site/dist/game.min.js
 
@@ -117,6 +119,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish"
           else
-            git commit -m "feat: v13 cloud forest trail with wind and joyful movement"
+            git commit -m "feat: refined v13 cloud woodland with wind and playful movement"
             git push origin HEAD:gh-pages
           fi
