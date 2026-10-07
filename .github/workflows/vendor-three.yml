@@ -72,7 +72,7 @@ jobs:
         run: |
           rm -rf build/quaternius
           git clone --depth 1 --filter=blob:none --sparse https://github.com/agentkaerf/FreeModels.git build/quaternius
-          git -C build/quaternius sparse-checkout set "Stylized Nature MegaKit[Standard]/glTF" "Ultimate Stylized Nature - May 2022/glTF"
+          git -C build/quaternius sparse-checkout set --skip-checks "Stylized Nature MegaKit[Standard]/glTF" "Ultimate Stylized Nature - May 2022/glTF"
           test -s "build/quaternius/Stylized Nature MegaKit[Standard]/glTF/Flower_3_Group.gltf"
           test -s "build/quaternius/Ultimate Stylized Nature - May 2022/glTF/Bush_Large_Flowers.gltf"
 
