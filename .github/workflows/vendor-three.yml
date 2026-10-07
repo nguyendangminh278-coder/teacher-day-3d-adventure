@@ -39,6 +39,10 @@ jobs:
         working-directory: source
         run: npm install --no-save --no-package-lock three@0.168.0 esbuild@0.24.0
 
+      - name: Run route and collider QA
+        working-directory: source
+        run: node tools/qa_routes.mjs
+
       - name: Install Blender for personalized chibi and 4K flowers
         run: |
           sudo apt-get update -qq
@@ -78,10 +82,6 @@ jobs:
           test -s ../site/assets/models/flower_empodium_4k.glb
           ls -lh ../site/assets/models/flower_empodium_4k.glb
 
-      - name: Inject premium 4K flower garden into game source
-        working-directory: source
-        run: python3 tools/inject_premium_flowers.py src/main.js
-
       - name: Bundle Three.js, GLTFLoader and game code locally
         working-directory: source
         run: |
@@ -93,6 +93,35 @@ jobs:
           curl -L --fail --retry 3 "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/sedan.glb" -o site/assets/models/sedan.glb
           test -s site/assets/models/sedan.glb
 
+      - name: Headless 3D visual smoke QA
+        working-directory: site
+        run: |
+          mkdir -p qa
+          python3 -m http.server 8123 --bind 127.0.0.1 >/tmp/teacher-day-qa-server.log 2>&1 &
+          SERVER_PID=$!
+          sleep 2
+          CHROME="$(command -v google-chrome || command -v chromium || true)"
+          if [ -z "$CHROME" ]; then
+            echo "Chrome not available on runner; route/collider QA already passed."
+          else
+            for STAGE in 0 4 6 7 8 9; do
+              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=6500 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}"
+              test -s "qa/stage-${STAGE}.png"
+            done
+          fi
+          kill $SERVER_PID || true
+
+      - name: Upload visual QA screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-qa-v9
+          path: site/qa
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Remove QA screenshots from public build
+        run: rm -rf site/qa
+
       - name: Publish gh-pages
         working-directory: site
         run: |
@@ -102,6 +131,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish"
           else
-            git commit -m "feat: add Poly Haven 4K flower garden"
+            git commit -m "feat: camera 360, cloud paths, gait animation and route-safe QA"
             git push origin HEAD:gh-pages
           fi
