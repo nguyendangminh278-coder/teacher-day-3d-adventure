@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#b9ddff" />
   <meta name="description" content="Hành trình game 3D góc nhìn thứ ba dành tặng Mẹ ngày Nhà giáo Việt Nam 20/11." />
   <title>Hành trình 20/11 dành tặng Mẹ</title>
-  <link rel="stylesheet" href="./src/styles.css?v=9" />
+  <link rel="stylesheet" href="./src/styles.css?v=10" />
 </head>
 <body>
   <div id="app">
@@ -17,7 +17,7 @@
         <span class="brand-dot"></span>
         <div>
           <strong>Hành trình 20/11 dành tặng Mẹ</strong>
-          <small id="assetStatus">Đang khởi tạo nhân vật chibi 3D, camera 360° và vườn hoa 4K…</small>
+          <small id="assetStatus">Đang khởi tạo nhân vật chibi 3D, camera 360° và các world tách biệt…</small>
         </div>
       </div>
       <div class="stage-pill"><span id="stageNumber">1</span>/10</div>
@@ -60,13 +60,15 @@
 
     <div class="controls-hint hud">
       <span>🖱️ Kéo chuột/chạm để xoay camera 360° · cuộn để zoom</span>
-      <span>☁️ Mẹ đi trên mây · 💗 trái tim bay lên theo từng bước chân</span>
+      <span>☁️ Đi trên mây · 💗 trái tim bay theo bước chân · 🏠 vào nhà sẽ chuyển world 3D riêng</span>
     </div>
+
+    <div id="fade" class="fade" aria-hidden="true"></div>
 
     <div id="loading" class="loading-screen">
       <div class="loader-orbit"><span></span></div>
       <strong>Đang mở cánh cổng dành cho Mẹ...</strong>
-      <small>Đang kiểm tra world 3D, đường đi, camera và các asset Blender</small>
+      <small>Đang kiểm tra world 3D, đường đi, camera, cầu thang và các asset Blender</small>
     </div>
   </div>
 
@@ -83,6 +85,6 @@
       }
     }, 5000);
   </script>
-  <script src="./dist/game.min.js?v=9" defer></script>
+  <script src="./dist/game.min.js?v=10" defer></script>
 </body>
 </html>
