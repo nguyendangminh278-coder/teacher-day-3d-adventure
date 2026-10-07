@@ -17,7 +17,7 @@ if load_marker not in s:
 premium_code = r'''function fitPremiumFlower(model,targetWidth=1.45){
   const b=new THREE.Box3().setFromObject(model),sz=new THREE.Vector3();b.getSize(sz);
   const sc=targetWidth/Math.max(sz.x,sz.z,.001);model.scale.setScalar(sc);
-  const b2=new THREE.Box3().setFromObject(model);model.position.y-=b2.min.y;
+  const b2=new THREE.Box3().setFromObject(model);model.userData.groundOffset=-b2.min.y;
 }
 function spawnPremiumFlowerGarden(){
   if(!premiumFlowerSource||premiumFlowers.length)return;
@@ -29,7 +29,9 @@ function spawnPremiumFlowerGarden(){
   for(let x=22;x<88;x+=8.5){spots.push([x,.08,-118.7,.72]);spots.push([x+2.4,.08,-107.4,.64]);}
   [[93,.08,-102,.72],[107,.08,-102,.66],[92,.08,-110,.62],[108,.08,-110,.7],[96,8.18,-102,.62],[104,8.18,-102,.65],[94,8.18,-109,.58],[108,8.18,-108,.6]].forEach(v=>spots.push(v));
   spots.forEach((p,i)=>{
-    const c=premiumFlowerSource.clone(true);c.position.set(p[0],p[1],p[2]);c.scale.multiplyScalar(p[3]);c.rotation.y=(i*2.3999632297)%(Math.PI*2);
+    const c=premiumFlowerSource.clone(true);c.scale.multiplyScalar(p[3]);
+    const groundOffset=(premiumFlowerSource.userData.groundOffset||0)*p[3];
+    c.position.set(p[0],p[1]+groundOffset,p[2]);c.rotation.y=(i*2.3999632297)%(Math.PI*2);
     c.traverse(o=>{if(o.isMesh){o.castShadow=false;o.receiveShadow=true;o.frustumCulled=true;}});
     world.add(c);premiumFlowers.push(c);
   });
