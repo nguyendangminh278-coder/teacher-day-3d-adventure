@@ -4,30 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#f6b7c5" />
-  <meta name="description" content="Hành trình 3D tương tác chúc mừng mẹ ngày Nhà giáo Việt Nam 20/11." />
+  <meta name="description" content="Hành trình tương tác chúc mừng mẹ ngày Nhà giáo Việt Nam 20/11." />
   <title>Hành trình 20/11 dành tặng Mẹ</title>
   <link rel="stylesheet" href="./src/styles.css" />
-  <link rel="preconnect" href="https://unpkg.com" crossorigin />
-  <link rel="modulepreload" href="https://unpkg.com/three@0.168.0/build/three.module.min.js" crossorigin />
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://unpkg.com/three@0.168.0/build/three.module.min.js",
-      "three/addons/": "https://unpkg.com/three@0.168.0/examples/jsm/"
-    }
-  }
-  </script>
 </head>
 <body>
   <div id="app">
-    <canvas id="game"></canvas>
+    <canvas id="game" aria-label="Hành trình tương tác 20/11"></canvas>
 
     <header class="hud top-hud" aria-live="polite">
       <div class="brand">
         <span class="brand-dot"></span>
         <div>
           <strong>Hành trình 20/11</strong>
-          <small>Dành tặng Mẹ</small>
+          <small>Dành tặng Mẹ · bản nhẹ</small>
         </div>
       </div>
       <div class="stage-pill"><span id="stageNumber">1</span>/8</div>
@@ -39,7 +29,7 @@
       <p id="objectiveText">Chạm để bắt đầu hành trình đặc biệt.</p>
     </aside>
 
-    <div id="dialogue" class="dialogue hidden" role="dialog" aria-live="polite">
+    <div id="dialogue" class="dialogue hidden" role="status" aria-live="polite">
       <div class="portrait">🌱</div>
       <div>
         <strong id="dialogueName">Mầm Nhỏ</strong>
@@ -50,7 +40,7 @@
     <section id="classroomPanel" class="panel classroom-panel hidden" aria-label="Lời chúc trong lớp học">
       <div class="panel-heading">
         <span>💌 25 lời chúc từ học trò</span>
-        <small>Có thể thay nội dung sau</small>
+        <small>Những lời chúc dành cho cô</small>
       </div>
       <div id="classWishes" class="wish-grid"></div>
       <button id="dismissClass" class="primary-btn">Tan lớp <span>→</span></button>
@@ -70,37 +60,29 @@
 
     <div class="controls-hint hud">
       <span>🖱️ Chạm / click để tiếp tục</span>
-      <span>↔ Di chuột để ngắm cảnh</span>
+      <span>↔ Di chuột để tạo hiệu ứng chiều sâu</span>
     </div>
 
     <div id="fade" class="fade"></div>
     <div id="loading" class="loading-screen">
       <div class="loader-orbit"><span></span></div>
       <strong>Đang mở cánh cổng trên mây...</strong>
-      <small>Đang khởi tạo thế giới 3D</small>
+      <small>Khởi tạo bản Canvas nhẹ, không tải thư viện ngoài</small>
     </div>
   </div>
 
   <script>
+    // Watchdog độc lập: màn hình loading không bao giờ được phép treo vô hạn.
     setTimeout(() => {
-      const loading = document.querySelector('#loading');
-      if (loading && !loading.classList.contains('done')) {
-        const small = loading.querySelector('small');
-        const strong = loading.querySelector('strong');
-        if (strong) strong.textContent = 'Kết nối thế giới 3D đang chậm hơn dự kiến…';
-        if (small) small.textContent = 'Nếu quá 10 giây, hãy tải lại trang. Mình đã chuyển sang CDN nhẹ hơn.';
-      }
-    }, 5000);
-    window.addEventListener('error', (event) => {
-      const loading = document.querySelector('#loading');
+      const loading = document.getElementById('loading');
       if (!loading || loading.classList.contains('done')) return;
-      const small = loading.querySelector('small');
-      const strong = loading.querySelector('strong');
-      if (strong) strong.textContent = 'Không tải được thư viện 3D';
-      if (small) small.textContent = 'Hãy tải lại trang hoặc kiểm tra kết nối mạng.';
-      console.error('3D boot error:', event.error || event.message);
-    });
+      loading.classList.add('done');
+      const objective = document.getElementById('objectiveText');
+      if (objective && !window.__APP_READY__) {
+        objective.textContent = 'Trang đã mở ở chế độ an toàn. Hãy tải lại nếu vùng minh họa chưa xuất hiện.';
+      }
+    }, 1800);
   </script>
-  <script type="module" src="./src/main.js"></script>
+  <script src="./src/main.js" defer></script>
 </body>
 </html>
