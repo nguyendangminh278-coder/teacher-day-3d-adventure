@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#b9ddff" />
   <meta name="description" content="Hành trình game 3D góc nhìn thứ ba dành tặng Mẹ ngày Nhà giáo Việt Nam 20/11." />
   <title>Hành trình 20/11 dành tặng Mẹ</title>
-  <link rel="stylesheet" href="./src/styles.css?v=8" />
+  <link rel="stylesheet" href="./src/styles.css?v=9" />
 </head>
 <body>
   <div id="app">
@@ -17,7 +17,7 @@
         <span class="brand-dot"></span>
         <div>
           <strong>Hành trình 20/11 dành tặng Mẹ</strong>
-          <small id="assetStatus">Đang khởi tạo nhân vật chibi 3D và vườn hoa 4K…</small>
+          <small id="assetStatus">Đang khởi tạo nhân vật chibi 3D, camera 360° và vườn hoa 4K…</small>
         </div>
       </div>
       <div class="stage-pill"><span id="stageNumber">1</span>/10</div>
@@ -59,14 +59,14 @@
     </button>
 
     <div class="controls-hint hud">
-      <span>🖱️ Click để tiếp tục hành trình</span>
-      <span>🎥 Camera góc nhìn thứ ba tự bám theo Mẹ</span>
+      <span>🖱️ Kéo chuột/chạm để xoay camera 360° · cuộn để zoom</span>
+      <span>☁️ Mẹ đi trên mây · 💗 trái tim bay lên theo từng bước chân</span>
     </div>
 
     <div id="loading" class="loading-screen">
       <div class="loader-orbit"><span></span></div>
       <strong>Đang mở cánh cổng dành cho Mẹ...</strong>
-      <small>Nhân vật Blender chibi + vườn hoa PBR 4K đang được nạp bất đồng bộ</small>
+      <small>Đang kiểm tra world 3D, đường đi, camera và các asset Blender</small>
     </div>
   </div>
 
@@ -81,8 +81,8 @@
         if (title) title.textContent = 'Chế độ 3D chưa sẵn sàng';
         if (text) text.textContent = 'Hãy bật Hardware Acceleration/WebGL trong Chrome rồi tải lại trang.';
       }
-    }, 3500);
+    }, 5000);
   </script>
-  <script src="./dist/game.min.js?v=8" defer></script>
+  <script src="./dist/game.min.js?v=9" defer></script>
 </body>
 </html>
