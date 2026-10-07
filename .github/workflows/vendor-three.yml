@@ -39,7 +39,7 @@ jobs:
         working-directory: source
         run: npm install --no-save --no-package-lock three@0.168.0 esbuild@0.24.0
 
-      - name: Install Blender for personalized chibi build
+      - name: Install Blender for personalized chibi and 4K flowers
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y blender python3-numpy
@@ -65,6 +65,23 @@ jobs:
           test -s ../site/assets/models/teacher_mom_chibi.glb
           ls -lh ../site/assets/models/teacher_mom_chibi.glb
 
+      - name: Fetch Poly Haven CC0 4K flower and pack local GLB
+        working-directory: source
+        env:
+          PYTHONPATH: /usr/lib/python3/dist-packages
+        run: |
+          rm -rf build/polyhaven/flower_empodium
+          python3 tools/fetch_polyhaven_gltf.py --asset flower_empodium --resolution 4k --out build/polyhaven/flower_empodium
+          FLOWER_GLTF="$(find build/polyhaven/flower_empodium -maxdepth 1 -type f -name '*.gltf' -print -quit)"
+          test -n "$FLOWER_GLTF"
+          blender -b --python tools/convert_gltf_to_glb.py -- --input "$FLOWER_GLTF" --output ../site/assets/models/flower_empodium_4k.glb
+          test -s ../site/assets/models/flower_empodium_4k.glb
+          ls -lh ../site/assets/models/flower_empodium_4k.glb
+
+      - name: Inject premium 4K flower garden into game source
+        working-directory: source
+        run: python3 tools/inject_premium_flowers.py src/main.js
+
       - name: Bundle Three.js, GLTFLoader and game code locally
         working-directory: source
         run: |
@@ -85,6 +102,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish"
           else
-            git commit -m "feat: personalized mother-teacher chibi 3D journey"
+            git commit -m "feat: add Poly Haven 4K flower garden"
             git push origin HEAD:gh-pages
           fi
