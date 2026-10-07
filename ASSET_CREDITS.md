@@ -7,6 +7,16 @@ The design is an original stylized chibi interpretation guided by reference phot
 
 The generated model is not extracted from any commercial game and does not depend on a third-party character asset.
 
+## Premium 4K flower garden
+- Asset: **Flower Empodium** (`flower_empodium`)
+- Source: **Poly Haven** — https://polyhaven.com/a/flower_empodium
+- Creators: **Jenelle van Heerden** (photography), **Rico Cilliers** (modeling)
+- License: **CC0 1.0 / Public Domain dedication**
+- Source quality: 4K PBR glTF with real scanned botanical textures.
+- Integration: downloaded only during GitHub Actions through the official Poly Haven public API, converted to a local GLB with Blender, and then cloned throughout the cloud garden, school road, and home/finale areas. The live game does not hotlink the Poly Haven model at runtime.
+
+Powered by Poly Haven for the build-time asset retrieval pipeline.
+
 ## Car
 - Model: `sedan.glb` from the **Car Kit**
 - Original creator: **Kenney**
@@ -15,4 +25,4 @@ The generated model is not extracted from any commercial game and does not depen
 - Purpose: vehicle for the continuous school-to-home driving sequence.
 
 ## Runtime
-Three.js and GLTFLoader are bundled into the local `dist/game.min.js` during GitHub Actions. The public site does not require a third-party JavaScript CDN at runtime. The personalized chibi GLB is also generated during CI and published locally under `assets/models/`.
+Three.js and GLTFLoader are bundled into the local `dist/game.min.js` during GitHub Actions. The public site does not require a third-party JavaScript CDN at runtime. The personalized chibi GLB and the Poly Haven flower GLB are generated/packed during CI and published locally under `assets/models/`.
