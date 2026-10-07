@@ -39,10 +39,10 @@ export const TREE_WISHES = [
 
 export const DIALOGUES = {
   intro:{name:'Mẹ',text:'Xin chào… hôm nay mẹ sẽ bước vào một hành trình rất đặc biệt.'},
-  garden:{name:'Mẹ',text:'Con đường hôm nay đẹp quá. Không biết phía trước đang chờ điều gì nhỉ?'},
-  school:{name:'Mẹ',text:'Cổng trường đang mở rồi. Từ đây đã có thể nhìn thấy lớp học thân quen ở phía trước.'},
-  classroom:{name:'Mẹ',text:'Nhìn các con trưởng thành chính là một trong những niềm hạnh phúc lớn nhất của cô.'},
-  afterClass:{name:'Mẹ',text:'Tan lớp rồi. Mình sẽ đi qua cửa bên phải và theo con đường này để về nhà.'},
+  garden:{name:'Mẹ',text:'Con đường mây hôm nay đẹp quá. Mỗi bước đi còn có những trái tim nhỏ bay lên nữa.'},
+  school:{name:'Mẹ',text:'Cổng trường ở ngay phía trước. Khi cổng mở, mẹ có thể nhìn thẳng vào lớp học thân quen.'},
+  classroom:{name:'Mẹ',text:'Mẹ đã tới bục giảng rồi. Camera sẽ quay lại nhìn xuống cả lớp để thấy những gương mặt và lời chúc thân thương.'},
+  afterClass:{name:'Mẹ',text:'Tan lớp rồi. Mình sẽ đi qua cửa bên phải, ra lối mây và tiếp tục hành trình về nhà.'},
   home:{name:'Mẹ',text:'Dù một ngày có dài đến đâu, trở về nhà vẫn luôn là khoảnh khắc ấm áp nhất.'},
   father:{name:'Bố',text:'Chúc em ngày 20/11 thật vui. Cảm ơn em vì luôn chăm lo cho gia đình và tận tâm với học trò. Anh luôn ở bên em.'},
   olderBrother:{name:'Anh trai',text:'Con chúc mẹ luôn mạnh khỏe, vui vẻ và thật nhiều bình an. Cảm ơn mẹ vì luôn tin tưởng và đồng hành cùng con.'},
@@ -53,23 +53,19 @@ export const DIALOGUES = {
 
 export const STAGES = [
   {title:'Mẹ xuất hiện',text:'Cô giáo của câu chuyện bước ra từ cánh cổng trên mây.',action:'Bắt đầu hành trình'},
-  {title:'Khu vườn trên mây',text:'Mẹ đáp xuống khu vườn và tiếp tục đi về phía con đường hoa.',action:'Đi qua khu vườn'},
-  {title:'Con đường đến trường',text:'Camera bám sau mẹ khi cô đi giữa hai hàng hoa về ngôi trường thân thương.',action:'Đi đến cổng trường'},
-  {title:'Cổng trường mở ra',text:'Hai cánh cổng sẽ mở thật sự. Lối giữa trường thông thẳng đến cửa lớp nên mẹ không đi xuyên qua bất kỳ bức tường nào.',action:'Mở cổng và vào lớp'},
-  {title:'Những lời chúc từ học trò',text:'Mẹ đứng trên bục giảng và nhận 25 lời chúc từ những học sinh xung quanh.',action:'Lắng nghe lời chúc'},
-  {title:'Tan lớp rồi, rẽ phải về nhà',text:'Mẹ đi qua cửa bên phải của lớp, ra đường và lên xe về nhà.',action:'Đang về nhà…'},
-  {title:'Tầng 1 · Lời chúc của Bố',text:'Mẹ bước vào nhà và đến gặp bố ở tầng 1.',action:'Đến gặp Bố'},
-  {title:'Tầng 2 · Lời chúc của Anh trai',text:'Mẹ đi đúng cầu thang lên tầng 2 để gặp anh trai.',action:'Lên gặp Anh trai'},
-  {title:'Tầng 2 · Lời chúc của Em trai',text:'Sau anh trai, mẹ đi tiếp trong tầng 2 để gặp em trai.',action:'Đến gặp Em trai'},
-  {title:'Tầng 3 · Cây điều ước',text:'Mẹ đi cầu thang thứ hai lên tầng 3, nơi cây điều ước và những bông hoa đang chờ.',action:'Lên tầng 3'}
+  {title:'Khu vườn trên mây',text:'Mẹ đáp xuống khu vườn, đi trên những cụm mây mềm và để lại các trái tim nhỏ phía sau.',action:'Đi qua khu vườn'},
+  {title:'Con đường mây đến trường',text:'Mẹ đi đúng hướng về phía trước trên lối mây, camera góc nhìn thứ ba có thể xoay 360°.',action:'Đi đến cổng trường'},
+  {title:'Cổng trường mở ra',text:'Hai cánh cổng mở thật sự. Trục giữa trường thông thẳng đến cửa lớp nên mẹ không xuyên qua tường.',action:'Mở cổng và vào lớp'},
+  {title:'Những lời chúc từ học trò',text:'Mẹ quay mặt về phía học sinh. Camera chuyển sang góc nhìn toàn lớp và vẫn có thể xoay 360°.',action:'Lắng nghe lời chúc'},
+  {title:'Tan lớp rồi, rẽ phải về nhà',text:'Mẹ đi qua đúng cửa bên phải của lớp, ra lối mây và lên xe về nhà.',action:'Đang về nhà…'},
+  {title:'Tầng 1 · Lời chúc của Bố',text:'Mẹ đi từ cửa trước vào nhà rồi đến gặp bố ở tầng 1.',action:'Đến gặp Bố'},
+  {title:'Tầng 2 · Lời chúc của Anh trai',text:'Mẹ đi đúng cầu thang thứ nhất lên tầng 2 để gặp anh trai.',action:'Lên gặp Anh trai'},
+  {title:'Tầng 2 · Lời chúc của Em trai',text:'Sau anh trai, mẹ đi tiếp trên tầng 2 để gặp em trai.',action:'Đến gặp Em trai'},
+  {title:'Tầng 3 · Cây điều ước',text:'Mẹ đi cầu thang thứ hai lên tầng 3. Camera lùi ra để không cắt vào tường hoặc tán cây.',action:'Lên tầng 3'}
 ];
 
 export const TEACHER_MOM_CHARACTER = {
-  id:'teacher_mom_chibi',
-  displayName:'Mẹ',
-  modelPath:'./assets/models/teacher_mom_chibi.glb',
-  style:'emotional-chibi-teacher-mother',
-  outfit:'pastel-blue-vietnamese-ao-dai',
+  id:'teacher_mom_chibi',displayName:'Mẹ',modelPath:'./assets/models/teacher_mom_chibi.glb',style:'emotional-chibi-teacher-mother',outfit:'pastel-blue-vietnamese-ao-dai',
   likenessNotes:['slim-oval-face','warm-open-smile','shoulder-length-dark-hair','soft-wavy-hair-ends','no-glasses'],
   animationAliases:{idle:['idle'],walk:['walk'],run:['run'],wave:['wave'],jump:['jump'],fall:['fall'],land:['land'],teach:['teach'],happy:['happy'],receiveLove:['receiveLove'],stairs:['stairs'],enterCar:['enterCar'],exitCar:['exitCar']}
 };
