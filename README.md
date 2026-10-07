@@ -48,7 +48,7 @@ Vào **Settings → Pages → Source: GitHub Actions** nếu repository chưa b�
 
 ## Concept
 
-Ảnh concept ban đầu nằm tại `docs/concept.png` để tham chiếu art direction.
+Ảnh concept tối ưu để tham chiếu art direction nằm tại `docs/concept.jpg`.
 
 ---
 
