@@ -43,17 +43,16 @@ jobs:
         working-directory: source
         run: node tools/qa_routes.mjs
 
-      - name: Install Blender for personalized chibi and 4K flowers
+      - name: Install Blender for personalized chibi and stylized nature
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y blender python3-numpy
           blender --version
-          python3 -c "import numpy; print('numpy', numpy.__version__)"
 
       - name: Prepare clean published site
         run: |
           find site -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
-          mkdir -p site/src site/dist site/assets/models site/docs
+          mkdir -p site/src site/dist site/assets/models/v11/quaternius site/assets/models/v11/kenney site/docs
           cp source/index.html site/index.html
           cp source/src/styles.css site/src/styles.css
           cp source/ASSET_CREDITS.md site/ASSET_CREDITS.md
@@ -67,31 +66,72 @@ jobs:
         run: |
           blender -b --python tools/build_teacher_mom.py -- --output ../site/assets/models/teacher_mom_chibi.glb
           test -s ../site/assets/models/teacher_mom_chibi.glb
-          ls -lh ../site/assets/models/teacher_mom_chibi.glb
 
-      - name: Fetch Poly Haven CC0 4K flower and pack local GLB
+      - name: Fetch Quaternius CC0 nature packs
+        working-directory: source
+        run: |
+          rm -rf build/quaternius
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/agentkaerf/FreeModels.git build/quaternius
+          git -C build/quaternius sparse-checkout set "Stylized Nature MegaKit[Standard]/glTF" "Ultimate Stylized Nature - May 2022/glTF"
+          test -s "build/quaternius/Stylized Nature MegaKit[Standard]/glTF/Flower_3_Group.gltf"
+          test -s "build/quaternius/Ultimate Stylized Nature - May 2022/glTF/Bush_Large_Flowers.gltf"
+
+      - name: Pack curated Quaternius CC0 assets to local GLB
         working-directory: source
         env:
           PYTHONPATH: /usr/lib/python3/dist-packages
         run: |
-          rm -rf build/polyhaven/flower_empodium
-          python3 tools/fetch_polyhaven_gltf.py --asset flower_empodium --resolution 4k --out build/polyhaven/flower_empodium
-          FLOWER_GLTF="$(find build/polyhaven/flower_empodium -maxdepth 1 -type f -name '*.gltf' -print -quit)"
-          test -n "$FLOWER_GLTF"
-          blender -b --python tools/convert_gltf_to_glb.py -- --input "$FLOWER_GLTF" --output ../site/assets/models/flower_empodium_4k.glb
-          test -s ../site/assets/models/flower_empodium_4k.glb
-          ls -lh ../site/assets/models/flower_empodium_4k.glb
+          MEGA="build/quaternius/Stylized Nature MegaKit[Standard]/glTF"
+          ULT="build/quaternius/Ultimate Stylized Nature - May 2022/glTF"
+          OUT="../site/assets/models/v11/quaternius"
+          pack(){ blender -b --python tools/convert_gltf_to_glb.py -- --input "$1" --output "$OUT/$2"; test -s "$OUT/$2"; }
+          pack "$MEGA/Flower_3_Group.gltf" flower_pink.glb
+          pack "$MEGA/Flower_4_Group.gltf" flower_yellow.glb
+          pack "$MEGA/Bush_Common_Flowers.gltf" bush_flowers.glb
+          pack "$MEGA/CommonTree_2.gltf" tree_common.glb
+          pack "$MEGA/TwistedTree_2.gltf" tree_twisted.glb
+          pack "$MEGA/Fern_1.gltf" fern.glb
+          pack "$MEGA/Mushroom_Common.gltf" mushroom.glb
+          pack "$MEGA/Rock_Medium_2.gltf" rock.glb
+          pack "$ULT/Bush_Large_Flowers.gltf" bush_ultimate.glb
+          pack "$ULT/BirchTree_2.gltf" birch.glb
+          ls -lh "$OUT"
 
-      - name: Bundle Three.js, GLTFLoader and game code locally
-        working-directory: source
+      - name: Add curated Kenney CC0 furniture and environment props
         run: |
-          npx esbuild src/main.js --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=../site/dist/game.min.js
-          test -s ../site/dist/game.min.js
+          OUT="site/assets/models/v11/kenney"
+          BASE="https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs"
+          get(){ curl -L --fail --retry 3 "$BASE/$1" -o "$OUT/$2"; test -s "$OUT/$2"; }
+          get furniture-kit/bench.glb bench.glb
+          get nature-kit/fence-simple.glb fence.glb
+          get furniture-kit/books.glb books.glb
+          get furniture-kit/bookcaseopen.glb bookcase.glb
+          get furniture-kit/pottedplant.glb pottedplant.glb
+          get furniture-kit/laptop.glb laptop.glb
+          get furniture-kit/ceilingfan.glb ceilingfan.glb
+          get furniture-kit/loungesofa.glb sofa.glb
+          get furniture-kit/tablecoffee.glb coffee-table.glb
+          get furniture-kit/rugrectangle.glb rug.glb
+          get furniture-kit/lamproundfloor.glb floor-lamp.glb
+          get furniture-kit/televisionmodern.glb tv.glb
+          get furniture-kit/sidetable.glb side-table.glb
+          get furniture-kit/desk.glb desk.glb
+          get furniture-kit/chair.glb chair.glb
+          get furniture-kit/loungechair.glb lounge-chair.glb
+          ls -lh "$OUT"
 
       - name: Add CC0 vehicle asset
         run: |
           curl -L --fail --retry 3 "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/sedan.glb" -o site/assets/models/sedan.glb
           test -s site/assets/models/sedan.glb
+
+      - name: Inject v11 living-world polish and bundle game locally
+        working-directory: source
+        run: |
+          python3 tools/inject_premium_flowers.py src/main.js
+          grep -q "V11_VISUAL_POLISH" src/main.js
+          npx esbuild src/main.js --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=../site/dist/game.min.js
+          test -s ../site/dist/game.min.js
 
       - name: Headless 3D visual smoke QA
         working-directory: site
@@ -105,7 +145,7 @@ jobs:
             echo "Chrome not available on runner; route/collider QA already passed."
           else
             for STAGE in 0 4 6 7 8 9; do
-              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=7000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=10"
+              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=11000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=11"
               test -s "qa/stage-${STAGE}.png"
             done
           fi
@@ -114,7 +154,7 @@ jobs:
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: visual-qa-v10
+          name: visual-qa-v11
           path: site/qa
           if-no-files-found: warn
           retention-days: 7
@@ -131,6 +171,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish"
           else
-            git commit -m "fix: isolated house world, clean camera and finale UI"
+            git commit -m "feat: v11 living world polish with Quaternius nature and Kenney props"
             git push origin HEAD:gh-pages
           fi
