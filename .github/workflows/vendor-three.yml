@@ -75,6 +75,7 @@ jobs:
           git -C build/quaternius sparse-checkout set --skip-checks "Stylized Nature MegaKit[Standard]/glTF" "Ultimate Stylized Nature - May 2022/glTF"
           test -s "build/quaternius/Stylized Nature MegaKit[Standard]/glTF/Flower_3_Group.gltf"
           test -s "build/quaternius/Ultimate Stylized Nature - May 2022/glTF/Bush_Large_Flowers.gltf"
+          test -s "build/quaternius/Ultimate Stylized Nature - May 2022/glTF/Grass_Large_Extruded.gltf"
 
       - name: Pack curated Quaternius CC0 assets to local GLB
         working-directory: source
@@ -95,6 +96,10 @@ jobs:
           pack "$MEGA/Rock_Medium_2.gltf" rock.glb
           pack "$ULT/Bush_Large_Flowers.gltf" bush_ultimate.glb
           pack "$ULT/BirchTree_2.gltf" birch.glb
+          pack "$ULT/Grass_Large_Extruded.gltf" grass_large.glb
+          pack "$ULT/Grass_Small.gltf" grass_small.glb
+          pack "$ULT/Bush_Small_Flowers.gltf" bush_small_flowers.glb
+          pack "$ULT/Flower_1_Clump.gltf" flower_clump.glb
           ls -lh "$OUT"
 
       - name: Add curated Kenney CC0 furniture and environment props
@@ -125,11 +130,13 @@ jobs:
           curl -L --fail --retry 3 "https://raw.githubusercontent.com/Hidencod/tge-assets/main/packs/car-kit/sedan.glb" -o site/assets/models/sedan.glb
           test -s site/assets/models/sedan.glb
 
-      - name: Inject v11 living-world polish and bundle game locally
+      - name: Inject V11 polish plus V12 dense world and bundle locally
         working-directory: source
         run: |
           python3 tools/inject_premium_flowers.py src/main.js
+          python3 tools/inject_dense_world_v12.py src/main.js
           grep -q "V11_VISUAL_POLISH" src/main.js
+          grep -q "V12_DENSE_WORLD" src/main.js
           npx esbuild src/main.js --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=../site/dist/game.min.js
           test -s ../site/dist/game.min.js
 
@@ -144,8 +151,8 @@ jobs:
           if [ -z "$CHROME" ]; then
             echo "Chrome not available on runner; route/collider QA already passed."
           else
-            for STAGE in 0 4 6 7 8 9; do
-              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=11000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=11"
+            for STAGE in 0 1 2 4 6 7 8 9; do
+              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=15000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=12"
               test -s "qa/stage-${STAGE}.png"
             done
           fi
@@ -154,7 +161,7 @@ jobs:
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: visual-qa-v11
+          name: visual-qa-v12
           path: site/qa
           if-no-files-found: warn
           retention-days: 7
@@ -171,6 +178,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish"
           else
-            git commit -m "feat: v11 living world polish with Quaternius nature and Kenney props"
+            git commit -m "feat: v12 dense floating garden with birds and layered foliage"
             git push origin HEAD:gh-pages
           fi
