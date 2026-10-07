@@ -7,12 +7,11 @@
   <meta name="description" content="Hành trình 3D tương tác chúc mừng mẹ ngày Nhà giáo Việt Nam 20/11." />
   <title>Hành trình 20/11 dành tặng Mẹ</title>
   <link rel="stylesheet" href="./src/styles.css" />
-  <link rel="preconnect" href="https://unpkg.com" crossorigin />
-  <link rel="modulepreload" href="https://unpkg.com/three@0.168.0/build/three.module.min.js" crossorigin />
+  <link rel="modulepreload" href="./vendor/three.module.min.js" />
   <script type="importmap">
   {
     "imports": {
-      "three": "https://unpkg.com/three@0.168.0/build/three.module.min.js",
+      "three": "./vendor/three.module.min.js",
       "three/addons/": "https://unpkg.com/three@0.168.0/examples/jsm/"
     }
   }
@@ -88,7 +87,7 @@
         const small = loading.querySelector('small');
         const strong = loading.querySelector('strong');
         if (strong) strong.textContent = 'Kết nối thế giới 3D đang chậm hơn dự kiến…';
-        if (small) small.textContent = 'Nếu quá 10 giây, hãy tải lại trang. Mình đã chuyển sang CDN nhẹ hơn.';
+        if (small) small.textContent = 'Nếu quá 5 giây, hãy tải lại trang. Bản này không còn phụ thuộc CDN 3D bên ngoài.';
       }
     }, 5000);
     window.addEventListener('error', (event) => {
