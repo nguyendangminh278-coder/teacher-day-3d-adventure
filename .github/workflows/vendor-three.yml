@@ -42,8 +42,9 @@ jobs:
       - name: Install Blender for personalized chibi build
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y blender
+          sudo apt-get install -y blender python3-numpy
           blender --version
+          python3 -c "import numpy; print('numpy', numpy.__version__)"
 
       - name: Prepare clean published site
         run: |
@@ -57,6 +58,8 @@ jobs:
 
       - name: Build personalized mother-teacher chibi in Blender
         working-directory: source
+        env:
+          PYTHONPATH: /usr/lib/python3/dist-packages
         run: |
           blender -b --python tools/build_teacher_mom.py -- --output ../site/assets/models/teacher_mom_chibi.glb
           test -s ../site/assets/models/teacher_mom_chibi.glb
