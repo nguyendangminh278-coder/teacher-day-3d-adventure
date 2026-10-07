@@ -3,21 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#f6b7c5" />
-  <meta name="description" content="Hành trình tương tác chúc mừng mẹ ngày Nhà giáo Việt Nam 20/11." />
+  <meta name="theme-color" content="#b9ddff" />
+  <meta name="description" content="Hành trình game 3D góc nhìn thứ ba dành tặng mẹ ngày Nhà giáo Việt Nam 20/11." />
   <title>Hành trình 20/11 dành tặng Mẹ</title>
-  <link rel="stylesheet" href="./src/styles.css" />
+  <link rel="stylesheet" href="./src/styles.css?v=5" />
 </head>
 <body>
   <div id="app">
-    <canvas id="game" aria-label="Hành trình tương tác 20/11"></canvas>
+    <canvas id="game" aria-label="Hành trình game 3D 20/11"></canvas>
 
     <header class="hud top-hud" aria-live="polite">
       <div class="brand">
         <span class="brand-dot"></span>
         <div>
           <strong>Hành trình 20/11</strong>
-          <small>Dành tặng Mẹ · bản nhẹ</small>
+          <small id="assetStatus">Đang khởi tạo thế giới game 3D…</small>
         </div>
       </div>
       <div class="stage-pill"><span id="stageNumber">1</span>/8</div>
@@ -26,7 +26,7 @@
     <aside id="objective" class="hud objective-card">
       <span class="objective-kicker">NHIỆM VỤ</span>
       <strong id="objectiveTitle">Gặp Mầm Nhỏ</strong>
-      <p id="objectiveText">Chạm để bắt đầu hành trình đặc biệt.</p>
+      <p id="objectiveText">Mầm Nhỏ sẽ xuất hiện từ cánh cổng và đáp xuống mây.</p>
     </aside>
 
     <div id="dialogue" class="dialogue hidden" role="status" aria-live="polite">
@@ -40,7 +40,7 @@
     <section id="classroomPanel" class="panel classroom-panel hidden" aria-label="Lời chúc trong lớp học">
       <div class="panel-heading">
         <span>💌 25 lời chúc từ học trò</span>
-        <small>Những lời chúc dành cho cô</small>
+        <small>Có thể thay toàn bộ nội dung sau</small>
       </div>
       <div id="classWishes" class="wish-grid"></div>
       <button id="dismissClass" class="primary-btn">Tan lớp <span>→</span></button>
@@ -53,36 +53,36 @@
       <button id="replayBtn" class="primary-btn secondary">Chơi lại hành trình ↻</button>
     </section>
 
-    <button id="actionBtn" class="action-btn" aria-label="Tiếp tục">
+    <button id="actionBtn" class="action-btn" aria-label="Tiếp tục hành trình">
       <span id="actionLabel">Bắt đầu</span>
       <span class="action-icon">➜</span>
     </button>
 
     <div class="controls-hint hud">
-      <span>🖱️ Chạm / click để tiếp tục</span>
-      <span>↔ Di chuột để tạo hiệu ứng chiều sâu</span>
+      <span>🖱️ Click để ra lệnh di chuyển</span>
+      <span>↔ Di chuột để xoay camera</span>
     </div>
 
-    <div id="fade" class="fade"></div>
     <div id="loading" class="loading-screen">
       <div class="loader-orbit"><span></span></div>
-      <strong>Đang mở cánh cổng trên mây...</strong>
-      <small>Khởi tạo bản Canvas nhẹ, không tải thư viện ngoài</small>
+      <strong>Đang dựng thế giới 3D liên tục...</strong>
+      <small>Engine được bundle cùng website · không dùng CDN runtime</small>
     </div>
   </div>
 
   <script>
-    // Watchdog độc lập: màn hình loading không bao giờ được phép treo vô hạn.
     setTimeout(() => {
       const loading = document.getElementById('loading');
       if (!loading || loading.classList.contains('done')) return;
       loading.classList.add('done');
-      const objective = document.getElementById('objectiveText');
-      if (objective && !window.__APP_READY__) {
-        objective.textContent = 'Trang đã mở ở chế độ an toàn. Hãy tải lại nếu vùng minh họa chưa xuất hiện.';
+      if (!window.__APP_READY__) {
+        const title = document.getElementById('objectiveTitle');
+        const text = document.getElementById('objectiveText');
+        if (title) title.textContent = 'Chế độ 3D chưa sẵn sàng';
+        if (text) text.textContent = 'Hãy bật Hardware Acceleration/WebGL trong Chrome rồi tải lại trang.';
       }
-    }, 1800);
+    }, 2500);
   </script>
-  <script src="./src/main.js" defer></script>
+  <script src="./dist/game.min.js?v=5" defer></script>
 </body>
 </html>
