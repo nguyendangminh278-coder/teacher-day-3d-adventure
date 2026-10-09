@@ -46,7 +46,7 @@ V16 and V17 add a physically based, real-world visual layer on top of the intera
 - License: **CC0**.
 - HDRI: `cloud_layers` for image-based lighting and the sky/cloud background.
 - PBR materials: `forest_floor`, `wood_floor`, `white_plaster_02`, `concrete_floor`, and `brick_wall_003`.
-- V17 model targets: `SchoolDesk_01`, `SchoolChair_01`, `island_tree_01`, `pine_tree_01`, and `potted_plant_02`. The CI fetcher treats individual 3D models as optional so deployment remains resilient if an upstream model package changes; downloaded models are converted to local GLB files before publishing.
+- V17 browser-sized model targets: `SchoolDesk_01`, `SchoolChair_01`, `potted_plant_02`, and `shrub_02`. The CI fetcher treats individual 3D models as optional so deployment remains resilient if an upstream model package changes; downloaded models are converted to local GLB files before publishing. Very heavy scanned trees are deliberately not shipped to the browser; the existing optimized trees remain as distant/background vegetation while scanned shrubs and props provide near-field realism.
 
 V17 also uses Three.js physically based glass, soft contact shadows, high-quality shadow maps on capable desktop hardware, and screen-space ambient occlusion (SSAO). These effects are project code and do not redistribute assets from any commercial game.
 
