@@ -81,8 +81,7 @@ async function v17BuildArchitecture(){
 function v17LoadModels(){
   loader.load('./assets/v17/models/school_desk.glb',g=>{const src=g.scene;v17Normalize(src,.88);DESKS.forEach((d,i)=>{const x=(d.min[0]+d.max[0])/2,z=(d.min[2]+d.max[2])/2;v17Clone(src,outdoorWorld,[x,.11,z],1,Math.PI);});},undefined,e=>console.warn('V17 desk model unavailable',e));
   loader.load('./assets/v17/models/school_chair.glb',g=>{const src=g.scene;v17Normalize(src,.92);DESKS.forEach((d,i)=>{const x=(d.min[0]+d.max[0])/2,z=(d.min[2]+d.max[2])/2;v17Clone(src,outdoorWorld,[x,.10,z+1.08],.92,Math.PI);});},undefined,e=>console.warn('V17 chair model unavailable',e));
-  loader.load('./assets/v17/models/island_tree.glb',g=>{const src=g.scene;v17Normalize(src,7.7);for(const p of [[-13,.05,-14],[12.7,.05,-26],[-12.7,.05,-46],[13.2,.05,-62],[-12.4,.05,-71]])v17Clone(src,outdoorWorld,p,.88+Math.random()*.18,Math.random()*6.28,true);},undefined,e=>console.warn('V17 island tree unavailable',e));
-  loader.load('./assets/v17/models/pine_tree.glb',g=>{const src=g.scene;v17Normalize(src,8.8);for(const p of [[13.5,.05,-11],[-13.5,.05,-31],[12.8,.05,-49],[-13.3,.05,-61]])v17Clone(src,outdoorWorld,p,.85+Math.random()*.18,Math.random()*6.28,true);},undefined,e=>console.warn('V17 pine tree unavailable',e));
+  loader.load('./assets/v17/models/shrub.glb',g=>{const src=g.scene;v17Normalize(src,2.35);const pts=[[-10.7,.05,-12],[10.8,.05,-17],[-11.2,.05,-29],[10.9,.05,-38],[-10.9,.05,-51],[11.1,.05,-61],[-10.5,.05,-71],[10.6,.05,-73]];for(const p of pts)v17Clone(src,outdoorWorld,p,.72+Math.random()*.26,Math.random()*6.28,true);},undefined,e=>console.warn('V17 shrub model unavailable',e));
   loader.load('./assets/v17/models/potted_plant.glb',g=>{const src=g.scene;v17Normalize(src,1.15);for(const p of [[6.7,.18,-4.6],[-6.8,.18,-4.7],[6.8,4.68,-4.4]])v17Clone(src,houseWorld,p,.9,Math.random()*6.28,true);},undefined,e=>console.warn('V17 potted plant unavailable',e));
 }
 
@@ -107,7 +106,7 @@ function updateV17RealWorld(dt,t){
   if(v17ContactShadow){v17ContactShadow.visible=teacherRoot.visible&&currentSpace!=='finale';v17ContactShadow.position.set(teacherRoot.position.x,teacherRoot.position.y+.018,teacherRoot.position.z);v17ContactShadow.rotation.z=-teacherRoot.rotation.y;}
   renderer.toneMappingExposure=THREE.MathUtils.lerp(renderer.toneMappingExposure,currentSpace==='outdoor'?1.16:1.25,1-Math.exp(-dt*2.2));
   if(v16SkyEnv)scene.environment=v16SkyEnv;
-  if(v17Ready&&ui.assetStatus&&!ui.assetStatus.textContent.startsWith('V17'))ui.assetStatus.textContent='V17 · HDRI + PBR scan + model CC0 thật + SSAO + click-to-move';
+  if(v17Ready&&ui.assetStatus&&!ui.assetStatus.textContent.startsWith('V17'))ui.assetStatus.textContent='V17 · HDRI + PBR scan + props/cây bụi CC0 thật + SSAO + click-to-move';
 }
 function v17Init(){v17EnhanceRenderer();v17BuildArchitecture();v17LoadModels();}
 setTimeout(v17Init,1450);
