@@ -76,6 +76,7 @@ jobs:
           python3 tools/refine_cloud_forest_v13.py src/main.js
           python3 tools/inject_bright_palette_v14.py src/main.js
           python3 tools/inject_aaa_clickmove_v15.py src/main.js
+          python3 tools/v15_qa_fastpath.py src/main.js
           grep -q "V11_VISUAL_POLISH" src/main.js
           grep -q "V12_DENSE_WORLD" src/main.js
           grep -q "V13_CLOUD_FOREST" src/main.js
