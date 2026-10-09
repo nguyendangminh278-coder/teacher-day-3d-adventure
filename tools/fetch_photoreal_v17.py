@@ -5,7 +5,7 @@ import json, shutil, subprocess, sys, tempfile, urllib.parse, urllib.request, zi
 SITE = Path(sys.argv[1] if len(sys.argv) > 1 else '../site').resolve()
 ROOT = SITE / 'assets' / 'v17'
 ROOT.mkdir(parents=True, exist_ok=True)
-UA = {'User-Agent':'TeacherDay3D/17.0 (GitHub Actions; CC0 Poly Haven assets)'}
+UA = {'User-Agent':'TeacherDay3D/17.1 (GitHub Actions; CC0 Poly Haven assets)'}
 
 
 def get_json(url):
@@ -42,13 +42,10 @@ def choose_url(asset, predicates, preferred=()):
     ranked=[]
     for p,u in items:
         s=(p+' '+u).lower()
-        if not all(pred(s,u.lower()) for pred in predicates):
-            continue
-        score=sum(15 for token in preferred if token.lower() in s)
-        score-=len(u)/10000
+        if not all(pred(s,u.lower()) for pred in predicates): continue
+        score=sum(15 for token in preferred if token.lower() in s)-len(u)/10000
         ranked.append((score,u,p))
-    if not ranked:
-        raise RuntimeError(f'No Poly Haven file match for {asset}')
+    if not ranked: raise RuntimeError(f'No Poly Haven file match for {asset}')
     ranked.sort(reverse=True)
     print('Selected', asset, ranked[0][2], ranked[0][1])
     return ranked[0][1]
@@ -56,8 +53,7 @@ def choose_url(asset, predicates, preferred=()):
 
 def fetch_map(asset, token, filename):
     def p(s,u): return token in s and '2k' in s and u.split('?')[0].endswith(('.jpg','.jpeg','.png'))
-    url=choose_url(asset,[p],preferred=('2k','jpg'))
-    return download(url,ROOT/'materials'/asset/filename)
+    return download(choose_url(asset,[p],preferred=('2k','jpg')),ROOT/'materials'/asset/filename)
 
 
 def fetch_material(asset):
@@ -67,37 +63,54 @@ def fetch_material(asset):
     fetch_map(asset,'rough','roughness.jpg')
 
 
-def find_gltf_url(asset):
-    data=get_json(f'https://api.polyhaven.com/files/{asset}')
-    items=flatten(data)
+def file_items(asset): return flatten(get_json(f'https://api.polyhaven.com/files/{asset}'))
+
+
+def find_gltf_url(asset, items):
     ranked=[]
     for p,u in items:
         ul=u.lower().split('?')[0]
-        if not ul.endswith('.gltf'):
-            continue
+        if not ul.endswith('.gltf'): continue
         s=(p+' '+u).lower()
         score=(60 if '1k' in s else 0)+(25 if 'gltf' in s else 0)+(10 if '2k' in s else 0)-len(u)/10000
         ranked.append((score,u,p))
-    if ranked:
-        ranked.sort(reverse=True)
-        print('Selected glTF',asset,ranked[0][2],ranked[0][1])
-        return ranked[0][1]
-    return None
+    if not ranked: return None
+    ranked.sort(reverse=True);print('Selected glTF',asset,ranked[0][2],ranked[0][1]);return ranked[0][1]
 
 
-def fetch_gltf_tree(gltf_url, work):
+def dependency_url(uri, gltf_url, items):
+    direct=urllib.parse.urljoin(gltf_url,uri)
+    base=Path(urllib.parse.unquote(uri)).name.lower()
+    exact=[u for _,u in items if Path(urllib.parse.urlparse(u).path).name.lower()==base]
+    if exact: return exact[0],direct
+    stem=Path(base).stem.lower()
+    candidates=[]
+    for p,u in items:
+        name=Path(urllib.parse.urlparse(u).path).name.lower()
+        s=(p+' '+u).lower()
+        if stem and (stem in name or stem in s):
+            score=(20 if '1k' in s else 0)+(8 if name.endswith(Path(base).suffix) else 0)-len(u)/10000
+            candidates.append((score,u))
+    if candidates:
+        candidates.sort(reverse=True);return candidates[0][1],direct
+    return direct,direct
+
+
+def fetch_gltf_tree(asset, gltf_url, work, items):
     gltf_path=download(gltf_url,work/'model.gltf',100)
     doc=json.loads(gltf_path.read_text(encoding='utf-8'))
     uris=[]
     for key in ('buffers','images'):
         for item in doc.get(key,[]):
             uri=item.get('uri')
-            if uri and not uri.startswith('data:') and uri not in uris:
-                uris.append(uri)
+            if uri and not uri.startswith('data:') and uri not in uris: uris.append(uri)
     for uri in uris:
-        target=work/urllib.parse.unquote(uri)
-        target.parent.mkdir(parents=True,exist_ok=True)
-        download(urllib.parse.urljoin(gltf_url,uri),target,1)
+        target=work/urllib.parse.unquote(uri);target.parent.mkdir(parents=True,exist_ok=True)
+        preferred,direct=dependency_url(uri,gltf_url,items)
+        try: download(direct,target,1)
+        except Exception:
+            print('Direct dependency failed; using Poly Haven API match:',uri,preferred)
+            download(preferred,target,1)
     return gltf_path
 
 
@@ -107,15 +120,14 @@ def fetch_model(asset,out_name):
         print('Reuse',out); return out
     try:
         with tempfile.TemporaryDirectory() as td:
-            work=Path(td)
-            gltf_url=find_gltf_url(asset)
+            work=Path(td);items=file_items(asset);gltf_url=find_gltf_url(asset,items)
             if gltf_url:
-                src=fetch_gltf_tree(gltf_url,work)
+                src=fetch_gltf_tree(asset,gltf_url,work,items)
             else:
-                def zpred(s,u): return u.split('?')[0].endswith('.zip')
-                zurl=choose_url(asset,[zpred],preferred=('gltf','1k','zip'))
-                zp=download(zurl,work/'model.zip',100)
-                ex=work/'ex'; ex.mkdir()
+                zips=[(p,u) for p,u in items if u.lower().split('?')[0].endswith('.zip')]
+                if not zips: raise RuntimeError('No glTF or ZIP package found')
+                zips.sort(key=lambda x:(('1k' not in (x[0]+' '+x[1]).lower()),('gltf' not in (x[0]+' '+x[1]).lower())))
+                zp=download(zips[0][1],work/'model.zip',100);ex=work/'ex';ex.mkdir()
                 with zipfile.ZipFile(zp) as z: z.extractall(ex)
                 gltfs=list(ex.rglob('*.gltf'))
                 if not gltfs: raise RuntimeError('No glTF in zip')
@@ -126,21 +138,18 @@ def fetch_model(asset,out_name):
             print('Packed',asset,'->',out,out.stat().st_size)
             return out
     except Exception as e:
-        print('WARN optional V17 model unavailable:',asset,e)
-        return None
+        print('WARN optional V17 model unavailable:',asset,e);return None
 
-# New scanned/PBR surfaces used for the school exterior and courtyard.
 for mat in ('concrete_floor','brick_wall_003'):
     try: fetch_material(mat)
     except Exception as e: print('WARN V17 material unavailable:',mat,e)
 
-# Real CC0 models. Keep these local so the deployed game has no runtime CDN dependency.
+# Keep the high-detail set focused on assets that remain practical for a browser build.
 for asset,name in (
     ('SchoolDesk_01','school_desk.glb'),
     ('SchoolChair_01','school_chair.glb'),
-    ('island_tree_01','island_tree.glb'),
-    ('pine_tree_01','pine_tree.glb'),
     ('potted_plant_02','potted_plant.glb'),
+    ('shrub_02','shrub.glb'),
 ):
     fetch_model(asset,name)
 
