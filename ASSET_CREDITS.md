@@ -39,5 +39,16 @@ The main flowers, bushes, trees, ferns, mushrooms and rocks in V11 come from Qua
 
 These assets are downloaded only during GitHub Actions and are served locally from the deployed site; the game does not hotlink them at runtime.
 
+## V16–V17 photoreal layer — Poly Haven
+V16 and V17 add a physically based, real-world visual layer on top of the interactive game geometry. Poly Haven assets are downloaded during GitHub Actions and served locally from `gh-pages`; the deployed game does not hotlink them at runtime.
+
+- Provider: **Poly Haven** — https://polyhaven.com/
+- License: **CC0**.
+- HDRI: `cloud_layers` for image-based lighting and the sky/cloud background.
+- PBR materials: `forest_floor`, `wood_floor`, `white_plaster_02`, `concrete_floor`, and `brick_wall_003`.
+- V17 model targets: `SchoolDesk_01`, `SchoolChair_01`, `island_tree_01`, `pine_tree_01`, and `potted_plant_02`. The CI fetcher treats individual 3D models as optional so deployment remains resilient if an upstream model package changes; downloaded models are converted to local GLB files before publishing.
+
+V17 also uses Three.js physically based glass, soft contact shadows, high-quality shadow maps on capable desktop hardware, and screen-space ambient occlusion (SSAO). These effects are project code and do not redistribute assets from any commercial game.
+
 ## Runtime
-Three.js and GLTFLoader are bundled into the local `dist/game.min.js` during GitHub Actions. The public site does not require a third-party JavaScript CDN at runtime. V11 nature and furniture assets are stored under `assets/models/v11/` in the deployed `gh-pages` build.
+Three.js and GLTFLoader are bundled into the local `dist/game.min.js` during GitHub Actions. The public site does not require a third-party JavaScript CDN at runtime. Nature, furniture, HDRI, PBR textures and V17 model assets are stored locally in the deployed `gh-pages` build.
