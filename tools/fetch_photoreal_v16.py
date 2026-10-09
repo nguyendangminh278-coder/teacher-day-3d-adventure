@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from pathlib import Path
-import json, os, shutil, subprocess, sys, tempfile, urllib.request, zipfile
+import json, shutil, subprocess, sys, tempfile, urllib.request, zipfile
 
 SITE = Path(sys.argv[1] if len(sys.argv) > 1 else '../site').resolve()
 ROOT = SITE / 'assets' / 'v16'
@@ -79,24 +79,30 @@ def fetch_model(asset, out_name):
     if out.exists() and out.stat().st_size>4096:
         print('Reuse', out); return out
     try:
-        url=choose(asset, required=('gltf',), preferred=('1k','zip'), exts=('.zip',))
-    except Exception:
-        url=choose(asset, required=('gltf',), preferred=('2k','zip'), exts=('.zip',))
-    with tempfile.TemporaryDirectory() as td:
-        td=Path(td); z=download(url, td/f'{asset}.zip'); ex=td/'ex'; ex.mkdir()
-        with zipfile.ZipFile(z) as zz: zz.extractall(ex)
-        gltfs=list(ex.rglob('*.gltf'))
-        if not gltfs: raise RuntimeError(f'No glTF inside {asset} package')
-        src=min(gltfs, key=lambda p: len(str(p)))
-        out.parent.mkdir(parents=True,exist_ok=True)
-        subprocess.run(['npx','gltf-transform','copy',str(src),str(out)],check=True)
-        print('Packed', asset, '->', out, out.stat().st_size)
-    return out
+        # Poly Haven's model API varies by asset; score every ZIP and prefer a glTF/1K package.
+        url=choose(asset, preferred=('gltf','1k','zip'), exts=('.zip',))
+        with tempfile.TemporaryDirectory() as td:
+            td=Path(td); z=download(url, td/f'{asset}.zip'); ex=td/'ex'; ex.mkdir()
+            with zipfile.ZipFile(z) as zz: zz.extractall(ex)
+            gltfs=list(ex.rglob('*.gltf'))
+            if not gltfs:
+                raise RuntimeError(f'Chosen package for {asset} did not contain glTF')
+            src=min(gltfs, key=lambda p: len(str(p)))
+            out.parent.mkdir(parents=True,exist_ok=True)
+            subprocess.run(['npx','gltf-transform','copy',str(src),str(out)],check=True)
+            print('Packed', asset, '->', out, out.stat().st_size)
+            return out
+    except Exception as e:
+        # Photoreal HDRI/PBR is mandatory; furniture is an enhancement and must not block deployment.
+        print('WARN optional Poly Haven model unavailable:', asset, e)
+        return None
 
 fetch_hdri()
 for mat in ('forest_floor','wood_floor','white_plaster_02'):
     fetch_material(mat)
-fetch_model('SchoolDesk_01','school_desk.glb')
-fetch_model('SchoolChair_01','school_chair.glb')
-fetch_model('standing_chalkboard_01','chalkboard.glb')
+for asset,name in (
+    ('SchoolDesk_01','school_desk.glb'),
+    ('SchoolChair_01','school_chair.glb'),
+    ('standing_chalkboard_01','chalkboard.glb')):
+    fetch_model(asset,name)
 print('V16 photoreal assets ready at', ROOT)
