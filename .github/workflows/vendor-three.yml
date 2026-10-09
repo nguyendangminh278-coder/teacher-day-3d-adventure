@@ -37,7 +37,7 @@ jobs:
 
       - name: Install local web build dependencies
         working-directory: source
-        run: npm install --no-save --no-package-lock three@0.168.0 esbuild@0.24.0
+        run: npm install --no-save --no-package-lock three@0.168.0 esbuild@0.24.0 @gltf-transform/cli@4.2.1
 
       - name: Run route and collider QA
         working-directory: source
@@ -57,6 +57,15 @@ jobs:
           test -s site/assets/models/v11/quaternius/rock.glb
           test -s site/assets/models/v11/kenney/bench.glb
 
+      - name: Fetch V16 photoreal CC0 assets from Poly Haven
+        working-directory: source
+        run: |
+          python3 tools/fetch_photoreal_v16.py ../site
+          test -s ../site/assets/v16/hdri/cloud_layers_2k.hdr
+          test -s ../site/assets/v16/materials/forest_floor/basecolor.jpg
+          test -s ../site/assets/v16/materials/wood_floor/basecolor.jpg
+          test -s ../site/assets/v16/materials/white_plaster_02/basecolor.jpg
+
       - name: Refresh source files while preserving optimized assets
         run: |
           mkdir -p site/src site/dist site/docs
@@ -66,7 +75,7 @@ jobs:
           cp source/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md site/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md
           touch site/.nojekyll
 
-      - name: Inject V11-V15 world, palette, renderer and controls
+      - name: Inject V11-V16 world, palette, renderer, controls and photoreal pass
         working-directory: source
         run: |
           python3 tools/inject_premium_flowers.py src/main.js
@@ -76,6 +85,7 @@ jobs:
           python3 tools/refine_cloud_forest_v13.py src/main.js
           python3 tools/inject_bright_palette_v14.py src/main.js
           python3 tools/inject_aaa_clickmove_v15.py src/main.js
+          python3 tools/inject_photoreal_v16.py src/main.js
           python3 tools/v15_qa_fastpath.py src/main.js
           grep -q "V11_VISUAL_POLISH" src/main.js
           grep -q "V12_DENSE_WORLD" src/main.js
@@ -83,6 +93,7 @@ jobs:
           grep -q "V13_REFINED_FOREST" src/main.js
           grep -q "V14_BRIGHT_CANDY_PALETTE" src/main.js
           grep -q "V15_AAA_CLICKMOVE" src/main.js
+          grep -q "V16_PHOTOREAL_HYBRID" src/main.js
           npx esbuild src/main.js --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=../site/dist/game.min.js
           test -s ../site/dist/game.min.js
 
@@ -98,7 +109,7 @@ jobs:
             echo "Chrome not available on runner; route/collider QA already passed."
           else
             for STAGE in 2 4 6 9; do
-              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1100,700 --virtual-time-budget=8000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=15"
+              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1100,700 --virtual-time-budget=9000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&qaFast=1&v=16"
               test -s "qa/stage-${STAGE}.png"
             done
           fi
@@ -107,7 +118,7 @@ jobs:
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: visual-qa-v15
+          name: visual-qa-v16
           path: site/qa
           if-no-files-found: warn
           retention-days: 7
@@ -124,6 +135,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish"
           else
-            git commit -m "feat: v15 cinematic renderer and MOBA click-to-move"
+            git commit -m "feat: v16 photoreal HDRI PBR hybrid"
             git push origin HEAD:gh-pages
           fi
