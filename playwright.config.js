@@ -7,7 +7,10 @@ export default defineConfig({
   reporter: "list",
   use: {
     baseURL: "http://127.0.0.1:8123",
-    viewport: { width: 1100, height: 700 },
+    // Software WebGL on hosted runners has a much lower pixel throughput.
+    viewport: process.env.CI
+      ? { width: 900, height: 600 }
+      : { width: 1100, height: 700 },
     channel: process.platform === "win32" ? "chrome" : undefined,
     launchOptions: {
       args: [

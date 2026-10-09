@@ -16,10 +16,17 @@ async function chapter(page, n) {
     })
     .toBe(true);
 }
-async function ready(page, url = "/?qa=1&qaSpeed=20&qaQuality=low") {
+async function ready(page, url = "/?qa=1&qaSpeed=30&qaQuality=low") {
   await page.goto(url);
   await expect(page.locator("#startBtn")).toBeEnabled();
   await expect(page.locator("#loading")).toBeHidden();
+}
+async function capture(page, name) {
+  // CI still captures both ends of the journey and the mobile panels; the local
+  // suite supplies the intermediate art-review screenshots without timing out
+  // the full interactive test on a software GPU.
+  if (process.env.CI && ["garden", "classroom", "house"].includes(name)) return;
+  await page.screenshot({ path: `test-results/${name}.png` });
 }
 function monitor(page) {
   const errors = [];
@@ -35,20 +42,20 @@ test("complete journey, door sequencing, pause, wishes, save/resume and restart"
 }) => {
   const errors = monitor(page);
   await ready(page);
-  await page.screenshot({ path: "test-results/welcome.png" });
+  await capture(page, "welcome");
   await page.locator("#startBtn").click();
   await chapter(page, 0);
   await page.locator("#actionBtn").click();
   await chapter(page, 1);
   await page.locator("#actionBtn").click();
   await chapter(page, 2);
-  await page.screenshot({ path: "test-results/garden.png" });
+  await capture(page, "garden");
   await page.locator("#actionBtn").click();
   await chapter(page, 3);
   await page.locator("#actionBtn").click();
   await chapter(page, 4);
   expect(await page.evaluate(() => window.__GAME_DEBUG__.gateOpen)).toBe(true);
-  await page.screenshot({ path: "test-results/classroom.png" });
+  await capture(page, "classroom");
   await page.locator("#actionBtn").click();
   await expect(page.locator(".wish-card")).toHaveCount(25);
   await page.locator("#dismissClass").click();
@@ -60,7 +67,7 @@ test("complete journey, door sequencing, pause, wishes, save/resume and restart"
   await chapter(page, 6);
   expect((await debug(page)).space).toBe("house");
   expect((await debug(page)).position).toEqual([-1, 0.18, 1]);
-  await page.screenshot({ path: "test-results/house.png" });
+  await capture(page, "house");
   await page.locator("#actionBtn").click();
   await chapter(page, 7);
   await page.locator("#actionBtn").click();
@@ -69,7 +76,7 @@ test("complete journey, door sequencing, pause, wishes, save/resume and restart"
   await chapter(page, 9);
   await expect(page.locator("#finalPanel")).toBeVisible();
   expect((await debug(page)).space).toBe("finale");
-  await page.screenshot({ path: "test-results/finale.png" });
+  await capture(page, "finale");
   await page.locator("#wishesBtn").click();
   await expect(page.locator("#treeWishes p")).toHaveCount(24);
   await page.keyboard.press("Escape");
