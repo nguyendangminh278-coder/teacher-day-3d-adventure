@@ -1,5 +1,7 @@
 # Teacher Mom Chibi — Master Character, Narrative & Integration Spec
 
+> Historical concept brief. The implemented V18 character follows `src/config.js` and the existing original model: pastel-blue áo dài, shoulder-length hair and no glasses. The speculative visual/animation targets below are concept guidance, not shipped features. Current integration and verified behavior are documented in `RELEASE_V18.md`.
+
 ## 1. Creative direction
 
 The protagonist is no longer a generic mascot. She is **the mother herself**, represented as an emotional, warm 3D chibi teacher. She is both the teacher in the classroom and the central playable character throughout the entire 20/11 journey.

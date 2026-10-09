@@ -1,90 +1,261 @@
 <!doctype html>
 <html lang="vi">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#fafcff" />
-  <meta name="description" content="Hành trình game 3D góc nhìn thứ ba dành tặng Mẹ ngày Nhà giáo Việt Nam 20/11." />
-  <title>Hành trình 20/11 dành tặng Mẹ</title>
-  <link rel="stylesheet" href="./src/styles.css?v=172" />
-</head>
-<body>
-  <div id="app">
-    <canvas id="game" aria-label="Hành trình game 3D 20/11 dành tặng Mẹ"></canvas>
-
-    <header class="hud top-hud" aria-live="polite">
-      <div class="brand">
-        <span class="brand-dot"></span>
-        <div>
-          <strong>Hành trình 20/11 dành tặng Mẹ</strong>
-          <small id="assetStatus">V17.2 · HDRI + PBR · chế độ kịch bản ổn định</small>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#152c31" />
+    <meta
+      name="description"
+      content="Một hành trình trên mây, qua lớp học và mái nhà, dành tặng Mẹ nhân ngày Nhà giáo Việt Nam 20/11."
+    />
+    <title>Gửi Mẹ · Hành trình 20/11</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='50' font-size='50'%3E🌷%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body class="welcome-ui">
+    <main id="app">
+      <canvas
+        id="game"
+        aria-label="Thế giới 3D của hành trình dành tặng Mẹ"
+        tabindex="0"
+      ></canvas>
+      <div class="cinematic-shade" aria-hidden="true"></div>
+      <header class="top-hud hud">
+        <div class="brand">
+          <span class="brand-mark">✳</span>
+          <div>
+            <strong>Gửi Mẹ</strong><small>MỘT HÀNH TRÌNH YÊU THƯƠNG</small>
+          </div>
         </div>
+        <nav class="toolbar" aria-label="Điều khiển trải nghiệm">
+          <button
+            id="soundBtn"
+            class="icon-btn"
+            aria-label="Bật nhạc"
+            aria-pressed="false"
+          >
+            ♪ <span>Nhạc</span>
+          </button>
+          <button id="cameraBtn" class="icon-btn" aria-label="Đặt lại góc nhìn">
+            ◎ <span>Góc nhìn</span>
+          </button>
+          <button
+            id="pauseBtn"
+            class="icon-btn"
+            aria-label="Tạm dừng và mở cài đặt"
+          >
+            Ⅱ <span>Tạm dừng</span>
+          </button>
+        </nav>
+      </header>
+      <aside id="objective" class="objective-card hud" aria-live="polite">
+        <div class="chapter-line">
+          <span class="objective-kicker">HÀNH TRÌNH</span
+          ><span class="stage-pill"><span id="stageNumber">1</span> / 10</span>
+        </div>
+        <strong id="objectiveTitle">Mẹ xuất hiện</strong>
+        <p id="objectiveText">Một món quà nhỏ đang chờ Mẹ ở phía trước.</p>
+        <div class="progress-track"><div id="chapterProgress"></div></div>
+      </aside>
+      <div
+        id="dialogue"
+        class="dialogue hidden"
+        role="status"
+        aria-live="polite"
+        inert
+      >
+        <div class="portrait" aria-hidden="true">✿</div>
+        <div>
+          <strong id="dialogueName">Mẹ</strong>
+          <p id="dialogueText"></p>
+        </div>
+        <button id="closeDialogue" class="close-btn" aria-label="Ẩn lời thoại">
+          ×
+        </button>
       </div>
-      <div class="stage-pill"><span id="stageNumber">1</span>/10</div>
-    </header>
-
-    <aside id="objective" class="hud objective-card">
-      <span class="objective-kicker">NHIỆM VỤ</span>
-      <strong id="objectiveTitle">Mẹ xuất hiện</strong>
-      <p id="objectiveText">Cô giáo của câu chuyện sẽ bước ra từ cánh cổng trên mây.</p>
-    </aside>
-
-    <div id="dialogue" class="dialogue hidden" role="status" aria-live="polite">
-      <div class="portrait">🌷</div>
-      <div>
-        <strong id="dialogueName">Mẹ</strong>
-        <p id="dialogueText">Xin chào…</p>
+      <section
+        id="classroomPanel"
+        class="panel classroom-panel hidden"
+        role="dialog"
+        aria-labelledby="classTitle"
+        inert
+      >
+        <div class="panel-heading">
+          <div>
+            <span class="eyebrow">NHỮNG HẠT MẦM CỦA MẸ</span>
+            <h2 id="classTitle">25 lời chúc, một tấm lòng.</h2>
+          </div>
+          <span class="panel-flower" aria-hidden="true">✿</span>
+        </div>
+        <div id="classWishes" class="wish-grid"></div>
+        <button id="dismissClass" class="primary-btn">
+          Tan lớp · Về nhà <span>→</span>
+        </button>
+      </section>
+      <section
+        id="finalPanel"
+        class="panel final-panel hidden"
+        aria-labelledby="finalTitle"
+        inert
+      >
+        <span class="eyebrow">NGÀY NHÀ GIÁO VIỆT NAM · 20/11</span>
+        <h1 id="finalTitle">
+          Mẹ đã gieo yêu thương.<br /><em
+            >Và hôm nay,<br />yêu thương nở hoa.</em
+          >
+        </h1>
+        <p>
+          Cảm ơn Mẹ vì vừa là mẹ, vừa là người thầy đầu tiên và tuyệt vời nhất
+          của chúng con.
+        </p>
+        <button id="wishesBtn" class="primary-btn">
+          Đọc những điều ước <span>✿</span></button
+        ><button id="replayBtn" class="text-btn">Chơi lại hành trình ↻</button>
+      </section>
+      <section
+        id="wishPanel"
+        class="panel wish-panel hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="wishTitle"
+        inert
+      >
+        <button id="closeWishes" class="close-btn" aria-label="Đóng điều ước">
+          ×</button
+        ><span class="eyebrow">MỖI BÔNG HOA, MỘT ĐIỀU ƯỚC</span>
+        <h2 id="wishTitle">Dành riêng cho Mẹ</h2>
+        <div id="treeWishes" class="tree-wishes"></div>
+      </section>
+      <button id="actionBtn" class="action-btn hidden" inert>
+        <span id="actionLabel">Bắt đầu hành trình</span
+        ><span class="action-icon">→</span>
+      </button>
+      <div class="controls-hint hud">
+        <span>Kéo để ngắm nhìn · Cuộn để đến gần</span
+        ><span>Enter: tiếp tục · Esc: tạm dừng</span>
       </div>
-    </div>
-
-    <section id="classroomPanel" class="panel classroom-panel hidden" aria-label="Lời chúc trong lớp học">
-      <div class="panel-heading">
-        <span>💌 25 lời chúc từ học trò</span>
-        <small>Dành riêng cho cô trong ngày 20/11</small>
+      <section id="welcome" class="welcome">
+        <div class="welcome-copy">
+          <span class="eyebrow">MỘT MÓN QUÀ CHO NGÀY 20/11</span>
+          <h1>Người gieo<br /><em>những mùa hoa.</em></h1>
+          <p>
+            Qua những con đường trên mây, một lớp học thân quen và mái nhà ấm
+            áp. Cùng Mẹ đi qua hành trình của yêu thương.
+          </p>
+          <div class="welcome-actions">
+            <button id="startBtn" class="primary-btn" disabled>
+              Bắt đầu hành trình <span>→</span></button
+            ><button id="resumeBtn" class="text-btn hidden" inert>
+              Tiếp tục hành trình đã lưu
+            </button>
+          </div>
+          <small
+            >Khoảng 3 phút · Kéo để xoay góc nhìn · Chạm nút để tiếp tục</small
+          >
+        </div>
+        <div class="welcome-date">
+          <span>20</span><span>11</span><small>DÀNH TẶNG MẸ</small>
+        </div>
+      </section>
+      <section
+        id="pausePanel"
+        class="panel pause-panel hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="pauseTitle"
+        inert
+      >
+        <span class="eyebrow">DỪNG LẠI MỘT CHÚT</span>
+        <h2 id="pauseTitle">Hành trình vẫn chờ Mẹ.</h2>
+        <p>Tiến trình được lưu sau mỗi chặng.</p>
+        <label for="quality">Chất lượng hình ảnh</label
+        ><select id="quality">
+          <option value="low">Nhẹ · Điện thoại / máy yếu</option>
+          <option value="medium">Cân bằng</option>
+          <option value="high">Điện ảnh · Máy mạnh</option>
+        </select>
+        <label class="check-row"
+          ><input id="reduceMotion" type="checkbox" /> Giảm chuyển động camera
+          tự động</label
+        >
+        <button id="continueBtn" class="primary-btn">
+          Tiếp tục <span>→</span></button
+        ><button id="restartBtn" class="text-btn">Bắt đầu lại</button
+        ><small id="assetStatus">Đang chuẩn bị thế giới…</small>
+      </section>
+      <section
+        id="restartPanel"
+        class="panel pause-panel hidden"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="restartTitle"
+        inert
+      >
+        <h2 id="restartTitle">Bắt đầu một hành trình mới?</h2>
+        <p>Tiến trình đang lưu sẽ được thay bằng hành trình mới.</p>
+        <button id="confirmRestart" class="primary-btn">Bắt đầu lại</button
+        ><button id="cancelRestart" class="text-btn">Quay lại</button>
+      </section>
+      <div id="fade" class="fade" aria-hidden="true"></div>
+      <div id="loading" class="loading-screen" role="status">
+        <div class="loader-orbit">✳</div>
+        <strong>Đang gieo những mùa hoa…</strong
+        ><small id="loadingText"
+          >Chuẩn bị ánh sáng, khu vườn và người gieo yêu thương.</small
+        >
+        <div class="loading-track"><div id="loadingProgress"></div></div>
       </div>
-      <div id="classWishes" class="wish-grid"></div>
-      <button id="dismissClass" class="primary-btn">Tan lớp <span>→</span></button>
-    </section>
-
-    <section id="finalPanel" class="panel final-panel hidden" aria-label="Cây điều ước">
-      <span class="final-kicker">CÂY ĐIỀU ƯỚC CỦA MẸ</span>
-      <h1>Cảm ơn mẹ vì vừa là mẹ,<br />vừa là người thầy tuyệt vời nhất.</h1>
-      <p>Mỗi bông hoa là một lời chúc dành cho mẹ. Chúc mẹ 20/11 thật nhiều niềm vui, bình an và luôn được yêu thương.</p>
-      <button id="replayBtn" class="primary-btn secondary">Chơi lại hành trình ↻</button>
-    </section>
-
-    <button id="actionBtn" class="action-btn" aria-label="Tiếp tục hành trình">
-      <span id="actionLabel">Bắt đầu hành trình</span>
-      <span class="action-icon">➜</span>
-    </button>
-
-    <div class="controls-hint hud">
-      <span>🖱️ Kéo chuột trái: xoay camera 360° · cuộn: zoom</span>
-      <span>✨ Bấm nút nhiệm vụ để Mẹ tự đi đúng theo kịch bản</span>
-    </div>
-
-    <div id="fade" class="fade" aria-hidden="true"></div>
-
-    <div id="loading" class="loading-screen">
-      <div class="loader-orbit"><span></span></div>
-      <strong>Đang dựng V17.2 ổn định...</strong>
-      <small>Giữ HDRI/PBR nhưng bỏ click-to-move và giảm tải model nặng để hành trình chạy mượt theo kịch bản</small>
-    </div>
-  </div>
-
-  <script>
-    setTimeout(() => {
-      const loading = document.getElementById('loading');
-      if (!loading || loading.classList.contains('done')) return;
-      loading.classList.add('done');
-      if (!window.__APP_READY__) {
-        const title = document.getElementById('objectiveTitle');
-        const text = document.getElementById('objectiveText');
-        if (title) title.textContent = 'Chế độ 3D chưa sẵn sàng';
-        if (text) text.textContent = 'Hãy bật Hardware Acceleration/WebGL trong Chrome rồi tải lại trang.';
-      }
-    }, 12000);
-  </script>
-  <script src="./dist/game.min.js?v=172" defer></script>
-</body>
+      <section
+        id="errorPanel"
+        class="panel error-panel hidden"
+        role="alert"
+        inert
+      >
+        <h2>Chưa thể mở thế giới 3D</h2>
+        <p id="errorText">
+          Hãy tải lại trang hoặc thử trình duyệt hỗ trợ WebGL 2.
+        </p>
+        <button class="primary-btn" onclick="location.reload()">Thử lại</button>
+      </section>
+      <noscript
+        ><div class="loading-screen">
+          <strong>Hãy bật JavaScript để bắt đầu hành trình.</strong>
+        </div></noscript
+      >
+    </main>
+    <script>
+      window.showBootError = (message) => {
+        document.getElementById("loading").classList.add("done");
+        const p = document.getElementById("errorPanel");
+        p.classList.remove("hidden");
+        p.inert = false;
+        document.getElementById("errorText").textContent = message;
+      };
+      window.addEventListener("error", (e) => {
+        if (!window.__APP_READY__)
+          window.showBootError(e.message || "Không tải được trò chơi.");
+      });
+      window.__BOOT_WATCHDOG__ = setTimeout(() => {
+        if (!window.__APP_READY__)
+          window.showBootError(
+            "Tải trò chơi mất quá lâu. Kiểm tra kết nối rồi thử lại.",
+          );
+      }, 30000);
+    </script>
+    <script
+      src="./dist/game.min.js"
+      defer
+      onerror="
+        showBootError(
+          'Không tải được trò chơi. Hãy kiểm tra kết nối hoặc chạy npm run build nếu đang dùng bản local.',
+        )
+      "
+    ></script>
+  </body>
 </html>

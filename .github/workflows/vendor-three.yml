@@ -1,153 +1,86 @@
-name: Build and publish personalized 3D game
+name: Verify and publish 3D journey
 
 on:
   push:
-    branches: ["main"]
-    paths:
-      - "index.html"
-      - "src/**"
-      - "tools/**"
-      - "docs/**"
-      - "ASSET_CREDITS.md"
-      - ".github/workflows/vendor-three.yml"
+    branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
-  group: publish-personalized-3d
+  group: journey-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          path: source
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Test narrative, assets and full-body route clearance
+        run: npm test
+      - name: Build self-contained static site
+        run: npm run build
+      - name: Install browser for actual WebGL journey QA
+        run: npx playwright install --with-deps chromium
+      - name: Verify full journey and desktop/mobile UI
+        run: npm run test:e2e
+      - name: Retain screenshots for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: journey-visual-qa
+          path: test-results
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Save verified site
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-site
+          path: site
+          include-hidden-files: true
+          retention-days: 7
 
-      - name: Checkout published branch with existing CC0 assets
+  publish:
+    if: github.event_name != 'pull_request'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+    steps:
+      - name: Preserve published branch history
         uses: actions/checkout@v4
         with:
           ref: gh-pages
-          path: site
-          fetch-depth: 0
-
-      - name: Install local web build dependencies
-        working-directory: source
-        run: npm install --no-save --no-package-lock three@0.168.0 esbuild@0.24.0 @gltf-transform/cli@4.2.1
-
-      - name: Run route and collider QA
-        working-directory: source
-        run: node tools/qa_routes.mjs
-
-      - name: Verify existing local game assets
-        run: |
-          test -s site/assets/models/teacher_mom_chibi.glb
-          test -s site/assets/models/sedan.glb
-          test -s site/assets/models/v11/quaternius/tree_common.glb
-          test -s site/assets/models/v11/quaternius/tree_twisted.glb
-          test -s site/assets/models/v11/quaternius/birch.glb
-          test -s site/assets/models/v11/quaternius/bush_flowers.glb
-          test -s site/assets/models/v11/quaternius/bush_ultimate.glb
-          test -s site/assets/models/v11/quaternius/fern.glb
-          test -s site/assets/models/v11/quaternius/flower_pink.glb
-          test -s site/assets/models/v11/quaternius/rock.glb
-          test -s site/assets/models/v11/kenney/bench.glb
-
-      - name: Fetch V16 photoreal CC0 assets from Poly Haven
-        working-directory: source
-        run: |
-          python3 tools/fetch_photoreal_v16.py ../site
-          test -s ../site/assets/v16/hdri/cloud_layers_2k.hdr
-          test -s ../site/assets/v16/materials/forest_floor/basecolor.jpg
-          test -s ../site/assets/v16/materials/wood_floor/basecolor.jpg
-          test -s ../site/assets/v16/materials/white_plaster_02/basecolor.jpg
-
-      - name: Fetch V17 real-world CC0 models and surfaces
-        working-directory: source
-        run: |
-          python3 tools/fetch_photoreal_v17.py ../site
-          test -s ../site/assets/v17/materials/concrete_floor/basecolor.jpg
-          test -s ../site/assets/v17/materials/brick_wall_003/basecolor.jpg
-
-      - name: Refresh source files while preserving optimized assets
-        run: |
-          mkdir -p site/src site/dist site/docs
-          cp source/index.html site/index.html
-          cp source/src/styles.css site/src/styles.css
-          cp source/ASSET_CREDITS.md site/ASSET_CREDITS.md
-          cp source/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md site/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md
-          touch site/.nojekyll
-
-      - name: Inject V11-V17.2 world, photoreal renderer and scripted-only stability pass
-        working-directory: source
-        run: |
-          python3 tools/inject_premium_flowers.py src/main.js
-          python3 tools/inject_dense_world_v12.py src/main.js
-          python3 tools/v12_reuse_existing_assets.py src/main.js
-          python3 tools/inject_cloud_forest_v13.py src/main.js
-          python3 tools/refine_cloud_forest_v13.py src/main.js
-          python3 tools/inject_bright_palette_v14.py src/main.js
-          python3 tools/inject_aaa_clickmove_v15.py src/main.js
-          python3 tools/inject_photoreal_v16.py src/main.js
-          python3 tools/inject_photoreal_v17.py src/main.js
-          python3 tools/v15_qa_fastpath.py src/main.js
-          python3 tools/inject_v17_stability.py src/main.js
-          python3 tools/inject_v172_scripted_only.py src/main.js
-          grep -q "V11_VISUAL_POLISH" src/main.js
-          grep -q "V12_DENSE_WORLD" src/main.js
-          grep -q "V13_CLOUD_FOREST" src/main.js
-          grep -q "V13_REFINED_FOREST" src/main.js
-          grep -q "V14_BRIGHT_CANDY_PALETTE" src/main.js
-          grep -q "V15_AAA_CLICKMOVE" src/main.js
-          grep -q "V16_PHOTOREAL_HYBRID" src/main.js
-          grep -q "V17_FULL_PHOTOREAL_REPLACEMENT" src/main.js
-          grep -q "V17_STABILITY_PATCH" src/main.js
-          grep -q "V17_2_SCRIPTED_ONLY" src/main.js
-          npx esbuild src/main.js --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=../site/dist/game.min.js
-          test -s ../site/dist/game.min.js
-
-      - name: Headless 3D visual smoke QA
-        working-directory: site
-        run: |
-          mkdir -p qa
-          python3 -m http.server 8123 --bind 127.0.0.1 >/tmp/teacher-day-qa-server.log 2>&1 &
-          SERVER_PID=$!
-          sleep 2
-          CHROME="$(command -v google-chrome || command -v chromium || true)"
-          if [ -z "$CHROME" ]; then
-            echo "Chrome not available on runner; route/collider QA already passed."
-          else
-            for STAGE in 2 3 4 6 9; do
-              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1100,700 --virtual-time-budget=10000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&qaFast=1&v=172"
-              test -s "qa/stage-${STAGE}.png"
-            done
-          fi
-          kill $SERVER_PID || true
-
-      - name: Upload visual QA screenshots
-        uses: actions/upload-artifact@v4
+          path: published
+      - uses: actions/download-artifact@v4
         with:
-          name: visual-qa-v17-2
-          path: site/qa
-          if-no-files-found: warn
-          retention-days: 7
-
-      - name: Remove QA screenshots from public build
-        run: rm -rf site/qa
-
-      - name: Publish gh-pages
-        working-directory: site
+          name: verified-site
+          path: artifact
+      - name: Replace public files with the verified build
+        run: rsync -a --delete --exclude='.git' artifact/ published/
+      - name: Publish to the existing GitHub Pages branch
+        working-directory: published
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          if git diff --cached --quiet; then
-            echo "No changes to publish"
-          else
-            git commit -m "fix: v17.2 scripted-only stable journey"
+          if ! git diff --cached --quiet; then
+            git commit -m 'Publish verified cinematic teacher-day journey'
             git push origin HEAD:gh-pages
           fi
+      # GITHUB_TOKEN branch pushes do not automatically trigger legacy Pages builds.
+      - name: Explicitly request the configured GitHub Pages build
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh api --method POST "repos/$GH_REPO/pages/builds"
