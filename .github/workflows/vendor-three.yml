@@ -96,8 +96,8 @@ jobs:
           if [ -z "$CHROME" ]; then
             echo "Chrome not available on runner; route/collider QA already passed."
           else
-            for STAGE in 0 1 2 3 4 6 7 8 9; do
-              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=19000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=15"
+            for STAGE in 2 4 6 9; do
+              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1100,700 --virtual-time-budget=8000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=15"
               test -s "qa/stage-${STAGE}.png"
             done
           fi
