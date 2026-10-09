@@ -66,7 +66,7 @@ jobs:
           cp source/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md site/docs/TEACHER_MOM_CHIBI_MASTER_SPEC.md
           touch site/.nojekyll
 
-      - name: Inject V11-V14 world and palette passes
+      - name: Inject V11-V15 world, palette, renderer and controls
         working-directory: source
         run: |
           python3 tools/inject_premium_flowers.py src/main.js
@@ -75,11 +75,13 @@ jobs:
           python3 tools/inject_cloud_forest_v13.py src/main.js
           python3 tools/refine_cloud_forest_v13.py src/main.js
           python3 tools/inject_bright_palette_v14.py src/main.js
+          python3 tools/inject_aaa_clickmove_v15.py src/main.js
           grep -q "V11_VISUAL_POLISH" src/main.js
           grep -q "V12_DENSE_WORLD" src/main.js
           grep -q "V13_CLOUD_FOREST" src/main.js
           grep -q "V13_REFINED_FOREST" src/main.js
           grep -q "V14_BRIGHT_CANDY_PALETTE" src/main.js
+          grep -q "V15_AAA_CLICKMOVE" src/main.js
           npx esbuild src/main.js --bundle --minify --format=iife --platform=browser --target=es2020 --outfile=../site/dist/game.min.js
           test -s ../site/dist/game.min.js
 
@@ -95,7 +97,7 @@ jobs:
             echo "Chrome not available on runner; route/collider QA already passed."
           else
             for STAGE in 0 1 2 3 4 6 7 8 9; do
-              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=18000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=14"
+              "$CHROME" --headless --no-sandbox --disable-dev-shm-usage --disable-gpu-sandbox --enable-webgl --ignore-gpu-blocklist --use-angle=swiftshader --window-size=1440,900 --virtual-time-budget=19000 --screenshot="qa/stage-${STAGE}.png" "http://127.0.0.1:8123/?qaStage=${STAGE}&v=15"
               test -s "qa/stage-${STAGE}.png"
             done
           fi
@@ -104,7 +106,7 @@ jobs:
       - name: Upload visual QA screenshots
         uses: actions/upload-artifact@v4
         with:
-          name: visual-qa-v14
+          name: visual-qa-v15
           path: site/qa
           if-no-files-found: warn
           retention-days: 7
@@ -121,6 +123,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to publish"
           else
-            git commit -m "feat: v14 bright white pastel cloud forest"
+            git commit -m "feat: v15 cinematic renderer and MOBA click-to-move"
             git push origin HEAD:gh-pages
           fi
