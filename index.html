@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#fafcff" />
   <meta name="description" content="Hành trình game 3D góc nhìn thứ ba dành tặng Mẹ ngày Nhà giáo Việt Nam 20/11." />
   <title>Hành trình 20/11 dành tặng Mẹ</title>
-  <link rel="stylesheet" href="./src/styles.css?v=14" />
+  <link rel="stylesheet" href="./src/styles.css?v=15" />
 </head>
 <body>
   <div id="app">
@@ -17,7 +17,7 @@
         <span class="brand-dot"></span>
         <div>
           <strong>Hành trình 20/11 dành tặng Mẹ</strong>
-          <small id="assetStatus">V14 đang nạp rừng mây trắng sáng, hoa lá pastel và gió nhẹ…</small>
+          <small id="assetStatus">V15 · cinematic render · click-to-move · rừng mây pastel</small>
         </div>
       </div>
       <div class="stage-pill"><span id="stageNumber">1</span>/10</div>
@@ -59,16 +59,16 @@
     </button>
 
     <div class="controls-hint hud">
-      <span>🖱️ Kéo chuột/chạm để xoay camera 360° · cuộn để zoom</span>
-      <span>☁️ Biển mây trắng · 🌸 pastel rực rỡ · 🍃 gió lay cỏ cây · 🐦 chim bay · 💗 bước chân nhún nhảy</span>
+      <span>🖱️ Kéo chuột trái: xoay camera 360° · cuộn: zoom</span>
+      <span>🟣 Chuột phải xuống mặt đất: Mẹ tự tìm đường và chạy tới đó như MOBA</span>
     </div>
 
     <div id="fade" class="fade" aria-hidden="true"></div>
 
     <div id="loading" class="loading-screen">
       <div class="loader-orbit"><span></span></div>
-      <strong>Đang mở khu rừng mây trắng dành cho Mẹ...</strong>
-      <small>Đang khởi tạo ánh sáng pastel, biển mây, cây cỏ chuyển động và nhân vật 3D</small>
+      <strong>Đang dựng thế giới cinematic trên mây...</strong>
+      <small>Đang khởi tạo ánh sáng môi trường, bóng đổ mềm, bloom, AA và click-to-move</small>
     </div>
   </div>
 
@@ -83,8 +83,8 @@
         if (title) title.textContent = 'Chế độ 3D chưa sẵn sàng';
         if (text) text.textContent = 'Hãy bật Hardware Acceleration/WebGL trong Chrome rồi tải lại trang.';
       }
-    }, 5000);
+    }, 7000);
   </script>
-  <script src="./dist/game.min.js?v=14" defer></script>
+  <script src="./dist/game.min.js?v=15" defer></script>
 </body>
 </html>
