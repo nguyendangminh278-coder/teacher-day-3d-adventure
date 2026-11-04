@@ -151,3 +151,158 @@ button { font: inherit; }
 @media(prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; transition: none !important; }
 }
+
+
+/* --- New outdoor RPG hub ------------------------------------------------- */
+.map-hotspots {
+  position: fixed;
+  inset: 0;
+  z-index: 23;
+  pointer-events: none;
+}
+.map-location {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 138px;
+  max-width: 156px;
+  padding: 6px 10px;
+  text-align: center;
+  background: #fff0c8;
+  color: #58424f;
+  font: 900 11px/1.23 "Courier New", monospace;
+  letter-spacing: .02em;
+  white-space: nowrap;
+  border: 3px solid #664959;
+  box-shadow: 3px 3px 0 #7f6370, inset 0 0 0 2px #f8c58e;
+  cursor: pointer;
+  pointer-events: auto;
+  isolation: isolate;
+  transition: filter .13s ease, transform .13s ease;
+}
+.map-location::after {
+  content: "";
+  position: absolute;
+  left: calc(50% - 5px);
+  bottom: -11px;
+  width: 9px;
+  height: 9px;
+  background: #fff0c8;
+  border-bottom: 3px solid #664959;
+  border-right: 3px solid #664959;
+  transform: rotate(45deg);
+}
+.map-location small {
+  color: #926f70;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.place-emoji { font-size: 18px; line-height: 1.1; }
+.map-location.is-active {
+  background: #fff6d7;
+  outline: 3px solid #fff4b3;
+  outline-offset: 2px;
+  box-shadow: 4px 4px 0 #73576b, inset 0 0 0 3px #f8cc8e, 0 0 22px 7px rgba(255,232,143,.7);
+  animation: hubMarkerPulse 1.35s steps(2,end) infinite;
+}
+.map-location.is-locked {
+  filter: saturate(.43) brightness(.87);
+  opacity: .83;
+  cursor: not-allowed;
+}
+.map-location.is-locked::before {
+  content: "🔒";
+  position: absolute;
+  top: -11px;
+  right: -10px;
+  font-size: 14px;
+}
+.map-location:focus-visible {
+  outline: 4px solid #fffef0;
+  outline-offset: 5px;
+}
+.map-location.is-active:hover { transform: translate(-50%,-106%); }
+.map-hint {
+  z-index: 19;
+  top: max(74px,calc(env(safe-area-inset-top) + 68px));
+  left: max(16px,env(safe-area-inset-left));
+  max-width: 330px;
+  padding: 9px 12px;
+  font-size: 10px;
+  line-height: 1.45;
+  background: #fff7e6;
+  border: 2px solid #664959;
+  box-shadow: 3px 3px 0 #75556b;
+}
+.map-return {
+  position: fixed;
+  left: max(16px,env(safe-area-inset-left));
+  top: max(86px,calc(env(safe-area-inset-top) + 74px));
+  z-index: 28;
+  background: #d1efdd;
+  border: 3px solid #49394e;
+  box-shadow: 4px 4px 0 #655168;
+  padding: 10px 13px;
+  color: #49394e;
+  font: 900 12px "Courier New",monospace;
+  cursor: pointer;
+}
+.map-return:hover { background: #efffe9; }
+.map-return:focus-visible { outline: 3px solid #fff;outline-offset: 4px; }
+.map-fade {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: #fff6df;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .3s steps(6,end);
+}
+.map-fade.on { opacity: 1; }
+@keyframes hubMarkerPulse {
+  0%,100% { box-shadow: 4px 4px 0 #73576b, inset 0 0 0 3px #f8cc8e, 0 0 18px 3px rgba(255,232,143,.50); }
+  50% { box-shadow: 4px 4px 0 #73576b, inset 0 0 0 3px #f8cc8e, 0 0 26px 9px rgba(255,232,143,.80); }
+}
+@media(max-width:760px) {
+  .map-hint {
+    top: max(67px,calc(env(safe-area-inset-top) + 61px));
+    left: 9px;
+    max-width: 38vw;
+    font-size: 9px;
+    padding: 6px;
+  }
+  .map-return {
+    top: max(74px,calc(env(safe-area-inset-top) + 65px));
+    left: 9px;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+  .map-location {
+    min-width: 0;
+    max-width: 125px;
+    white-space: normal;
+    font-size: 10px;
+    padding: 6px 7px;
+    border-width: 2px;
+    box-shadow: 2px 2px 0 #73576b;
+  }
+  .map-location small { font-size: 8px; }
+  .map-location:not(.is-active) {
+    width: 39px;
+    height: 39px;
+    padding: 3px;
+    font-size: 0;
+  }
+  .map-location:not(.is-active) small { display: none; }
+  .map-location:not(.is-active) .place-emoji { font-size: 20px; }
+  .map-location.is-locked::before { top: -7px; right: -7px; font-size: 9px; }
+  .map-location.is-active { min-width: 104px; }
+}
+@media(prefers-reduced-motion: reduce) {
+  .map-location, .map-fade { transition: none; animation: none; }
+}
