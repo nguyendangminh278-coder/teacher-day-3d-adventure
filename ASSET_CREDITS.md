@@ -57,3 +57,7 @@ Three.js and GLTFLoader are bundled into the local `dist/game.min.js` during Git
 ## Illustrated pixel edition (2026-11-04)
 
 The local PNG assets in `assets/illustrations/` were generated with the built-in image_gen tool, using the user-supplied reference image for visual direction. See `docs/ILLUSTRATED_ASSETS.md` for the prompt set and scene mapping. The reference is not loaded at runtime. Earlier model credits below/above apply only to legacy source, not the current 2D game.
+
+
+## Chronological edition
+Local font Be Vietnam Pro from Google Fonts (SIL Open Font License 1.1, included at assets/fonts/OFL.txt). School/house artworks are generated architectural interpretations of the user-provided reference, not redistributed Street View photos. New motion assets and prompts documented in docs/ILLUSTRATED_ASSETS.md.

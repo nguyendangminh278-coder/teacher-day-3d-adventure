@@ -1,96 +1,65 @@
-// Assets are local, without baked UI. Each atlas cell is a distinct illustration.
-const sources = ['village.png', 'story-atlas.png', 'details-atlas.png', 'family.png'];
-const images = [];
-export async function loadIllustrations() {
-  await Promise.all(sources.map((name, i) => new Promise((resolve, reject) => {
-    const img = new Image(); images[i] = img;
-    img.onload = resolve;
-    img.onerror = () => reject(new Error(`Không tải được hình ảnh ${name}. Hãy tải lại trang.`));
-    img.src = new URL(`../assets/illustrations/${name}`, import.meta.url).href;
-  })));
-}
-const cells = {
-  'school-front': [1, 0, 0, 2, 3], 'school-exit': [1, 0, 0, 2, 3],
-  classroom: [1, 1, 0, 2, 3], 'car-driving': [1, 0, 1, 2, 3],
-  floor1: [1, 1, 1, 2, 3], floor2older: [1, 0, 2, 2, 3],
-  floor2younger: [1, 0, 2, 2, 3], 'wish-rooftop': [1, 1, 2, 2, 3],
-  'school-hall': [2, 0, 0, 2, 2], 'home-front': [2, 1, 0, 2, 2],
-  'car-boarding': [2, 0, 1, 2, 2], stairs: [2, 1, 1, 2, 2],
-};
-function drawCharacter(ctx, x, feet, scale, t, who = 'mother', walk = false) {
-  const source = images[3], col = { dad: 0, older: 1, younger: 2, mother: 3 }[who];
-  const sw = source.naturalWidth / 4, sh = source.naturalHeight;
-  const h = scale * 75, w = h * sw / sh;
-  const bob = walk ? Math.sin(t * 12) * 2 : 0;
-  ctx.save();
-  ctx.fillStyle = '#243c3270';ctx.beginPath();ctx.ellipse(x, feet, w*.27, 5, 0, 0, Math.PI*2);ctx.fill();
-  ctx.drawImage(source, col * sw, 0, sw, sh, x-w/2, feet-h*.96+bob, w, h);
-  ctx.restore();
-}
-function background(ctx, W, H, cell) {
-  const [img, col, row, cols, rows] = cell, source = images[img];
-  const sw = source.naturalWidth / cols, sh = source.naturalHeight / rows;
-  ctx.drawImage(source, col * sw, row * sh, sw, sh, 0, 0, W, H);
-}
-function petals(ctx, W, H, t, quiet) {
-  if (quiet) return;
-  ctx.fillStyle = '#ffd6e8';
-  for (let i = 0; i < 16; i++) {
-    const x = (i * 137 + t * 17 + Math.sin(t + i) * 16) % W;
-    const y = (i * 61 + t * 23) % H;
-    ctx.globalAlpha = .4 + (i % 3) * .15;
-    ctx.fillRect(Math.round(x), Math.round(y), 5, 3);
+const names=['school-thanhhoa.png','home-townhouse.png','story-atlas.png','details-atlas.png','family.png','mother-walk.png','car-action.png','town-road.png'];
+const images=[],bounds=new Map();
+export async function loadIllustrations(){
+ await Promise.all(names.map((name,i)=>new Promise((resolve,reject)=>{
+  const im=new Image();images[i]=im;im.onload=resolve;im.onerror=()=>reject(new Error('Không tải được '+name));
+  im.src=new URL('../assets/illustrations/'+name,import.meta.url).href;
+ })));
+ // Read alpha bounds to keep differently padded walk frames anchored to the feet.
+ for(const [img,cols,rows] of [[4,4,1],[5,4,2],[6,2,1]]){
+  const im=images[img],c=document.createElement('canvas');c.width=im.width;c.height=im.height;
+  const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);
+  const {data}=g.getImageData(0,0,c.width,c.height),cw=Math.floor(c.width/cols),ch=Math.floor(c.height/rows);
+  for(let row=0;row<rows;row++)for(let col=0;col<cols;col++){
+   let l=cw,r=0,t=ch,b=0;
+   for(let y=0;y<ch;y++)for(let x=0;x<cw;x++)if(data[((row*ch+y)*c.width+col*cw+x)*4+3]>40){l=Math.min(l,x);r=Math.max(r,x);t=Math.min(t,y);b=Math.max(b,y);}
+   bounds.set(`${img}:${col}:${row}`,[col*cw+l,row*ch+t,r-l+1,b-t+1]);
   }
-  ctx.globalAlpha = 1;
+ }
 }
-export function drawRpgOverworld(ctx, W, H, t, actor, car, quiet) {
-  ctx.drawImage(images[0], 0, 0, W, H);
-  petals(ctx, W, H, t, quiet);
-  if (actor.visible) {
-    drawCharacter(ctx, actor.x - 99, actor.y - 5, 1.5, t, 'dad', actor.walking);
-    drawCharacter(ctx, actor.x - 65, actor.y + 3, 1.35, t, 'older', actor.walking);
-    drawCharacter(ctx, actor.x - 33, actor.y + 3, 1.25, t, 'younger', actor.walking);
-    drawCharacter(ctx, actor.x, actor.y, 1.5, t, 'mother', actor.walking);
-    // Quest marker stays attached to the player.
-    ctx.fillStyle = '#ffe6a1'; ctx.strokeStyle = '#533820'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.roundRect(actor.x - 17, actor.y - 133, 34, 39, 7); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#50321c'; ctx.font = 'bold 28px Georgia'; ctx.textAlign = 'center';
-    ctx.fillText('!', actor.x, actor.y - 104);
-  }
+function character(ctx,a,clock){
+ if(!a.visible)return;
+ const walking=a.walking,img=walking?5:4,col=walking?Math.floor(clock/130)%4:3,row=walking&&a.direction==='north'?1:0;
+ const [sx,sy,sw,sh]=bounds.get(`${img}:${col}:${row}`),w=a.size*sw/sh;
+ ctx.save();ctx.translate(a.x,a.y);if(a.direction==='west')ctx.scale(-1,1);
+ ctx.fillStyle='#20352d45';ctx.beginPath();ctx.ellipse(0,0,w*.25,4,0,0,Math.PI*2);ctx.fill();
+ ctx.drawImage(images[img],sx,sy,sw,sh,-w/2,-a.size,w,a.size);ctx.restore();
 }
-export function drawStoryLocation(ctx, W, H, id, t, selected, count, quiet) {
-  background(ctx, W, H, cells[id]);
-  const elapsed = Math.max(0, performance.now() - window.__finePixelArrival) / 1000;
-  let x = W * .43, y = H * .84;
-  if (id === 'classroom') { x = W * .65; y = H * .73; }
-  if (id.startsWith('floor2')) { x = W * .75; y = H * .91; }
-  if (id === 'school-exit') x = W * (.46 + Math.min(1, elapsed / 2) * .12);
-  if (id === 'car-boarding') { x = W * .32; y = H * .88; }
-  if (id === 'stairs') {
-    const p = quiet ? .7 : Math.min(1, elapsed / 2.6);
-    x = W * (.24 + p * .33); y = H * (.94 - p * .65);
-  }
-  if (id === 'wish-rooftop') { x = W * .25; y = H * .91; }
-  if (id !== 'car-driving') drawCharacter(ctx, x, y, id === 'classroom' || id.startsWith('floor') ? 3.2 : 1.9, t, 'mother', id === 'stairs' || id === 'school-exit');
-  else if (!quiet) {
-    // Moving light and road streaks make the travel interval visible.
-    ctx.fillStyle = '#fff6c8'; ctx.globalAlpha = .45;
-    for (let i = 0; i < 9; i++) ctx.fillRect((W + i * 213 - t * 290 % W) % W, H * .89 + (i % 3) * 9, 38, 3);
-    ctx.globalAlpha = 1;
-  }
-  const hits = [];
-  if (id === 'wish-rooftop') {
-    for (let i = 0; i < count; i++) {
-      const a = i * 2.39996, r = 45 + (i % 6) * 35;
-      const px = W * .52 + Math.cos(a) * r, py = H * .40 + Math.sin(a) * r * .66;
-      hits.push({ x: px, y: py, index: i });
-      ctx.fillStyle = selected === i ? '#fff8d7' : '#ffadd5';
-      for (const [dx,dy] of [[-7,0],[7,0],[0,-7],[0,7]]) {
-        ctx.beginPath();ctx.arc(px+dx,py+dy,6,0,Math.PI*2);ctx.fill();
-      }
-      ctx.fillStyle='#ffe395';ctx.fillRect(px-3,py-3,6,6);
-    }
-    petals(ctx, W, H, t, quiet);
-  }
-  return hits;
+function car(ctx,x,y,width,open,travel){
+ const [sx,sy,sw,sh]=bounds.get(`6:${open?1:0}:0`),h=width*sh/sw;
+ ctx.drawImage(images[6],sx,sy,sw,sh,x-width/2,y-h,width,h);
+ if(travel){ctx.strokeStyle='#b5c3d6';ctx.lineWidth=2;for(const wheel of [-.31,.32]){
+  const cx=x+width*wheel,cy=y-h*.14,r=h*.12;
+  for(let k=0;k<3;k++){const a=travel/90+k*Math.PI/3;ctx.beginPath();ctx.moveTo(cx-Math.cos(a)*r,cy-Math.sin(a)*r);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);ctx.stroke();}
+ }}
+}
+const cells={classroom:[2,1,0,2,3],floor1:[2,1,1,2,3],floor2older:[2,0,2,2,3],floor2younger:[2,0,2,2,3],'wish-rooftop':[2,1,2,2,3],'school-hall':[3,0,0,2,2],stairs:[3,1,1,2,2]};
+function backdrop(ctx,W,H,id){
+ const source=id==='home-front'?images[1]:['school-front','school-exit','car-boarding'].includes(id)?images[0]:id==='car-driving'?images[7]:null;
+ if(source){ctx.drawImage(source,0,0,W,H);return;}
+ const [i,col,row,cols,rows]=cells[id],im=images[i],sw=im.width/cols,sh=im.height/rows;
+ ctx.drawImage(im,col*sw,row*sh,sw,sh,0,0,W,H);
+}
+export function renderScene(ctx,W,H,id,actor,state){
+ backdrop(ctx,W,H,id);
+ const {clock,progress,moving,selectedBloom}=state;
+ if(id==='car-driving'){
+  const x=W*(.08+.84*progress);
+  car(ctx,x,H*.93,450,false,clock);
+ }else if(id==='car-boarding'){
+  const open=moving&&progress>.25&&progress<.9;
+  if(!moving||progress<.77)character(ctx,actor,clock);
+  car(ctx,W*.62,H*.92,490,open,0);
+ }else{
+  if(id==='home-front')car(ctx,W*.8,H*.94,370,false,0);
+  character(ctx,actor,clock);
+ }
+ const hits=[];
+ if(id==='wish-rooftop')for(let i=0;i<24;i++){
+  const a=i*2.39996,r=45+(i%6)*35,x=W*.52+Math.cos(a)*r,y=H*.4+Math.sin(a)*r*.66;
+  hits.push({x,y,index:i});ctx.fillStyle=selectedBloom===i?'#fff9d5':'#ffacd3';
+  for(const [dx,dy] of [[-7,0],[7,0],[0,-7],[0,7]]){ctx.beginPath();ctx.arc(x+dx,y+dy,6,0,Math.PI*2);ctx.fill();}
+  ctx.fillStyle='#ffe7a3';ctx.fillRect(x-3,y-3,6,6);
+ }
+ return hits;
 }

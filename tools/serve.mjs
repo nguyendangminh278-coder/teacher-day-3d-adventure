@@ -3,6 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 const root = resolve(process.argv.includes("--site") ? "site" : ".");
 const types = {
+  ".ttf": "font/ttf",
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript",
   ".css": "text/css",

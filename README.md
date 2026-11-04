@@ -1,42 +1,31 @@
-# Hành trình Ngày Nhà giáo Việt Nam
+# Một ngày cùng mẹ · Hành trình 20/11
 
-Game pixel art dành tặng Mẹ. Phong cảnh được tạo theo ảnh tham khảo của người dùng: rừng xanh, trường mái đỏ, nhà mái vàng, suối, cầu đá, cối xay gió và bảng giấy da. Các nút và nội dung tiếng Việt là giao diện thật, không được gắn cứng vào ảnh.
+Câu chuyện pixel art bắt đầu **ngay tại cổng trường**, theo thứ tự thời gian: vào trường → hành lang → lớp học và 25 lời chúc → ra trường → lên xe → xe chạy về nhà → vào nhà → tầng 1 → cầu thang → tầng 2 gặp hai con → cầu thang → cây điều ước ở tầng cao nhất.
 
-## Chơi và chạy tại máy
+Có 13 chặng. Thanh lộ trình thể hiện những phần đã đi qua; không có bản đồ gom các địa điểm hay nút nhảy đến tương lai. Giờ hiển thị là giờ kể chuyện minh họa, không phải thời khóa biểu thực tế.
 
-Cần Node.js 22 trở lên:
+## Chạy
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Mở http://127.0.0.1:8124. Không có bước build; toàn bộ ảnh và mã chạy trực tiếp từ repository, không cần CDN, WebGL hoặc API khi chơi.
+Mở http://127.0.0.1:8124. Bấm nút hành động hoặc phím E/Enter. Nhân vật thực hiện đường đi trong cảnh hiện tại trước khi sang cảnh tiếp theo. Mũi tên/WASD hoặc nút cảm ứng giúp di chuyển nhân vật. Khi mở bảng thiệp hoặc nhật ký, chuyển động tạm dừng.
 
-- Bấm **Trường học** hoặc bảng nhiệm vụ để tự đi theo đường. Có thể dùng mũi tên/WASD và E/Enter, hoặc phím cảm ứng.
-- Vào trường → hành lang → lớp học → đọc 25 lời chúc → ra cổng trường.
-- Ra bản đồ → đến xe → lên xe → xem chuyến xe về nhà → vào nhà.
-- Tầng 1 gặp Bố → cầu thang → tầng 2 gặp hai con → cầu thang → tầng 3 có cây điều ước.
-- Chạm các bông hoa sáng trên cây để đọc 24 lời chúc. Có thể chơi lại ở cuối.
-- Góc phải có nhật ký, thành tích và tùy chọn giảm chuyển động. Màn hình dọc giữ trọn bản đồ; xoay ngang để xem phong cảnh lớn hơn.
+## Hình ảnh và chuyển động
 
-Nhà và cây điều ước được khóa trên bản đồ để bảo đảm đến trường trước và về nhà bằng xe. Cây điều ước chỉ tương tác được khi đã lên tầng 3.
+- Cổng trường được tạo từ mẫu THCS Cù Chính Lan tại Thanh Hóa do người dùng gửi trên Maps: vòm vàng, trụ đỏ, cổng sắt đen, cờ nhiều màu. Nhà lấy cảm hứng từ mặt tiền trong liên kết riêng người dùng cung cấp: mái hiên xanh, cửa gỗ, cột màu nâu đỏ, sân ô xanh–xám. Ảnh đường phố xem được ghi tháng 6/2017; tranh là mô phỏng nghệ thuật, không phải hồ sơ hiện trạng hay bản vẽ kiến trúc.
+- Sprite mẹ có tám tư thế bước chân và hai hướng nhìn. Xe có ảnh cửa mở/đóng và di chuyển thật qua đường phố. Đường vào cổng, cửa lớp, cửa nhà và hai cầu thang được diễn hoạt theo tọa độ và tỷ lệ xa/gần.
+- Không dùng chớp sáng, nhấp nháy, nhịp phát sáng, hạt sáng hay hiệu ứng trắng khi chuyển cảnh. Cài đặt cho phép rút ngắn thời gian hành động.
+- Font **Be Vietnam Pro** Regular/Bold lưu local, đầy đủ dấu tiếng Việt, giấy phép OFL đi kèm trong assets/fonts/OFL.txt.
+- Ảnh tạo bằng công cụ image_gen tích hợp. Các ảnh gốc Maps chỉ được xem làm mẫu, không đưa vào bản phát hành. Nội thất và cây điều ước là tưởng tượng theo câu chuyện.
 
-## Cảnh minh họa
-
-`assets/illustrations/village.png` là bản đồ ngoài trời. `story-atlas.png` có sáu ô: cổng trường, lớp học, đường về, tầng 1, tầng 2, sân thượng. `details-atlas.png` có bốn ô: hành lang, trước cửa nhà, điểm lên xe, cầu thang. Renderer lấy từng ô ảnh khi đến địa điểm; ảnh không tải từ dịch vụ bên ngoài.
-
-`src/illustrated-scenes.js` quản lý hình ảnh, nhân vật, cánh hoa và điểm chạm điều ước. `src/pixel-game.js` giữ lộ trình 15 chặng. `src/config.js` chứa lời thoại và lời chúc. `src/styles.css` chứa giao diện giấy da.
-
-Tranh được tạo bằng công cụ tạo ảnh tích hợp từ ảnh tham khảo, không phải bản sao từng pixel. Chi tiết và bố cục có điều chỉnh để nhà có ba tầng và cây điều ước nằm trên tầng cao nhất. Xem [ghi chú tài nguyên](docs/ILLUSTRATED_ASSETS.md).
-
-## Kiểm thử và phát hành
+## Kiểm thử
 
 ```sh
 npx playwright install chromium
 npm test
 ```
 
-Windows dùng Chrome; CI Linux dùng Chromium. Kiểm thử đi hết 15 chặng, kiểm tra đủ 25 thiệp, tương tác điều ước, khóa địa điểm, chuyến xe không bị bỏ qua, nút chơi lại, hộp thoại và màn hình điện thoại. Ảnh QA được lưu tại `test-results/`.
-
-Workflow `.github/workflows/vendor-three.yml` chạy kiểm thử trước khi cập nhật `gh-pages` từ `main`; toàn bộ ảnh minh họa được xuất bản cùng mã nguồn. Nhánh thay đổi riêng không tự thay trang đang chạy.
+Playwright kiểm tra điểm bắt đầu là trường, nhân vật đổi vị trí khi bước vào, chuyến xe không bị bỏ qua, cầu thang, 25 thiệp, 24 điều ước, chơi lại, font local và không có CSS animation nhấp nháy; đồng thời kiểm tra màn hình dọc/ngang. Ảnh ở test-results/. Workflow chạy trên PR và xuất bản gh-pages sau khi cập nhật main.

@@ -9,6 +9,7 @@ on:
       - "src/fine-pixel-art.js"
       - "src/illustrated-scenes.js"
       - "assets/illustrations/**"
+      - "assets/fonts/**"
       - "tests/**"
       - "package*.json"
       - "playwright.config.js"
@@ -56,7 +57,7 @@ jobs:
           npx playwright install --with-deps chromium
           npm test
 
-      - name: Validate the illustrated 15-stage story
+      - name: Validate the chronological story
         working-directory: source
         run: |
           node --input-type=module --check < src/config.js
@@ -89,6 +90,7 @@ jobs:
           cp source/src/illustrated-scenes.js site/src/illustrated-scenes.js
           mkdir -p site/assets
           cp -r source/assets/illustrations site/assets/illustrations
+          cp -r source/assets/fonts site/assets/fonts
           cp source/README.md site/README.md
           touch site/.nojekyll
           test -s site/index.html
