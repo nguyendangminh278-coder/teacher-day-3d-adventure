@@ -42,7 +42,7 @@ export const DIALOGUES = {
   garden:{name:'Mẹ',text:'Con đường trên mây hôm nay đẹp quá. Không biết phía trước đang chờ điều gì nhỉ?'},
   school:{name:'Mẹ',text:'Cổng trường đang mở rồi. Từ đây đã có thể nhìn thấy lớp học thân quen ở phía trước.'},
   classroom:{name:'Mẹ',text:'Nhìn các con trưởng thành chính là một trong những niềm hạnh phúc lớn nhất của cô.'},
-  afterClass:{name:'Mẹ',text:'Tan lớp rồi. Mình sẽ đi qua cửa bên phải và theo con đường mây để về nhà.'},
+  afterClass:{name:'Mẹ',text:'Tan lớp rồi. Mẹ ra khỏi cổng trường, đi đến điểm đón xe, lên xe và về nhà nhé.'},
   home:{name:'Mẹ',text:'Về đến nhà rồi. Cửa đang mở, bước qua đây sẽ là không gian thân thuộc nhất của mẹ.'},
   father:{name:'Bố',text:'Chúc em ngày 20/11 thật vui. Cảm ơn em vì luôn chăm lo cho gia đình và tận tâm với học trò. Anh luôn ở bên em.'},
   olderBrother:{name:'Anh trai',text:'Con chúc mẹ luôn mạnh khỏe, vui vẻ và thật nhiều bình an. Cảm ơn mẹ vì luôn tin tưởng và đồng hành cùng con.'},
@@ -52,16 +52,21 @@ export const DIALOGUES = {
 };
 
 export const STAGES = [
-  {title:'Mẹ xuất hiện',text:'Cô giáo của câu chuyện bước ra từ cánh cổng trên mây.',action:'Bắt đầu hành trình'},
-  {title:'Khu vườn trên mây',text:'Mẹ đáp xuống khu vườn và tiếp tục đi trên lối mây có những trái tim nhỏ bay theo từng bước chân.',action:'Đi qua khu vườn'},
-  {title:'Con đường mây đến trường',text:'Camera góc nhìn thứ ba bám theo mẹ khi cô đi trên mây về ngôi trường thân thương.',action:'Đi đến cổng trường'},
-  {title:'Cổng trường mở ra',text:'Hai cánh cổng mở thật sự, lối giữa trường thông thẳng vào cửa lớp.',action:'Mở cổng và vào lớp'},
-  {title:'Những lời chúc từ học trò',text:'Mẹ đứng trên bục giảng. Camera chuyển sang góc nhìn bao quát lớp học và vẫn có thể xoay 360°.',action:'Lắng nghe lời chúc'},
-  {title:'Tan lớp · Trở về nhà',text:'Mẹ đi qua cửa bên phải, lên xe và theo con đường mây về nhà.',action:'Đang về nhà…'},
-  {title:'Tầng 1 · Lời chúc của Bố',text:'Sau khi bước qua cửa, mẹ đã ở trong một không gian 3D riêng của ngôi nhà và gặp bố ở tầng 1.',action:'Lên gặp Anh trai'},
-  {title:'Tầng 2 · Lời chúc của Anh trai',text:'Mẹ đi đúng cầu thang thứ nhất lên tầng 2 để nhận lời chúc của anh trai.',action:'Đến gặp Em trai'},
-  {title:'Tầng 2 · Lời chúc của Em trai',text:'Mẹ đi tiếp trong tầng 2 để gặp em trai, sau đó sẽ lên cầu thang thứ hai.',action:'Lên tầng 3'},
-  {title:'Tầng 3 · Cây điều ước',text:'Không gian tầng 3 mở thành khu vườn mây riêng. Mỗi bông hoa nở là một lời chúc dành cho mẹ.',action:'Ngắm cây nở hoa'}
+  {title:'Chuẩn bị đến trường',text:'Hành trình bắt đầu trên bản đồ làng hoa. Hãy đến trường học trước!',action:'Đến trường'},
+  {title:'Đường đến trường',text:'Mẹ đang đi bộ qua lối hoa dẫn vào cổng trường.',action:'Đang di chuyển'},
+  {title:'Đến cổng trường',text:'Ngôi trường thân quen đã hiện ra. Bấm Vào trường để đi tiếp.',action:'Vào trường'},
+  {title:'Trong hành lang trường',text:'Mẹ bước qua hành lang và tới cửa lớp học thân quen.',action:'Vào lớp học'},
+  {title:'Lớp học · 25 lời chúc',text:'Mẹ đứng trên bục giảng. Học trò đang chờ để gửi 25 lời chúc 20/11.',action:'Đọc lời chúc'},
+  {title:'Tan lớp · Ra khỏi trường',text:'Mẹ đi ra khỏi lớp và qua cổng trường để đến điểm đón xe.',action:'Ra khỏi trường'},
+  {title:'Đến xe · Chuẩn bị lên xe',text:'Mẹ đã đến bên xe. Hãy lên xe để bắt đầu chuyến về nhà.',action:'Lên xe'},
+  {title:'Đi xe về nhà',text:'Mẹ đang ngồi trên ô tô chạy dọc con đường rừng hoa về nhà.',action:'Tiếp tục'},
+  {title:'Về trước cửa nhà',text:'Ô tô đã về tới nhà. Bước qua cửa để gặp gia đình!',action:'Vào nhà'},
+  {title:'Tầng 1 · Lời chúc của Bố',text:'Trong phòng khách tầng 1, bố đang đợi để chúc mẹ ngày 20/11.',action:'Lên cầu thang'},
+  {title:'Cầu thang lên tầng 2',text:'Mẹ đi lên cầu thang từ tầng 1 đến tầng 2.',action:'Lên tầng 2'},
+  {title:'Tầng 2 · Lời chúc của Anh trai',text:'Trên tầng 2, anh trai gửi mẹ lời chúc từ trái tim.',action:'Gặp em trai'},
+  {title:'Tầng 2 · Lời chúc của Em trai',text:'Em trai cũng có một lời chúc riêng dành cho mẹ.',action:'Lên tầng trên cùng'},
+  {title:'Cầu thang lên tầng 3',text:'Mẹ lên cầu thang cuối cùng. Khu vườn cây điều ước đang đợi ở tầng trên cùng.',action:'Khám phá tầng 3'},
+  {title:'Tầng 3 · Cây điều ước',text:'Trên tầng cao nhất của ngôi nhà là cây điều ước. Chạm từng bông hoa để đọc lời chúc.',action:'Ngắm cây điều ước'}
 ];
 
 export const TEACHER_MOM_CHARACTER = {
