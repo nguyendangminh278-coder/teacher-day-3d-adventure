@@ -6,6 +6,7 @@ on:
     paths:
       - "index.html"
       - "src/pixel-game.js"
+      - "src/fine-pixel-art.js"
       - "src/config.js"
       - "src/styles.css"
       - "README.md"
@@ -44,11 +45,13 @@ jobs:
           cp source/index.html site/index.html
           cp source/src/config.js site/src/config.js
           cp source/src/pixel-game.js site/src/pixel-game.js
+          cp source/src/fine-pixel-art.js site/src/fine-pixel-art.js
           cp source/src/styles.css site/src/styles.css
           cp source/README.md site/README.md
           touch site/.nojekyll
           test -s site/index.html
           test -s site/src/pixel-game.js
+          test -s site/src/fine-pixel-art.js
           ! grep -qi 'dist/game.min.js' site/index.html
           ! grep -qi 'three' site/index.html
 
