@@ -6,24 +6,25 @@
 <title>Một ngày cùng mẹ · Hành trình 20/11</title>
 <link rel="preload" as="font" href="./assets/fonts/BeVietnamPro-Regular.ttf" type="font/ttf" crossorigin>
 <link rel="preload" as="font" href="./assets/fonts/BeVietnamPro-Bold.ttf" type="font/ttf" crossorigin>
-<link rel="stylesheet" href="./src/styles.css?v=story7">
+<link rel="stylesheet" href="./src/styles.css?v=flower-intro9">
 </head>
 <body>
 <main id="app">
-<canvas id="game" width="1672" height="941" aria-label="Cảnh của hành trình theo thời gian, bắt đầu tại trường học. Dùng phím mũi tên để di chuyển và E để thực hiện hành động."></canvas>
-<header class="game-title"><small>Hành trình 20/11</small><strong>Một ngày cùng mẹ</strong><span>NGÀY NHÀ GIÁO VIỆT NAM</span></header>
-<nav class="top-actions" aria-label="Tùy chọn"><button id="achievementBtn" aria-label="Thành tích">♜</button><button id="journalBtn" aria-label="Nhật ký">▤</button><button id="settingsBtn" aria-label="Cài đặt">⚙</button></nav>
-<ol id="timeline" class="timeline" aria-label="Lộ trình theo thời gian"></ol>
-<div class="scene-heading"><time id="sceneTime">07:00</time><strong id="sceneTitle">Buổi sáng · Đến trường</strong></div>
-<section id="objective" class="quest-card" aria-live="polite"><div class="quest-ribbon">Chặng <span id="stageNumber">1</span> / <span id="stageTotal">13</span></div><h1 id="objectiveTitle">Buổi sáng · Đến trường</h1><p id="objectiveText">Cùng mẹ bước qua cổng trường.</p><div class="quest-progress"><div id="progressFill"></div></div></section>
+<p id="sceneStatus" class="sr-only" aria-live="polite"></p>
+<canvas id="game" width="1672" height="941" aria-label="Cảnh của hành trình theo thời gian, bắt đầu trên con đường hoa và mây. Dùng phím mũi tên để di chuyển và E để thực hiện hành động."></canvas>
+
+
+
+
+
 <button id="actionBtn" class="action-btn" disabled><span id="actionLabel">Bước qua cổng trường</span><span aria-hidden="true">→</span></button>
-<section id="controlsPanel" class="controls-panel" aria-label="Di chuyển"><div class="direction-pad"><button data-move="arrowup" class="up" aria-label="Đi lên">↑</button><button data-move="arrowleft" class="left" aria-label="Đi trái">←</button><button data-move="arrowdown" class="down" aria-label="Đi xuống">↓</button><button data-move="arrowright" class="right" aria-label="Đi phải">→</button></div><div><span>Di chuyển</span><p><button id="enterBtn">E</button> Thực hiện</p></div></section>
+
 <div id="dialogue" class="dialogue" hidden role="status"><strong id="dialogueName">Mẹ</strong><p id="dialogueText"></p></div>
 <section id="classroomPanel" class="panel classroom-panel" hidden role="dialog" aria-modal="true" aria-labelledby="classTitle"><small>Những hạt mầm yêu thương</small><h2 id="classTitle">25 lời chúc từ học trò</h2><div id="classWishes" class="wish-grid"></div><button id="dismissClass" class="primary-btn">Cảm ơn các con · Mẹ ra khỏi lớp →</button></section>
-<section id="finalPanel" class="panel final-panel" hidden aria-label="Cây điều ước trên tầng cao nhất"><small>Tầng 3 · Dành riêng cho mẹ</small><h2>Yêu thương mẹ gieo đã nở thành hoa.</h2><p>Chạm vào những bông hoa trên cây để đọc lời chúc.</p><p id="treeWish" class="selected-wish" aria-live="polite">Mỗi bông hoa là một điều ước.</p><button id="allWishesBtn" class="primary-btn">Đọc 24 điều ước</button><button id="replayBtn" class="text-btn">Chơi lại từ trường học ↻</button></section>
+<section id="finalPanel" class="panel final-panel" hidden aria-label="Cây điều ước trên tầng cao nhất"><small>Tầng 3 · Dành riêng cho mẹ</small><h2>Yêu thương mẹ gieo đã nở thành hoa.</h2><p>Chạm vào những bông hoa trên cây để đọc lời chúc.</p><p id="treeWish" class="selected-wish" aria-live="polite">Mỗi bông hoa là một điều ước.</p><button id="allWishesBtn" class="primary-btn">Đọc 24 điều ước</button><button id="replayBtn" class="text-btn">Đi lại từ con đường hoa ↻</button></section>
 <section id="infoPanel" class="panel info-panel" hidden role="dialog" aria-modal="true" aria-labelledby="infoTitle"><button id="infoClose" class="info-close" aria-label="Đóng">×</button><h2 id="infoTitle"></h2><p id="infoBody"></p><button id="motionButton" class="primary-btn" hidden>Rút ngắn chuyển động</button></section>
 <div id="loading" class="loading-screen" role="status"><strong>Chuẩn bị một ngày cùng mẹ…</strong><p id="loadingText">Trường học → Xe về nhà → Gia đình → Cây điều ước</p><button id="retryBtn" hidden>Tải lại</button></div>
 <noscript>Hãy bật JavaScript để bắt đầu hành trình.</noscript>
 </main>
-<script type="module" src="./src/pixel-game.js?v=story7"></script>
+<script type="module" src="./src/pixel-game.js?v=flower-intro9"></script>
 </body></html>

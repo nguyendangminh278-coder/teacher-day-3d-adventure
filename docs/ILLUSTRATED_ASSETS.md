@@ -39,3 +39,13 @@ Built-in image_gen used with the user's latest family and car photos as identity
 - home-rooms-v2.png: equal 2×2 backgrounds, empty living room, empty second-floor room, clear staircase and rooftop wish tree. No baked characters or human portraits. Broad clear floor, props against walls, consistent wood and flower palette.
 
 All characters are separate sprites. Foot-based routes, floor regions and height by perspective are shared in src/scene-layout.js. Manual movement is constrained to floor areas. House route avoids the parked vehicle and ends at the door threshold. Parent/son sprite height ratios share the same perspective function, and draw order follows foot depth. Stair paths follow stair treads; route interpolation uses traveled length rather than equal time for unequal segments.
+
+
+## Flower road and clean pixel film view
+
+Built-in image_gen assets copied into assets/illustrations/:
+
+- flower-cloud-road.png — single 16:9 pixel-art flower road floating among cloud banks at sunrise; broad horizontal golden cobblestone path across y82%; pink cosmos, blue flowers, daisies and yellow wildflowers on both sides, distant green hills, airy pastel clouds. No characters, buildings or UI. Runtime adds independently drifting pixel clouds.
+- mother-walk-v3.png — same mother's identity, cream dress and blue-white cardigan; equal 4-column × 3-row transparent atlas: east, north/back and south/front; four alternating leg/arm phases per direction, changing sleeves and skirt, stable head and foot baseline, crisp 16bit clusters. West uses horizontal flip.
+
+Game is rasterized to a common 836×470 canvas, CSS nearest-neighbor pixelated scaling. Gait phase follows accumulated distance / character height, rather than time; standing freezes gait. Greeting arm parts are articulated in Canvas around shoulder anchors while head/torso/legs retain ground placement. Intro runs 8.5 seconds, followed by a 2.2-second smooth crossfade to the school (no white flash). Removed title, timeline, clock, quest card, direction pad and top icons from the DOM, as requested. Only scene dialogue, contextual action and wish interactions remain.

@@ -7,3 +7,9 @@
 
 @media(min-width:641px){.dialogue{top:180px;bottom:auto;left:20px;transform:none;width:320px;max-width:26vw}}
 @media(max-height:500px) and (min-width:641px){.dialogue{top:100px;width:235px;max-width:28vw}}
+
+/* Quiet film view: only the current interaction and story dialogue remain. */
+#game{image-rendering:pixelated;touch-action:none}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.dialogue{top:24px;left:24px;bottom:auto;transform:none}
+@media(max-width:640px){.action-btn{bottom:max(24px,env(safe-area-inset-bottom));white-space:normal;text-align:center}.dialogue{top:16px;left:3vw;bottom:auto}.final-panel{bottom:100px}}

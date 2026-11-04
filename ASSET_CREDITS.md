@@ -65,3 +65,6 @@ Local font Be Vietnam Pro from Google Fonts (SIL Open Font License 1.1, included
 
 ## Latest family reference revision
 Five new runtime PNGs generated with built-in image_gen using the user-provided photos: family-v2, mother-walk-v2, vios-action, vios-rear and home-rooms-v2. Raw family/car photos are not included in source. family-v2 was regenerated once to remove background glow and align standing/walking proportions. See docs/ILLUSTRATED_ASSETS.md for prompt summaries.
+
+
+Flower opening revision: flower-cloud-road.png and mother-walk-v3.png generated with built-in image_gen. Prompts and runtime animation notes are recorded in docs/ILLUSTRATED_ASSETS.md.
