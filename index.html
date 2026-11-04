@@ -3,88 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#fafcff" />
-  <meta name="description" content="Hành trình game 3D góc nhìn thứ ba dành tặng Mẹ ngày Nhà giáo Việt Nam 20/11." />
-  <title>Hành trình 20/11 dành tặng Mẹ</title>
-  <link rel="stylesheet" href="./src/styles.css?v=172" />
+  <meta name="theme-color" content="#a5e2e8" />
+  <meta name="description" content="Một trò chơi pixel art 2D nhẹ nhàng dành tặng Mẹ ngày Nhà giáo Việt Nam 20/11." />
+  <title>Hành trình 20/11 dành tặng Mẹ · Pixel Art</title>
+  <link rel="stylesheet" href="./src/styles.css?v=pixel2" />
 </head>
 <body>
   <div id="app">
-    <canvas id="game" aria-label="Hành trình game 3D 20/11 dành tặng Mẹ"></canvas>
+    <canvas id="game" aria-label="Thế giới pixel art 2D kể hành trình của mẹ ngày 20/11. Chọn nút nhiệm vụ để tiếp tục." role="img"></canvas>
 
-    <header class="hud top-hud" aria-live="polite">
+    <header class="hud top-hud">
       <div class="brand">
-        <span class="brand-dot"></span>
+        <span class="brand-pixel" aria-hidden="true">✿</span>
         <div>
-          <strong>Hành trình 20/11 dành tặng Mẹ</strong>
-          <small id="assetStatus">V17.2 · HDRI + PBR · chế độ kịch bản ổn định</small>
+          <strong>HÀNH TRÌNH 20/11 DÀNH TẶNG MẸ</strong>
+          <small id="assetStatus">PIXEL EDITION · CANVAS 2D</small>
         </div>
       </div>
-      <div class="stage-pill"><span id="stageNumber">1</span>/10</div>
+      <div class="stage-pill" aria-label="Tiến độ hành trình"><span id="stageNumber">1</span> / 10</div>
     </header>
 
-    <aside id="objective" class="hud objective-card">
-      <span class="objective-kicker">NHIỆM VỤ</span>
+    <aside id="objective" class="hud objective-card" aria-live="polite">
+      <span class="objective-kicker">✦ NHIỆM VỤ HIỆN TẠI</span>
       <strong id="objectiveTitle">Mẹ xuất hiện</strong>
-      <p id="objectiveText">Cô giáo của câu chuyện sẽ bước ra từ cánh cổng trên mây.</p>
+      <p id="objectiveText">Bước vào câu chuyện 20/11 được vẽ hoàn toàn bằng pixel.</p>
     </aside>
 
     <div id="dialogue" class="dialogue hidden" role="status" aria-live="polite">
-      <div class="portrait">🌷</div>
+      <div class="portrait" aria-hidden="true">🌷</div>
       <div>
         <strong id="dialogueName">Mẹ</strong>
         <p id="dialogueText">Xin chào…</p>
       </div>
     </div>
 
-    <section id="classroomPanel" class="panel classroom-panel hidden" aria-label="Lời chúc trong lớp học">
+    <section id="classroomPanel" class="panel classroom-panel hidden" aria-label="25 lời chúc từ học trò">
       <div class="panel-heading">
-        <span>💌 25 lời chúc từ học trò</span>
-        <small>Dành riêng cho cô trong ngày 20/11</small>
+        <div><span class="panel-star">✿</span><h2>25 LỜI CHÚC TỪ HỌC TRÒ</h2></div>
+        <small>Cô ơi, chúng em cảm ơn cô! 💌</small>
       </div>
       <div id="classWishes" class="wish-grid"></div>
-      <button id="dismissClass" class="primary-btn">Tan lớp <span>→</span></button>
+      <button id="dismissClass" class="primary-btn" type="button">TAN LỚP · VỀ NHÀ <span>→</span></button>
     </section>
 
-    <section id="finalPanel" class="panel final-panel hidden" aria-label="Cây điều ước">
-      <span class="final-kicker">CÂY ĐIỀU ƯỚC CỦA MẸ</span>
-      <h1>Cảm ơn mẹ vì vừa là mẹ,<br />vừa là người thầy tuyệt vời nhất.</h1>
-      <p>Mỗi bông hoa là một lời chúc dành cho mẹ. Chúc mẹ 20/11 thật nhiều niềm vui, bình an và luôn được yêu thương.</p>
-      <button id="replayBtn" class="primary-btn secondary">Chơi lại hành trình ↻</button>
+    <section id="finalPanel" class="panel final-panel hidden" aria-label="Cây điều ước dành tặng Mẹ">
+      <span class="final-kicker">✦ CÂY ĐIỀU ƯỚC CỦA MẸ ✦</span>
+      <h1>Cảm ơn mẹ vì vừa là mẹ, vừa là người thầy tuyệt vời nhất.</h1>
+      <p>Mỗi bông hoa là một lời chúc dành cho mẹ. Chúc mẹ 20/11 thật nhiều niềm vui và bình an!</p>
+      <p id="treeWish" class="selected-wish" aria-live="polite">✿ Chạm vào một bông hoa trên cây để mở lời chúc.</p>
+      <button id="replayBtn" class="primary-btn secondary" type="button">↻ CHƠI LẠI</button>
     </section>
 
-    <button id="actionBtn" class="action-btn" aria-label="Tiếp tục hành trình">
-      <span id="actionLabel">Bắt đầu hành trình</span>
-      <span class="action-icon">➜</span>
+    <button id="actionBtn" class="action-btn" type="button" aria-label="Tiếp tục hành trình">
+      <span id="actionLabel">BẮT ĐẦU HÀNH TRÌNH</span>
+      <span class="action-icon" aria-hidden="true">▶</span>
     </button>
 
-    <div class="controls-hint hud">
-      <span>🖱️ Kéo chuột trái: xoay camera 360° · cuộn: zoom</span>
-      <span>✨ Bấm nút nhiệm vụ để Mẹ tự đi đúng theo kịch bản</span>
-    </div>
-
-    <div id="fade" class="fade" aria-hidden="true"></div>
-
-    <div id="loading" class="loading-screen">
-      <div class="loader-orbit"><span></span></div>
-      <strong>Đang dựng V17.2 ổn định...</strong>
-      <small>Giữ HDRI/PBR nhưng bỏ click-to-move và giảm tải model nặng để hành trình chạy mượt theo kịch bản</small>
+    <div class="controls-hint hud">✦ Nhấn nút nhiệm vụ để tiếp tục · Phím → để chuyển cảnh · Chạm hoa để đọc lời chúc</div>
+    <div id="loading" class="loading-screen" role="status">
+      <div class="pixel-loader" aria-hidden="true">✿</div>
+      <strong>ĐANG MỞ THẾ GIỚI PIXEL...</strong>
+      <small>Một hành trình nhỏ xinh, không WebGL và không mô hình 3D</small>
     </div>
   </div>
-
-  <script>
-    setTimeout(() => {
-      const loading = document.getElementById('loading');
-      if (!loading || loading.classList.contains('done')) return;
-      loading.classList.add('done');
-      if (!window.__APP_READY__) {
-        const title = document.getElementById('objectiveTitle');
-        const text = document.getElementById('objectiveText');
-        if (title) title.textContent = 'Chế độ 3D chưa sẵn sàng';
-        if (text) text.textContent = 'Hãy bật Hardware Acceleration/WebGL trong Chrome rồi tải lại trang.';
-      }
-    }, 12000);
-  </script>
-  <script src="./dist/game.min.js?v=172" defer></script>
+  <script type="module" src="./src/pixel-game.js?v=pixel2"></script>
 </body>
 </html>
