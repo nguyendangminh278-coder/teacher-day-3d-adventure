@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2b6aca" />
   <meta name="description" content="Hành trình 20/11 dành tặng Mẹ: game pixel art RPG khám phá trường học, lên xe về nhà và cây điều ước trên tầng cao nhất." />
   <title>Hành trình ngày Nhà giáo Việt Nam · Pixel RPG</title>
-  <link rel="stylesheet" href="./src/styles.css?v=rpg-route5" />
+  <link rel="stylesheet" href="./src/styles.css?v=illustrated-v6" />
 </head>
 <body>
 <div id="app">
@@ -24,10 +24,10 @@
   </div>
 
   <nav id="mapHotspots" class="map-hotspots" aria-label="Địa điểm ngoài trời">
-    <button type="button" class="map-location" data-place="school"><span class="place-emoji" aria-hidden="true">🎓</span><span>TRƯỜNG HỌC</span></button>
-    <button type="button" class="map-location" data-place="car"><span class="place-emoji" aria-hidden="true">🚙</span><span>ĐI BẰNG XE</span></button>
-    <button type="button" class="map-location" data-place="home"><span class="place-emoji" aria-hidden="true">🏠</span><span>NHÀ CỦA MẸ</span></button>
-    <button type="button" class="map-location" data-place="wish"><span class="place-emoji" aria-hidden="true">🌸</span><span>CÂY ĐIỀU ƯỚC</span></button>
+    <button type="button" class="map-location" data-place="school"><span class="place-emoji" aria-hidden="true">🎓</span><span>Trường học</span></button>
+    <button type="button" class="map-location" data-place="car"><span class="place-emoji" aria-hidden="true">🚙</span><span>Đi bằng xe</span></button>
+    <button type="button" class="map-location" data-place="home"><span class="place-emoji" aria-hidden="true">🏠</span><span>Nhà</span></button>
+    <button type="button" class="map-location" data-place="wish"><span class="place-emoji" aria-hidden="true">🌸</span><span>Tầng 3 · CÂY ĐIỀU ƯỚC</span></button>
   </nav>
 
   <div id="sceneBanner" class="scene-banner hidden" aria-live="polite">
@@ -82,6 +82,7 @@
     <h1>Cảm ơn mẹ vì vừa là mẹ, vừa là người thầy tuyệt vời nhất.</h1>
     <p>Mỗi bông hoa mang một lời chúc. Mẹ đã đi qua trường học, chuyến xe trở về và những tầng nhà đầy yêu thương để tới đây!</p>
     <p id="treeWish" class="selected-wish" aria-live="polite">✿ Chạm vào bông hoa trên cây để đọc lời chúc.</p>
+    <button id="allWishesBtn" class="primary-btn" type="button">ĐỌC 24 ĐIỀU ƯỚC</button>
     <button id="replayBtn" class="primary-btn secondary" type="button">↻ CHƠI LẠI TỪ ĐẦU</button>
   </section>
 
@@ -93,6 +94,7 @@
   </section>
 
   <div id="mapFade" class="map-fade" aria-hidden="true"></div>
+  <noscript>Hãy bật JavaScript để chơi hành trình.</noscript>
   <div id="loading" class="loading-screen" role="status">
     <div class="pixel-loader">✿</div>
     <strong>ĐANG VẼ LÀNG HOA 20/11...</strong>
@@ -101,6 +103,6 @@
   <span id="assetStatus" class="sr-only">PIXEL ART RPG · 15 CHẶNG</span>
   <span id="storyProgress" class="sr-only"></span>
 </div>
-<script type="module" src="./src/pixel-game.js?v=rpg-route5"></script>
+<script type="module" src="./src/pixel-game.js?v=illustrated-v6"></script>
 </body>
 </html>

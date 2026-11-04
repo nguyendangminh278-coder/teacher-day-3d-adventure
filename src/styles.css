@@ -296,3 +296,45 @@ button:focus-visible { outline:3px solid #fff5c0;outline-offset:4px; }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
+/* Illustrated edition */
+body{background:#153e36 url('../assets/illustrations/village.png') center/cover fixed;color:#3e2519}
+#app{background:rgba(9,35,30,.75)}
+#game{inset:auto;image-rendering:auto}
+.game-title{width:min(380px,calc(100vw - 240px));min-height:96px;border-color:#794720;border-radius:9px;background:linear-gradient(130deg,#fff0c5,#f3cf95);box-shadow:0 0 0 3px #d19c60,0 0 0 6px #543922,5px 7px 0 #2e351b80,inset 0 0 0 3px #fff2cc}
+.game-title strong{font-size:25px;color:#392213}.game-title .title-small{font-size:20px;color:#392213}
+.title-deco{font-size:30px}.icon-tile{background:#5c3d33;border-color:#342b28;border-radius:10px;box-shadow:0 0 0 2px #eac894,inset 0 0 0 3px #ac7f57,3px 5px 0 #263a2b}
+.map-location{font-size:20px;font-weight:700;color:#352312;min-height:47px;border-color:#78502d;border-radius:6px;padding:8px 16px;box-shadow:0 0 0 2px #d7aa67,inset 0 0 0 2px #fff0c7,3px 4px 0 #483622}
+.map-location.is-locked{filter:none;opacity:1}.map-location.is-locked::after{content:'🔒';font-size:9px;line-height:17px;background:#795735}
+.map-location[data-place=wish]{font-size:14px}
+.quest-card{width:min(430px,32vw);padding:29px 42px 15px 22px;background:linear-gradient(135deg,#ffebbe,#f5d399);border-color:#8a582f;color:#412917;box-shadow:0 0 0 3px #d3a46d,4px 5px 0 #3e321f,inset 0 0 0 3px #fff1ce}
+.quest-card strong{color:#402719;font-size:21px}.quest-card p{font-size:17px}.quest-ribbon{font-size:17px;background:linear-gradient(#e67e87,#bf414f);border-color:#7f3928}
+.controls-panel{background:#303a31d9;border-color:#cfb086}.controls-info{font-size:15px}
+.map-hint{display:none}.dialogue{bottom:100px;max-width:560px}
+body[data-view=map] .dialogue{display:none}
+body[data-view=map] .action-btn{left:22px;bottom:23px;transform:none;opacity:0;width:min(430px,32vw);max-width:none;height:132px}
+body[data-view=map] .action-btn:focus-visible{opacity:1}
+body[data-view=map] .quest-card::after{content:'▶';position:absolute;right:15px;top:40%;color:#b15b21;font-size:25px}
+.scene-banner{top:128px;max-width:50vw;background:#ffedc9ed;color:#4a2b1b;border-color:#7d502e}
+.map-return{top:133px}.scene-banner strong{font-size:19px}
+.final-panel{width:min(390px,30vw);max-height:65vh;overflow:auto}
+.final-panel h1{font-size:23px}.final-panel p{font-size:14px}
+@media(max-width:920px){
+ .game-title{width:300px;min-height:75px}.game-title strong{font-size:19px}.game-title .title-small{font-size:16px}
+ .map-location{font-size:14px;min-height:34px;padding:5px 9px}.map-location[data-place=wish]{font-size:11px}
+ .quest-card strong{font-size:16px}.quest-card p{font-size:12px}.quest-ribbon{font-size:12px}
+ .controls-info{font-size:11px}.scene-banner{top:105px}.scene-banner strong{font-size:15px}
+}
+@media(max-width:640px){
+ .game-title{width:215px;min-height:63px}.game-title strong{font-size:14px}.game-title .title-small{font-size:12px}
+ .top-actions{top:12px}.icon-tile{width:35px;height:37px}
+ .map-location{font-size:10px;min-height:29px;padding:4px 6px;border-width:2px;gap:3px}
+ .map-location[data-place=wish]{font-size:8px}
+ .quest-card{width:54vw;padding:18px 26px 8px 9px;left:8px;bottom:10px;min-height:90px}
+ .quest-card strong{font-size:12px}.quest-card p{font-size:11px}.quest-ribbon{font-size:10px}
+ body[data-view=map] .action-btn{left:8px;bottom:10px;width:54vw;height:90px}
+ .controls-info{font-size:9px}.controls-panel{right:7px;bottom:12px}
+ .scene-banner{top:90px;max-width:92vw}.scene-banner strong{font-size:12px}.scene-banner span{font-size:10px}
+ .map-return{top:140px}.dialogue{bottom:170px}.final-panel{width:calc(100vw - 28px);max-height:30vh;bottom:135px}.final-panel h1{font-size:17px}
+}
+@media(max-width:640px){.quest-card{width:48vw}body[data-view=map] .action-btn{width:48vw}}
+.info-panel #infoBody{white-space:pre-line}

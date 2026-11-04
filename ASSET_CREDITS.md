@@ -52,3 +52,8 @@ V17 also uses Three.js physically based glass, soft contact shadows, high-qualit
 
 ## Runtime
 Three.js and GLTFLoader are bundled into the local `dist/game.min.js` during GitHub Actions. The public site does not require a third-party JavaScript CDN at runtime. Nature, furniture, HDRI, PBR textures and V17 model assets are stored locally in the deployed `gh-pages` build.
+
+
+## Illustrated pixel edition (2026-11-04)
+
+The local PNG assets in `assets/illustrations/` were generated with the built-in image_gen tool, using the user-supplied reference image for visual direction. See `docs/ILLUSTRATED_ASSETS.md` for the prompt set and scene mapping. The reference is not loaded at runtime. Earlier model credits below/above apply only to legacy source, not the current 2D game.
