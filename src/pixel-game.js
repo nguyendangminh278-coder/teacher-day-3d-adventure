@@ -146,6 +146,11 @@ function refreshUI() {
   ui.mapHint.classList.toggle('hidden',!onMap);
   ui.mapReturn.classList.toggle('hidden',onMap||stage===9);
   const blocked=busy();
+  if(onMap && stage===5){
+    ui.objectiveText.textContent = mapPhase==='home'
+      ? 'Xe đã tới nơi. Chọn Nhà của mẹ trên bản đồ để gặp gia đình.'
+      : 'Tan lớp rồi! Chạm điểm Đi bằng xe để trở về nhà.';
+  }
   Object.entries(placeButtons).forEach(([key,button])=>{
     const active=onMap && key===mapPhase && !blocked;
     button.disabled=!active;
@@ -263,12 +268,12 @@ function advanceJourney(now) {
 function walkToSchool() {
   if(mapPhase!=='school'||busy())return;
   setStage(1);
-  showDialogue(DIALOGUES.garden,2700);
   const y=ground();
   const start={x:teacher.x,y:teacher.y};
   move([start,{x:357,y:y+43},{x:307,y:y+23},point('school')],reduceMotion?160:2750,false,()=>{
     enterScene(3,DIALOGUES.school);
   });
+  showDialogue(DIALOGUES.garden,2700);
 }
 function rideHome() {
   if(mapPhase!=='car'||busy())return;
