@@ -1,54 +1,57 @@
-# 🌸 Hành trình 20/11 dành tặng Mẹ — 3D Adventure
+# 🌸 Hành trình 20/11 dành tặng Mẹ — Pixel Art 2D
 
-Một landing page / mini game 3D chạy trực tiếp trên trình duyệt, kể một hành trình chúc mừng mẹ nhân ngày Nhà giáo Việt Nam 20/11.
+Một mini game 2D phong cách pixel art, kể hành trình chúc mừng mẹ nhân ngày Nhà giáo Việt Nam 20/11. Hình ảnh được vẽ trực tiếp bằng Canvas 2D với các ô màu đơn giản, **không cần Three.js, WebGL, mô hình 3D, HDRI/PBR, texture 4K hay build AAA**.
 
-## Trải nghiệm
+## Hành trình 10 chặng
 
-- Mascot 3D “Mầm Nhỏ” xuất hiện từ cổng không gian.
-- Rơi xuống khu vườn trên mây.
-- Camera góc nhìn thứ 3 đi theo mascot trên con đường hoa tới trường.
-- Đi qua cổng trường và hành lang vào lớp học.
-- Hiển thị 25 lời chúc mẫu từ học trò.
-- “Tan lớp” rồi lái xe về nhà.
-- Khám phá nhà 3 tầng: bố, hai con trai và cây điều ước.
-- Kết thúc bằng cây cổ thụ nở hoa, mỗi bông hoa tượng trưng cho một lời chúc.
+1. Mẹ xuất hiện bên cổng mây pixel.
+2. Khu vườn hoa đầy sắc màu.
+3. Con đường đến ngôi trường thân thương.
+4. Cổng trường Hoa Mây.
+5. Lớp học với đủ **25 lời chúc** từ học trò.
+6. Chuyến xe đưa mẹ về nhà.
+7. Tầng 1 — bố gửi lời chúc.
+8. Tầng 2 — lời chúc của anh trai.
+9. Tầng 2 — lời chúc của em trai.
+10. Cây điều ước nở hoa — **chạm vào từng hoa để đọc lời chúc**.
+
+Các đoạn hội thoại, 25 lời chúc của học trò và 24 lời chúc trên cây đều được giữ từ phiên bản trước.
 
 ## Công nghệ
 
-- Three.js (ES Modules từ jsDelivr CDN)
-- HTML / CSS / JavaScript thuần
-- Không cần build, không cần npm, không cần backend
-- Responsive desktop + mobile
-- Có workflow GitHub Pages sẵn
+- HTML / CSS / JavaScript ES Modules thuần.
+- Canvas 2D, vẽ ở độ phân giải thấp và phóng to bằng image-rendering: pixelated.
+- Không thư viện ngoài, không tải texture, không cần npm hoặc bundler.
+- Hỗ trợ màn hình desktop và điện thoại, chuột và chạm.
+- Có tùy chọn giảm chuyển động theo hệ điều hành.
 
 ## Chạy local
 
-Do browser chặn ES module khi mở trực tiếp bằng `file://`, hãy chạy một static server nhỏ:
+Dùng một static server vì trò chơi import ES Modules:
 
-```bash
-python -m http.server 8000
-```
+    python -m http.server 8000
 
-Sau đó mở `http://localhost:8000`.
+Truy cập http://localhost:8000 trong trình duyệt, hoặc dùng VS Code Live Server.
 
-Hoặc dùng VS Code Live Server.
+## Điều khiển
 
-## Thay lời chúc
+- Bấm nút nhiệm vụ hoặc phím mũi tên phải (→) để chuyển chặng.
+- Ở lớp học, mở và đọc 25 tấm thiệp, sau đó chọn **Tan lớp · Về nhà**.
+- Ở cây điều ước, chạm/bấm vào những bông hoa để hiện lời chúc.
+- Chọn **Chơi lại** để bắt đầu từ đầu.
 
-Sửa `src/config.js`:
+## Tùy chỉnh
 
-- `CLASS_WISHES`: 25 lời chúc trong lớp học
-- `TREE_WISHES`: lời chúc trên cây điều ước
+- Lời chúc và hội thoại: src/config.js.
+- Cảnh, nhân vật pixel, hiệu ứng hoa và cây: src/pixel-game.js.
+- Màu sắc, giao diện pixel và responsive: src/styles.css.
+- Trang HTML: index.html.
 
-## Deploy GitHub Pages
+Những nguồn 3D cũ trong src/main.js, src/world-spec.mjs và tools/ chỉ được giữ làm tài liệu tham khảo; **không còn được chạy hoặc xuất bản**.
 
-Workflow `.github/workflows/pages.yml` sẽ deploy toàn bộ repository lên GitHub Pages khi push vào `main`.
+## GitHub Pages
 
-Vào **Settings → Pages → Source: GitHub Actions** nếu repository chưa bật Pages.
-
-## Concept
-
-Ảnh concept tối ưu để tham chiếu art direction nằm tại `docs/concept.jpg`.
+Workflow .github/workflows/vendor-three.yml (tên tệp giữ lại để không làm mất workflow) giờ xuất bản bản **Pixel Art 2D** trực tiếp sang nhánh gh-pages khi cập nhật main. Nó dọn các asset 3D đã xuất bản, không tải model hay build Three.js nữa. Cần cài đặt Pages → **Deploy from a branch** → gh-pages / (root) nếu trang chưa bật.
 
 ---
 
