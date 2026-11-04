@@ -1,6 +1,6 @@
 # 🌸 Hành trình 20/11 dành tặng Mẹ — Pixel Art 2D
 
-Một mini game 2D phong cách pixel art, kể hành trình chúc mừng mẹ nhân ngày Nhà giáo Việt Nam 20/11. Hình ảnh được vẽ trực tiếp bằng Canvas 2D với các ô màu đơn giản, **không cần Three.js, WebGL, mô hình 3D, HDRI/PBR, texture 4K hay build AAA**.
+Một mini game 2D phong cách pixel art, kể hành trình chúc mừng mẹ nhân ngày Nhà giáo Việt Nam 20/11. Hình ảnh được vẽ trực tiếp bằng Canvas 2D ở độ phân giải nội bộ 768px với pixel nhỏ, tán lá nhiều lớp, hoa, sỏi, mái ngói và đường lát chi tiết kiểu game RPG, **không cần Three.js, WebGL, mô hình 3D, HDRI/PBR, texture 4K hay build AAA**.
 
 ## Hành trình 10 chặng
 
@@ -20,7 +20,9 @@ Các đoạn hội thoại, 25 lời chúc của học trò và 24 lời chúc t
 ## Công nghệ
 
 - HTML / CSS / JavaScript ES Modules thuần.
-- Canvas 2D, vẽ ở độ phân giải thấp và phóng to bằng image-rendering: pixelated.
+- Canvas 2D tại 768px chiều ngang; các nét raster chi tiết thường chỉ 1–3px, phóng to bằng image-rendering: pixelated.
+- Các cảnh chi tiết được vẽ một lần và lưu vào canvas tạm để giảm chi phí render mỗi khung hình.
+- Thẩm mỹ cozy fantasy / RPG pixel art nhỏ, không dùng ảnh photoreal hoặc khối pixel to.
 - Không thư viện ngoài, không tải texture, không cần npm hoặc bundler.
 - Hỗ trợ màn hình desktop và điện thoại, chuột và chạm.
 - Có tùy chọn giảm chuyển động theo hệ điều hành.
@@ -43,7 +45,8 @@ Truy cập http://localhost:8000 trong trình duyệt, hoặc dùng VS Code Live
 ## Tùy chỉnh
 
 - Lời chúc và hội thoại: src/config.js.
-- Cảnh, nhân vật pixel, hiệu ứng hoa và cây: src/pixel-game.js.
+- Cảnh, nhân vật pixel, hiệu ứng hoa và cây: src/fine-pixel-art.js.
+- Logic hành trình, hội thoại, lời chúc: src/pixel-game.js.
 - Màu sắc, giao diện pixel và responsive: src/styles.css.
 - Trang HTML: index.html.
 
@@ -51,7 +54,7 @@ Những nguồn 3D cũ trong src/main.js, src/world-spec.mjs và tools/ chỉ đ
 
 ## GitHub Pages
 
-Workflow .github/workflows/vendor-three.yml (tên tệp giữ lại để không làm mất workflow) giờ xuất bản bản **Pixel Art 2D** trực tiếp sang nhánh gh-pages khi cập nhật main. Nó dọn các asset 3D đã xuất bản, không tải model hay build Three.js nữa. Cần cài đặt Pages → **Deploy from a branch** → gh-pages / (root) nếu trang chưa bật.
+Workflow .github/workflows/vendor-three.yml (tên tệp giữ lại để không làm mất workflow) giờ xuất bản bản **Pixel Art 2D** trực tiếp sang nhánh gh-pages khi cập nhật main. Nó xuất bản cả src/fine-pixel-art.js và dọn các asset 3D đã xuất bản, không tải model hay build Three.js nữa. Cần cài đặt Pages → **Deploy from a branch** → gh-pages / (root) nếu trang chưa bật.
 
 ---
 
