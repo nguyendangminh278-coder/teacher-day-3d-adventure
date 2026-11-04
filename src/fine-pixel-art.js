@@ -451,3 +451,91 @@ export function drawFinePixelScene(context,width,height,stage,time,selectedBloom
  g=context;seed=194713+stage*47+Math.floor(time*.25);
  return drawStageAnimation(stage,width,height,time,selectedBloom,bloomCount,reduceMotion);
 }
+
+
+/**
+ * Outdoor hub world: a single persistent illustrated map linking the school,
+ * the car pickup point and the family home. Interior scenes are rendered
+ * separately via drawFinePixelScene().
+ *
+ * All map coordinates use the same 768px world space as the scene renderer.
+ */
+const overworldCache = new Map();
+
+function mapCar(cx,feet,s=1) {
+  const x=cx-34*s, y=feet-24*s;
+  ell(cx,feet+4*s,35*s,5*s,'#526c64',2);
+  p(x,y+11*s,70*s,18*s,'#714c67');
+  p(x+2*s,y+10*s,66*s,16*s,'#df8193');
+  p(x+15*s,y,39*s,14*s,'#c76983');
+  p(x+19*s,y+3*s,15*s,10*s,'#a9d9df');
+  p(x+37*s,y+3*s,13*s,10*s,'#b7e6e5');
+  p(x+34*s,y+2*s,3*s,13*s,'#7d6172');
+  p(x+3*s,y+15*s,6*s,5*s,'#fff5c9');
+  p(x+65*s,y+15*s,5*s,6*s,'#ffd093');
+  for(const dx of [14,57]) {
+    ell(x+dx*s,y+29*s,9*s,10*s,'#433e4c',2);
+    ell(x+dx*s,y+29*s,4*s,4*s,'#b7b7ad',2);
+  }
+  for(let i=0;i<15;i++)p(x+(i*13%68)*s,y+(18+i%3)*s,2*s,1*s,i%2?'#f6b8af':'#ae617d');
+}
+function mapWaystone(cx,feet,kind) {
+  p(cx-12,feet-13,24,16,'#6b715f');
+  p(cx-9,feet-15,18,16,kind==='school'?'#e4c2aa':kind==='home'?'#c9afbe':'#9eb8a7');
+  p(cx-4,feet-9,9,4,'#fff2d7');
+  p(cx-2,feet-9,5,2,kind==='home'?'#ba718d':'#7c6775');
+  p(cx-9,feet+1,18,3,'#89877a');
+}
+function mapTrailDot(cx,cy,i) {
+  const color=i%3===0?'#fff3cf':i%2?'#d8b896':'#b59577';
+  p(cx,cy,2,2,color);
+}
+
+export function drawOverworldMap(context,width,height,t,avatar,carPosition=null,reduceMotion=false) {
+  const key=width+'x'+height;
+  let surface=overworldCache.get(key);
+  if(!surface) {
+    surface=document.createElement('canvas');
+    surface.width=width;
+    surface.height=height;
+    g=surface.getContext('2d',{alpha:false});
+    g.imageSmoothingEnabled=false;
+    seed=157732;
+    staticScene(1,width,height);
+    // Hand-sprinkled flower beds and stone route connect the three points.
+    const base=Math.round(height*.72);
+    for(let seg=0;seg<2;seg++){
+      const a=seg===0?[236,base+28]:[433,base+55];
+      const b=seg===0?[433,base+55]:[598,base+26];
+      for(let i=0;i<=70;i++){
+        const z=i/70;
+        const tx=a[0]+(b[0]-a[0])*z;
+        const ty=a[1]+(b[1]-a[1])*z+Math.sin(z*Math.PI)*13*(seg?1:-1);
+        for(let j=0;j<4;j++)mapTrailDot(tx+rr(-5,5),ty+rr(-3,3),i+j);
+      }
+    }
+    for(let i=0;i<34;i++) {
+      const x=rr(0,width),yy=base+rr(10,Math.min(112,height-base-5));
+      if(Math.abs(x-432)<59&&Math.abs(yy-base-55)<30)continue;
+      flower(x,yy,rr(.45,.75),i%3===0?'#f3adbd':i%3===1?'#ffebc9':'#e9d4f9');
+    }
+    mapWaystone(228,base+28,'school');
+    mapWaystone(605,base+31,'home');
+    overworldCache.set(key,surface);
+    // Avoid growing beyond a handful of surfaces on repeated viewport resizes.
+    if(overworldCache.size>4)overworldCache.delete(overworldCache.keys().next().value);
+  }
+  context.drawImage(surface,0,0);
+  g=context;
+  seed=182013+Math.floor(t*2);
+  const base=Math.round(height*.72);
+  rotor(599,base-23-116*.72,.72,reduceMotion?0:t);
+  // The parked car lives on the map; while driving it follows the bridge.
+  if(carPosition) mapCar(carPosition.x,carPosition.y,1.05);
+  else mapCar(433,base+56,1.05);
+  if(avatar && avatar.visible!==false) {
+    sprite(avatar.x,avatar.y,1.10,reduceMotion?0:t,'mother',Boolean(avatar.walking));
+    if(avatar.walking&&!reduceMotion&&Math.floor(t*4)%2===0)
+      heart(avatar.x+25,avatar.y-60,.48,'#f2b9c9');
+  }
+}
