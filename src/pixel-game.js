@@ -118,11 +118,11 @@ function updateControls(){
  ui.mapHotspots.classList.toggle('hidden',!map);
  ui.controls.classList.toggle('hidden',!map);
  ui.mapHint.classList.toggle('hidden',!map);
- ui.mapReturn.classList.toggle('hidden',map||stage===14);
+ ui.mapReturn.classList.toggle('hidden',map||![2,3,5].includes(stage));
  ui.sceneBanner.classList.toggle('hidden',map);
  ui.action.classList.toggle('hidden',stage===14||stage===4&&!ui.classPanel.classList.contains('hidden'));
  ui.action.disabled=Boolean(traveling||transitioning);
- const current=map && (stage===0||stage===1)?'school':map?'car':null;
+ const current=map && (stage===0||stage===1)?'school':map&&stage===5?'car':null;
  for(const [key,b] of Object.entries(placeButtons)){
   const open=map && key===current && !traveling && !transitioning;
   b.disabled=!open;
@@ -206,6 +206,7 @@ function returnToOverworld(){
   actor.walking=false;actor.visible=true;
   if(stage<5){
    actor=Object.assign(actor,target('school'));
+   setStage(0);
   }else{
    actor=Object.assign(actor,target('school'));
    setStage(5);
@@ -293,8 +294,7 @@ ui.dismissClass.addEventListener('click',()=>{
 });
 ui.mapReturn.addEventListener('click',()=>{
  if(view!=='scene'||traveling||transitioning||stage===14)return;
- if(stage<=4||stage===5)returnToOverworld();
- if(stage===8)returnToOverworld();
+ if([2,3,5].includes(stage))returnToOverworld();
 });
 ui.replay.addEventListener('click',()=>{
  clearTimeout(driveTimer);clearTimeout(dialogueTimer);clearTimeout(finaleTimer);clearTimeout(fadeTimer);
