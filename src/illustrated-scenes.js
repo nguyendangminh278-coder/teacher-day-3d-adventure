@@ -62,7 +62,8 @@ export function renderScene(ctx,W,H,id,actor,state){
   const cast=[actor];
   const npc=(person,x,y,ratio)=>cast.push({person,x:x*W,y:y*H,size:heightAt(id,y)*ratio,visible:true,walking:false,direction:'south'});
   if(id==='floor1')npc(1,.57,.79,1.08);
-  if(id==='floor2older'||id==='floor2younger'){npc(3,.40,.78,1.12);npc(2,.57,.78,1.10);}
+  // Confirmed by the user: older son has no glasses; younger son wears black glasses.
+  if(id==='floor2older'||id==='floor2younger'){npc(2,.40,.78,1.12);npc(3,.57,.78,1.10);}
   cast.sort((a,b)=>a.y-b.y).forEach(a=>character(ctx,a,clock));
  }
  const hits=[];

@@ -28,6 +28,8 @@ No flashes or fading white overlays. Scene changes follow completed character pa
 
 ## Family and grounded movement revision · 2026-11-04
 
+User-confirmed roles: the black-haired son in the center of the reference photo, wearing a short-sleeve white T-shirt without glasses, is the older brother (sprite column 2, zero-based). The son at the right wearing black glasses and a long-sleeve white shirt is the younger brother (column 3). The older brother stands at the first greeting position on floor 2; the younger brother stands at the second position.
+
 Built-in image_gen used with the user's latest family and car photos as identity references. Raw personal photos are not part of the repository. New local assets:
 
 - family-v2.png: four transparent adult-proportioned chibi pixel characters, equal columns: mother in cream dress/blue-white cardigan, father in navy jacket and light gold rim glasses, black-haired son in short-sleeve white T-shirt, copper-highlighted-haired son in black glasses and long-sleeve white shirt. Prompt preserves faces, hairstyles and outfits; no background or ambient glow. A second generation corrected transparency and matched the walking proportions.
