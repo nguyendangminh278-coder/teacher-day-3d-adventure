@@ -68,3 +68,7 @@ Five new runtime PNGs generated with built-in image_gen using the user-provided 
 
 
 Flower opening revision: flower-cloud-road.png and mother-walk-v3.png generated with built-in image_gen. Prompts and runtime animation notes are recorded in docs/ILLUSTRATED_ASSETS.md.
+
+
+## Current procedural runtime
+All active scenery, characters, students and vehicles are drawn by original Canvas code in src/pixel-world.js. Runtime visuals require no image assets. The generated-image credits above apply to archived versions. Be Vietnam Pro remains the local font dependency.

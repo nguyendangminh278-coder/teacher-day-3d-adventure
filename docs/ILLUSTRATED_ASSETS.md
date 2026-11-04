@@ -49,3 +49,8 @@ Built-in image_gen assets copied into assets/illustrations/:
 - mother-walk-v3.png — same mother's identity, cream dress and blue-white cardigan; equal 4-column × 3-row transparent atlas: east, north/back and south/front; four alternating leg/arm phases per direction, changing sleeves and skirt, stable head and foot baseline, crisp 16bit clusters. West uses horizontal flip.
 
 Game is rasterized to a common 836×470 canvas, CSS nearest-neighbor pixelated scaling. Gait phase follows accumulated distance / character height, rather than time; standing freezes gait. Greeting arm parts are articulated in Canvas around shoulder anchors while head/torso/legs retain ground placement. Intro runs 8.5 seconds, followed by a 2.2-second smooth crossfade to the school (no white flash). Removed title, timeline, clock, quest card, direction pad and top icons from the DOM, as requested. Only scene dialogue, contextual action and wish interactions remain.
+
+
+## Procedural pixel world · current runtime
+
+Current runtime is src/pixel-world.js. All visual elements are generated in Canvas code: pixels, polygons, stepped ellipses, texture clusters, window/gate geometry, furniture, school pupils, articulated people and Vios parts. It creates no Image objects and makes no illustration requests. The release includes code and local fonts only. Earlier image-generation prompts above document archived artwork, not current dependencies. The renderer's scene inventory exposes procedural=true, pupil count and imageAssets=0 for QA. Full-journey testing aborts every assets/illustrations request to verify that the story plays independently of the archived PNGs.

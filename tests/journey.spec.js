@@ -5,8 +5,9 @@ async function chapter(p,n){await expect.poll(async()=>(await state(p))?.stage,{
 async function go(p,n){await expect(p.locator('#actionBtn')).toBeEnabled();await p.locator('#actionBtn').click();await chapter(p,n);}
 test('chronological journey starts at school, performs actions and reads every wish',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)errors.push(r.url());});
+ await page.route('**/assets/illustrations/**',route=>route.abort());
  await page.goto('/?qa=1');await expect(page.locator('#loading')).toBeHidden();
- expect((await state(page)).scene).toBe('flower-road');
+ await expect.poll(async()=>(await state(page))?.scene).toBe('flower-road');
  await expect(page.locator('.game-title,.top-actions,#timeline,.scene-heading,#objective,#controlsPanel')).toHaveCount(0);
  await expect.poll(async()=>(await state(page)).actor.stride).toBeGreaterThan(60);
  await page.screenshot({path:'test-results/flower-opening.png'});
@@ -21,6 +22,7 @@ test('chronological journey starts at school, performs actions and reads every w
  const mid=await state(page);expect(mid.moving).toBe(true);expect(mid.actor.direction).toBe('north');
  await page.screenshot({path:'test-results/entering-school.png'});
  await chapter(page,2);await go(page,3);
+ expect((await state(page)).world).toMatchObject({procedural:true,pupils:25,imageAssets:0});
  await page.screenshot({path:'test-results/new-classroom.png'});
  await page.locator('#actionBtn').click();await expect(page.locator('.wish-card')).toHaveCount(25);
  await page.locator('#dismissClass').click();await chapter(page,4);await go(page,5);
@@ -40,7 +42,7 @@ test('chronological journey starts at school, performs actions and reads every w
   await expect(page.locator('#treeWish')).toHaveText(TREE_WISHES[i]);
  }
  await page.locator('#allWishesBtn').click();await expect(page.locator('#infoBody')).toContainText(TREE_WISHES[23]);
- await page.keyboard.press('Escape');await page.locator('#replayBtn').click();expect((await state(page)).scene).toBe('flower-road');expect(errors).toEqual([]);
+ await page.keyboard.press('Escape');await page.locator('#replayBtn').click();await expect.poll(async()=>(await state(page))?.scene).toBe('flower-road');expect(errors).toEqual([]);
 });
 test('Vietnamese local font, no flashing effects, mobile layout and movement',async({page})=>{
  await page.setViewportSize({width:390,height:844});await page.goto('/?qa=1');await expect(page.locator('#loading')).toBeHidden();await chapter(page,1);

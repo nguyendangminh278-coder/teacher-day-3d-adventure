@@ -1,5 +1,5 @@
 import { CLASS_WISHES, TREE_WISHES, DIALOGUES } from './config.js';
-import { loadIllustrations, renderScene } from './illustrated-scenes.js';
+import { preparePixelWorld, renderScene, inspectWorld } from './pixel-world.js';
 import {ROUTE_POINTS,onFloor,heightAt,sampleRoute} from './scene-layout.js';
 
 const $=id=>document.getElementById(id);
@@ -158,9 +158,9 @@ function frame(now){
   const [x,y,size]=scenes[0].start;
   renderScene(ctx,W,H,'school-front',{x:x*W,y:y*H,size,visible:true,walking:false,direction:'south'}, {clock,progress:0,moving:false,selectedBloom,sceneAge:0});ctx.restore();
  }
- if(location.search.includes('qa=1'))window.__STORY_STATE__={stage,scene:activeScene().id,moving:!!motion,transition:transition?transition.elapsed/transition.duration:null,progress,actor:{...actor},spriteFrame:Math.floor((actor.stride||0)/(actor.size*.22))%4};
+ if(location.search.includes('qa=1'))window.__STORY_STATE__={stage,scene:activeScene().id,moving:!!motion,transition:transition?transition.elapsed/transition.duration:null,progress,actor:{...actor},world:inspectWorld(activeScene().id),spriteFrame:Math.floor((actor.stride||0)/(actor.size*.22))%4};
 }
 try{
- await Promise.all([loadIllustrations(),document.fonts.ready]);loaded=true;$('loading').hidden=true;enter(-1);requestAnimationFrame(frame);
+ await Promise.all([preparePixelWorld(),document.fonts.ready]);loaded=true;$('loading').hidden=true;enter(-1);requestAnimationFrame(frame);
 }catch(e){$('loadingText').textContent=e.message;$('retryBtn').hidden=false;}
 $('retryBtn').addEventListener('click',()=>location.reload());
