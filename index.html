@@ -3,79 +3,104 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#a5e2e8" />
-  <meta name="description" content="Một trò chơi pixel art 2D chi tiết, sắc nét dành tặng Mẹ ngày Nhà giáo Việt Nam 20/11." />
-  <title>Hành trình 20/11 dành tặng Mẹ · Pixel Art</title>
-  <link rel="stylesheet" href="./src/styles.css?v=hub4" />
+  <meta name="theme-color" content="#2b6aca" />
+  <meta name="description" content="Hành trình 20/11 dành tặng Mẹ: game pixel art RPG khám phá trường học, lên xe về nhà và cây điều ước trên tầng cao nhất." />
+  <title>Hành trình ngày Nhà giáo Việt Nam · Pixel RPG</title>
+  <link rel="stylesheet" href="./src/styles.css?v=rpg-route5" />
 </head>
 <body>
-  <div id="app">
-    <canvas id="game" aria-label="Bản đồ ngoài trời với trường học bên trái, xe ở giữa và nhà của mẹ bên phải. Các nút địa điểm mở cảnh tương ứng." role="img"></canvas>
+<div id="app">
+  <canvas id="game" role="img" aria-label="Bản đồ làng hoa pixel art: trường học, xe, nhà và cây điều ước. Bấm điểm đến hoặc phím mũi tên để di chuyển."></canvas>
 
-    <nav id="mapHotspots" class="map-hotspots" aria-label="Các địa điểm trên bản đồ">
-      <button type="button" class="map-location" data-place="school"><span class="place-emoji">🏫</span><span>TRƯỜNG HỌC</span><small>Vào lớp nhận lời chúc</small></button>
-      <button type="button" class="map-location" data-place="car"><span class="place-emoji">🚗</span><span>ĐI BẰNG XE</span><small>Qua cây cầu về nhà</small></button>
-      <button type="button" class="map-location" data-place="home"><span class="place-emoji">🏡</span><span>NHÀ CỦA MẸ</span><small>Gặp bố và hai con</small></button>
-    </nav>
-
-    <header class="hud top-hud">
-      <div class="brand">
-        <span class="brand-pixel" aria-hidden="true">✿</span>
-        <div>
-          <strong>HÀNH TRÌNH 20/11 DÀNH TẶNG MẸ</strong>
-          <small id="assetStatus">BẢN ĐỒ RPG · KHÁM PHÁ 3 ĐỊA ĐIỂM</small>
-        </div>
-      </div>
-      <div class="stage-pill" aria-label="Tiến độ hành trình"><span id="stageNumber">1</span> / 10</div>
-    </header>
-
-    <aside id="objective" class="hud objective-card" aria-live="polite">
-      <span class="objective-kicker">✦ NHIỆM VỤ HIỆN TẠI</span>
-      <strong id="objectiveTitle">Mẹ xuất hiện</strong>
-      <p id="objectiveText">Bước vào câu chuyện 20/11 được vẽ hoàn toàn bằng pixel.</p>
-    </aside>
-
-    <div id="dialogue" class="dialogue hidden" role="status" aria-live="polite">
-      <div class="portrait" aria-hidden="true">🌷</div>
-      <div>
-        <strong id="dialogueName">Mẹ</strong>
-        <p id="dialogueText">Xin chào…</p>
-      </div>
-    </div>
-
-    <section id="classroomPanel" class="panel classroom-panel hidden" aria-label="25 lời chúc từ học trò">
-      <div class="panel-heading">
-        <div><span class="panel-star">✿</span><h2>25 LỜI CHÚC TỪ HỌC TRÒ</h2></div>
-        <small>Cô ơi, chúng em cảm ơn cô! 💌</small>
-      </div>
-      <div id="classWishes" class="wish-grid"></div>
-      <button id="dismissClass" class="primary-btn" type="button">TAN LỚP · VỀ NHÀ <span>→</span></button>
-    </section>
-
-    <section id="finalPanel" class="panel final-panel hidden" aria-label="Cây điều ước dành tặng Mẹ">
-      <span class="final-kicker">✦ CÂY ĐIỀU ƯỚC CỦA MẸ ✦</span>
-      <h1>Cảm ơn mẹ vì vừa là mẹ, vừa là người thầy tuyệt vời nhất.</h1>
-      <p>Mỗi bông hoa là một lời chúc dành cho mẹ. Chúc mẹ 20/11 thật nhiều niềm vui và bình an!</p>
-      <p id="treeWish" class="selected-wish" aria-live="polite">✿ Chạm vào một bông hoa trên cây để mở lời chúc.</p>
-      <button id="replayBtn" class="primary-btn secondary" type="button">↻ CHƠI LẠI</button>
-    </section>
-
-    <button id="mapReturn" class="map-return hidden" type="button" aria-label="Quay về bản đồ ngoài trời">‹ BẢN ĐỒ</button>
-    <div id="mapHint" class="map-hint hud">✦ Chạm địa điểm đang sáng trên bản đồ để di chuyển</div>
-    <div id="mapFade" class="map-fade" aria-hidden="true"></div>
-
-    <button id="actionBtn" class="action-btn" type="button" aria-label="Tiếp tục hành trình">
-      <span id="actionLabel">BẮT ĐẦU HÀNH TRÌNH</span>
-      <span class="action-icon" aria-hidden="true">▶</span>
-    </button>
-
-    <div class="controls-hint hud">✦ Chạm một địa điểm trên bản đồ · Xem cảnh riêng · Trở lại bản đồ để đi tiếp</div>
-    <div id="loading" class="loading-screen" role="status">
-      <div class="pixel-loader" aria-hidden="true">✿</div>
-      <strong>ĐANG MỞ THẾ GIỚI PIXEL...</strong>
-      <small>Một hành trình nhỏ xinh, không WebGL và không mô hình 3D</small>
-    </div>
+  <header class="game-title hud" aria-label="Tiêu đề trò chơi">
+    <span class="title-deco left" aria-hidden="true">🌸</span>
+    <div><span class="title-small">Hành trình</span><strong>Ngày Nhà giáo Việt Nam</strong></div>
+    <span class="title-deco right" aria-hidden="true">🌷</span>
+  </header>
+  <div class="top-actions">
+    <button type="button" id="achievementBtn" class="icon-tile" aria-label="Xem thành tích" title="Thành tích">🏆</button>
+    <button type="button" id="journalBtn" class="icon-tile" aria-label="Xem nhật ký hành trình" title="Nhật ký">📖</button>
+    <button type="button" id="settingsBtn" class="icon-tile" aria-label="Mở cài đặt" title="Cài đặt">⚙️</button>
   </div>
-  <script type="module" src="./src/pixel-game.js?v=hub4"></script>
+
+  <nav id="mapHotspots" class="map-hotspots" aria-label="Địa điểm ngoài trời">
+    <button type="button" class="map-location" data-place="school"><span class="place-emoji" aria-hidden="true">🎓</span><span>TRƯỜNG HỌC</span></button>
+    <button type="button" class="map-location" data-place="car"><span class="place-emoji" aria-hidden="true">🚙</span><span>ĐI BẰNG XE</span></button>
+    <button type="button" class="map-location" data-place="home"><span class="place-emoji" aria-hidden="true">🏠</span><span>NHÀ CỦA MẸ</span></button>
+    <button type="button" class="map-location" data-place="wish"><span class="place-emoji" aria-hidden="true">🌸</span><span>CÂY ĐIỀU ƯỚC</span></button>
+  </nav>
+
+  <div id="sceneBanner" class="scene-banner hidden" aria-live="polite">
+    <strong>TRƯỜNG HOA MÂY</strong>
+    <span id="sceneSubtitle">Điểm đến của hành trình</span>
+  </div>
+  <button id="mapReturn" class="map-return hidden" type="button">‹ QUAY LẠI BẢN ĐỒ</button>
+
+  <section id="objective" class="quest-card hud" aria-live="polite">
+    <div class="quest-ribbon">
+      <span>CHẶNG <span id="stageNumber">1</span> / <span id="stageTotal">15</span></span>
+    </div>
+    <strong id="objectiveTitle">Chuẩn bị đến trường</strong>
+    <p id="objectiveText">Hãy đi đến trường học trước!</p>
+    <div class="quest-progress"><div id="progressFill"></div></div>
+  </section>
+
+  <section id="controlsPanel" class="controls-panel hud" aria-label="Điều khiển trên bản đồ">
+    <div class="direction-pad" aria-label="Di chuyển">
+      <button type="button" data-move="ArrowUp" class="up" aria-label="Đi lên">↑</button>
+      <button type="button" data-move="ArrowLeft" class="left" aria-label="Đi trái">←</button>
+      <button type="button" data-move="ArrowDown" class="down" aria-label="Đi xuống">↓</button>
+      <button type="button" data-move="ArrowRight" class="right" aria-label="Đi phải">→</button>
+    </div>
+    <div class="controls-info">
+      <div><strong>↑ ↓ ← →</strong> Di chuyển</div>
+      <div><button id="enterBtn" type="button" aria-label="Đi vào địa điểm">E</button> Vào địa điểm</div>
+      <small>Hoặc chạm vào bảng chỉ dẫn</small>
+    </div>
+  </section>
+
+  <div id="mapHint" class="map-hint" aria-live="polite">Hãy chọn Trường học để bắt đầu.</div>
+  <button id="actionBtn" class="action-btn" type="button" aria-label="Tiếp tục nhiệm vụ">
+    <span id="actionLabel">ĐI ĐẾN TRƯỜNG</span><span class="action-icon" aria-hidden="true">▶</span>
+  </button>
+  <div id="dialogue" class="dialogue hidden" role="status" aria-live="polite">
+    <div class="portrait" aria-hidden="true">🌷</div>
+    <div><strong id="dialogueName">Mẹ</strong><p id="dialogueText">Xin chào…</p></div>
+  </div>
+
+  <section id="classroomPanel" class="panel classroom-panel hidden" aria-label="25 lời chúc từ học trò">
+    <div class="panel-heading">
+      <div><span class="panel-star">✿</span><h2>25 LỜI CHÚC TỪ HỌC TRÒ</h2></div>
+      <small>Cảm ơn cô vì luôn tận tâm với chúng em! 💌</small>
+    </div>
+    <div id="classWishes" class="wish-grid"></div>
+    <button id="dismissClass" class="primary-btn" type="button">TAN LỚP · RA KHỎI TRƯỜNG <span>➜</span></button>
+  </section>
+
+  <section id="finalPanel" class="panel final-panel hidden" aria-label="Cây điều ước trên tầng 3">
+    <span class="final-kicker">🌸 TẦNG CAO NHẤT · CÂY ĐIỀU ƯỚC 🌸</span>
+    <h1>Cảm ơn mẹ vì vừa là mẹ, vừa là người thầy tuyệt vời nhất.</h1>
+    <p>Mỗi bông hoa mang một lời chúc. Mẹ đã đi qua trường học, chuyến xe trở về và những tầng nhà đầy yêu thương để tới đây!</p>
+    <p id="treeWish" class="selected-wish" aria-live="polite">✿ Chạm vào bông hoa trên cây để đọc lời chúc.</p>
+    <button id="replayBtn" class="primary-btn secondary" type="button">↻ CHƠI LẠI TỪ ĐẦU</button>
+  </section>
+
+  <section id="infoPanel" class="panel info-panel hidden" role="dialog" aria-modal="false" aria-labelledby="infoTitle">
+    <button id="infoClose" class="info-close" type="button" aria-label="Đóng bảng">✕</button>
+    <h2 id="infoTitle">NHẬT KÝ</h2>
+    <p id="infoBody"></p>
+    <button id="motionButton" class="primary-btn hidden" type="button">GIẢM CHUYỂN ĐỘNG</button>
+  </section>
+
+  <div id="mapFade" class="map-fade" aria-hidden="true"></div>
+  <div id="loading" class="loading-screen" role="status">
+    <div class="pixel-loader">✿</div>
+    <strong>ĐANG VẼ LÀNG HOA 20/11...</strong>
+    <small>Trường học → Lên xe → Về nhà → Tầng 3: Cây điều ước</small>
+  </div>
+  <span id="assetStatus" class="sr-only">PIXEL ART RPG · 15 CHẶNG</span>
+  <span id="storyProgress" class="sr-only"></span>
+</div>
+<script type="module" src="./src/pixel-game.js?v=rpg-route5"></script>
 </body>
 </html>
