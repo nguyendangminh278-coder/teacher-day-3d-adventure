@@ -61,3 +61,7 @@ The local PNG assets in `assets/illustrations/` were generated with the built-in
 
 ## Chronological edition
 Local font Be Vietnam Pro from Google Fonts (SIL Open Font License 1.1, included at assets/fonts/OFL.txt). School/house artworks are generated architectural interpretations of the user-provided reference, not redistributed Street View photos. New motion assets and prompts documented in docs/ILLUSTRATED_ASSETS.md.
+
+
+## Latest family reference revision
+Five new runtime PNGs generated with built-in image_gen using the user-provided photos: family-v2, mother-walk-v2, vios-action, vios-rear and home-rooms-v2. Raw family/car photos are not included in source. family-v2 was regenerated once to remove background glow and align standing/walking proportions. See docs/ILLUSTRATED_ASSETS.md for prompt summaries.

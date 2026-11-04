@@ -24,3 +24,16 @@ Built-in image_gen, original generated files copied into assets/illustrations/:
 - town-road.png: continuous detailed Vietnamese urban street in afternoon light, three-storey townhouses, bougainvillea, overhead wires, straight horizontal road in foreground, no vehicles or people.
 
 No flashes or fading white overlays. Scene changes follow completed character paths; default durations 2.4–4 seconds, drive 6.5 seconds. Times in the UI are fictional narrative times.
+
+
+## Family and grounded movement revision · 2026-11-04
+
+Built-in image_gen used with the user's latest family and car photos as identity references. Raw personal photos are not part of the repository. New local assets:
+
+- family-v2.png: four transparent adult-proportioned chibi pixel characters, equal columns: mother in cream dress/blue-white cardigan, father in navy jacket and light gold rim glasses, black-haired son in short-sleeve white T-shirt, copper-highlighted-haired son in black glasses and long-sleeve white shirt. Prompt preserves faces, hairstyles and outfits; no background or ambient glow. A second generation corrected transparency and matched the walking proportions.
+- mother-walk-v2.png: same mother's identity/outfit; 4 east-facing walking phases and 4 north-facing phases, transparent 4×2 atlas.
+- vios-action.png: champagne sand-beige Toyota Vios four-door sedan, same side-facing car in two cells, rear passenger door closed/open, no people or background. Replaces blue hatchback.
+- vios-rear.png: isolated rear-view sand Vios matching user's rear photo. Blank white plate; runtime renders the user-specified plate text exactly with the local font.
+- home-rooms-v2.png: equal 2×2 backgrounds, empty living room, empty second-floor room, clear staircase and rooftop wish tree. No baked characters or human portraits. Broad clear floor, props against walls, consistent wood and flower palette.
+
+All characters are separate sprites. Foot-based routes, floor regions and height by perspective are shared in src/scene-layout.js. Manual movement is constrained to floor areas. House route avoids the parked vehicle and ends at the door threshold. Parent/son sprite height ratios share the same perspective function, and draw order follows foot depth. Stair paths follow stair treads; route interpolation uses traveled length rather than equal time for unequal segments.

@@ -29,3 +29,10 @@ npm test
 ```
 
 Playwright kiểm tra điểm bắt đầu là trường, nhân vật đổi vị trí khi bước vào, chuyến xe không bị bỏ qua, cầu thang, 25 thiệp, 24 điều ước, chơi lại, font local và không có CSS animation nhấp nháy; đồng thời kiểm tra màn hình dọc/ngang. Ảnh ở test-results/. Workflow chạy trên PR và xuất bản gh-pages sau khi cập nhật main.
+
+
+## Cập nhật gia đình và tỷ lệ
+
+Xe là Toyota Vios màu cát, có ảnh cửa mở/đóng và góc nhìn sau ở trước nhà. Biển số theo nội dung người dùng được vẽ bằng font thật. Mẹ, bố và hai con là sprite riêng theo bộ ảnh gia đình mới, không nằm cố định trong nền phòng.
+
+`src/scene-layout.js` dùng tọa độ chân, vùng sàn hợp lệ, tỷ lệ theo chiều sâu và đường đi theo quãng đường. Nhân vật được chặn khỏi vùng đồ đạc; khi bắt đầu hành động sau khi di chuyển tay, đường đi bắt đầu ngay từ vị trí hiện tại. Kiểm thử bổ sung lấy mẫu toàn bộ đường đi để phát hiện đoạn ra ngoài sàn.

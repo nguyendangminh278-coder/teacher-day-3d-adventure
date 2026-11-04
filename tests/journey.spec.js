@@ -22,10 +22,10 @@ test('chronological journey starts at school, performs actions and reads every w
  await page.keyboard.press('Enter');expect((await state(page)).scene).toBe('car-driving');
  await page.screenshot({path:'test-results/car-driving.png'});
  await chapter(page,7);await page.screenshot({path:'test-results/new-home.png'});
- await go(page,8);await go(page,9);await page.locator('#actionBtn').click();
+ await go(page,8);await page.screenshot({path:'test-results/family-floor1.png'});await go(page,9);await page.locator('#actionBtn').click();
  await expect.poll(async()=>(await state(page)).actor.y).toBeLessThan(850);
  await page.screenshot({path:'test-results/climbing.png'});await chapter(page,10);
- await go(page,11);await go(page,12);await go(page,13);
+ await page.screenshot({path:'test-results/family-floor2.png'});await go(page,11);await go(page,12);await go(page,13);
  await expect(page.locator('#finalPanel')).toBeVisible();
  for(let i=0;i<24;i++){
   const a=i*2.39996,r=45+(i%6)*35;

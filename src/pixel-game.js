@@ -1,5 +1,6 @@
 import { CLASS_WISHES, TREE_WISHES, DIALOGUES } from './config.js';
 import { loadIllustrations, renderScene } from './illustrated-scenes.js';
+import {ROUTE_POINTS,onFloor,heightAt,sampleRoute} from './scene-layout.js';
 
 const $=id=>document.getElementById(id);
 const canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
@@ -21,6 +22,9 @@ const scenes=[
  scene('stairs','Cầu thang · Lên tầng 3','Điều bất ngờ cuối cùng đang ở tầng trên cùng.','Bước lên sân thượng','12:40',4,[.23,.94,150],[[.23,.94,150],[.39,.65,140],[.58,.28,115]],4000,DIALOGUES.upstairs),
  scene('wish-rooftop','Tầng 3 · Cây điều ước','Mỗi bông hoa là một điều ước dành riêng cho mẹ.','Đọc những điều ước','12:45',4,[.25,.91,160],[],0,DIALOGUES.finale),
 ];
+for(const [i,points] of Object.entries(ROUTE_POINTS)){
+ const s=scenes[Number(i)];s.path=points.map(([x,y])=>[x,y,heightAt(s.id,y)]);s.start=s.path[0];
+}
 let stage=0,actor={},motion=null,loaded=false,paused=false,clock=0,prev=0,bloomHits=[];
 let selectedBloom=-1,classRead=false,calm=false;
 const keys=new Set();
@@ -61,7 +65,7 @@ function beginAction(){
  if(!loaded||motion||blocked()||stage===12)return;
  if(stage===2&&!classRead){$('classroomPanel').hidden=false;update();$('dismissClass').focus();return;}
  if(stage===5)return;
- motion={elapsed:0,duration:calm?Math.min(1800,scenes[stage].duration):scenes[stage].duration,path:scenes[stage].path};
+ motion={elapsed:0,duration:calm?Math.min(1800,scenes[stage].duration):scenes[stage].duration,path:[[actor.x/W,actor.y/H,actor.size],...scenes[stage].path.slice(1)]};
  actor.walking=true;keys.clear();update();
 }
 $('actionBtn').addEventListener('click',beginAction);
@@ -116,10 +120,9 @@ canvas.addEventListener('pointerdown',e=>{
  if(Math.hypot(nearest.x-x,nearest.y-y)<48){selectedBloom=nearest.index;$('treeWish').textContent=TREE_WISHES[selectedBloom];}
 });
 function followPath(path,t){
- const f=Math.min(path.length-1.000001,t*(path.length-1)),i=Math.floor(f),k=f-i;
- const a=path[i],b=path[i+1];
- actor.x=(a[0]+(b[0]-a[0])*k)*W;actor.y=(a[1]+(b[1]-a[1])*k)*H;actor.size=a[2]+(b[2]-a[2])*k;
- actor.direction=Math.abs(b[0]-a[0])*W>Math.abs(b[1]-a[1])*H?(b[0]>a[0]?'east':'west'):(b[1]>a[1]?'south':'north');
+ const p=sampleRoute(path,t);
+ actor.x=p.x*W;actor.y=p.y*H;actor.size=heightAt(scenes[stage].id,p.y);
+ actor.direction=Math.abs(p.dx)*W>Math.abs(p.dy)*H?(p.dx>0?'east':'west'):(p.dy>0?'south':'north');
 }
 function frame(now){
  requestAnimationFrame(frame);
@@ -136,12 +139,13 @@ function frame(now){
    actor.walking=!!(dx||dy);
    if(actor.walking){
     actor.direction=dx>0?'east':dx<0?'west':dy<0?'north':'south';
-    actor.x=Math.max(60,Math.min(W-60,actor.x+dx*dt*.22));actor.y=Math.max(H*.45,Math.min(H*.95,actor.y+dy*dt*.22));
+    const nx=actor.x+dx*dt*.22,ny=actor.y+dy*dt*.22;
+    if(onFloor(scenes[stage].id,nx/W,ny/H)){actor.x=nx;actor.y=ny;actor.size=heightAt(scenes[stage].id,ny/H);}
    }
   }
  }
  const progress=motion?motion.elapsed/motion.duration:0;
- bloomHits=renderScene(ctx,W,H,scenes[stage].id,actor,{clock,progress,moving:!!motion,selectedBloom,calm});
+ bloomHits=renderScene(ctx,W,H,scenes[stage].id,actor,{clock,progress,moving:!!motion,selectedBloom,calm,stage});
  if(location.search.includes('qa=1'))window.__STORY_STATE__={stage,scene:scenes[stage].id,moving:!!motion,progress,actor:{...actor},spriteFrame:Math.floor(clock/130)%4};
 }
 try{

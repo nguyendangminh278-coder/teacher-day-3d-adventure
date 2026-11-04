@@ -1,4 +1,5 @@
-const names=['school-thanhhoa.png','home-townhouse.png','story-atlas.png','details-atlas.png','family.png','mother-walk.png','car-action.png','town-road.png'];
+import {heightAt} from './scene-layout.js';
+const names=['school-thanhhoa.png','home-townhouse.png','story-atlas.png','details-atlas.png','family-v2.png','mother-walk-v2.png','vios-action.png','town-road.png','home-rooms-v2.png','vios-rear.png'];
 const images=[],bounds=new Map();
 export async function loadIllustrations(){
  await Promise.all(names.map((name,i)=>new Promise((resolve,reject)=>{
@@ -6,7 +7,7 @@ export async function loadIllustrations(){
   im.src=new URL('../assets/illustrations/'+name,import.meta.url).href;
  })));
  // Read alpha bounds to keep differently padded walk frames anchored to the feet.
- for(const [img,cols,rows] of [[4,4,1],[5,4,2],[6,2,1]]){
+ for(const [img,cols,rows] of [[4,4,1],[5,4,2],[6,2,1],[9,1,1]]){
   const im=images[img],c=document.createElement('canvas');c.width=im.width;c.height=im.height;
   const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);
   const {data}=g.getImageData(0,0,c.width,c.height),cw=Math.floor(c.width/cols),ch=Math.floor(c.height/rows);
@@ -19,7 +20,7 @@ export async function loadIllustrations(){
 }
 function character(ctx,a,clock){
  if(!a.visible)return;
- const walking=a.walking,img=walking?5:4,col=walking?Math.floor(clock/130)%4:3,row=walking&&a.direction==='north'?1:0;
+ const walking=a.walking,img=walking?5:4,col=walking?Math.floor(clock/130)%4:(a.person??0),row=walking&&a.direction==='north'?1:0;
  const [sx,sy,sw,sh]=bounds.get(`${img}:${col}:${row}`),w=a.size*sw/sh;
  ctx.save();ctx.translate(a.x,a.y);if(a.direction==='west')ctx.scale(-1,1);
  ctx.fillStyle='#20352d45';ctx.beginPath();ctx.ellipse(0,0,w*.25,4,0,0,Math.PI*2);ctx.fill();
@@ -33,7 +34,7 @@ function car(ctx,x,y,width,open,travel){
   for(let k=0;k<3;k++){const a=travel/90+k*Math.PI/3;ctx.beginPath();ctx.moveTo(cx-Math.cos(a)*r,cy-Math.sin(a)*r);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);ctx.stroke();}
  }}
 }
-const cells={classroom:[2,1,0,2,3],floor1:[2,1,1,2,3],floor2older:[2,0,2,2,3],floor2younger:[2,0,2,2,3],'wish-rooftop':[2,1,2,2,3],'school-hall':[3,0,0,2,2],stairs:[3,1,1,2,2]};
+const cells={classroom:[2,1,0,2,3],floor1:[8,0,0,2,2],floor2older:[8,1,0,2,2],floor2younger:[8,1,0,2,2],'wish-rooftop':[8,1,1,2,2],'school-hall':[3,0,0,2,2],stairs:[8,0,1,2,2]};
 function backdrop(ctx,W,H,id){
  const source=id==='home-front'?images[1]:['school-front','school-exit','car-boarding'].includes(id)?images[0]:id==='car-driving'?images[7]:null;
  if(source){ctx.drawImage(source,0,0,W,H);return;}
@@ -48,11 +49,21 @@ export function renderScene(ctx,W,H,id,actor,state){
   car(ctx,x,H*.93,450,false,clock);
  }else if(id==='car-boarding'){
   const open=moving&&progress>.25&&progress<.9;
-  if(!moving||progress<.77)character(ctx,actor,clock);
-  car(ctx,W*.62,H*.92,490,open,0);
+  car(ctx,W*.62,H*.94,490,open,0);
+  if(!moving||progress<.85)character(ctx,actor,clock);
  }else{
-  if(id==='home-front')car(ctx,W*.8,H*.94,370,false,0);
-  character(ctx,actor,clock);
+  if(id==='home-front'){
+   const [sx,sy,sw,sh]=bounds.get('9:0:0'),width=215,h=width*sh/sw,x=W*.43,y=H*.935;
+   ctx.drawImage(images[9],sx,sy,sw,sh,x-width/2,y-h,width,h);
+   ctx.fillStyle='#fffefa';ctx.fillRect(x-width*.135,y-h*.315,width*.27,h*.075);
+   ctx.fillStyle='#182121';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='700 8px "Be Vietnam Pro"';
+   ctx.fillText('36A.21538',x,y-h*.277);
+  }
+  const cast=[actor];
+  const npc=(person,x,y,ratio)=>cast.push({person,x:x*W,y:y*H,size:heightAt(id,y)*ratio,visible:true,walking:false,direction:'south'});
+  if(id==='floor1')npc(1,.57,.79,1.08);
+  if(id==='floor2older'||id==='floor2younger'){npc(3,.40,.78,1.12);npc(2,.57,.78,1.10);}
+  cast.sort((a,b)=>a.y-b.y).forEach(a=>character(ctx,a,clock));
  }
  const hits=[];
  if(id==='wish-rooftop')for(let i=0;i<24;i++){
