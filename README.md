@@ -1,68 +1,70 @@
-# 🌸 Hành trình 20/11 dành tặng Mẹ — Pixel Art 2D
+# 🌸 Hành trình 20/11 dành tặng Mẹ — RPG Pixel Art
 
-Một mini game 2D phong cách pixel art có **bản đồ làng ngoài trời liên thông** và các cảnh trong nhà/trường riêng biệt, kể hành trình chúc mừng mẹ nhân ngày Nhà giáo Việt Nam 20/11. Hình ảnh được vẽ trực tiếp bằng Canvas 2D ở độ phân giải nội bộ 768px với pixel nhỏ, tán lá nhiều lớp, hoa, sỏi, mái ngói và đường lát chi tiết kiểu game RPG, **không cần Three.js, WebGL, mô hình 3D, HDRI/PBR, texture 4K hay build AAA**.
+Mini game kể chuyến đi đầy yêu thương của một người mẹ làm nghề giáo. Game dùng **Canvas 2D vẽ pixel art chi tiết** và giao diện sách cổ tích lấy cảm hứng từ ảnh RPG tham khảo: tiêu đề giấy da ở góc trên trái, 3 biểu tượng ở góc trên phải, bảng chỉ đường ngay trên bản đồ, nhiệm vụ ở dưới trái và hướng dẫn điều khiển ở dưới phải.
 
-## Bản đồ ngoài trời và cách chuyển cảnh
+**Không cần Three.js, WebGL, ảnh 3D/PBR hay dịch vụ ngoài.** Các cảnh được vẽ bằng raster pixel nhỏ, có phong cảnh, công trình, nhân vật và vật dụng cụ thể — không chỉ đổi chữ khi đi đến địa điểm.
 
-- **Trường học (trái bản đồ):** Chọn bảng Trường học, nhân vật tự đi tới trường. Game chuyển từ bản đồ chung sang cảnh cổng trường và lớp học.
-- **Đi bằng xe (giữa bản đồ):** Sau khi đọc 25 lời chúc và tan lớp, trở lại bản đồ. Chọn bảng Đi bằng xe: nhân vật đi tới xe, ô tô chạy qua tuyến đường về nhà.
-- **Nhà của mẹ (phải bản đồ):** Khi xe đến nơi, chọn bảng Nhà của mẹ để mở phòng khách, gặp bố và hai con rồi đi tới cây điều ước.
-- **Nút BẢN ĐỒ:** Trong các cảnh trường và nhà có thể trở lại bản đồ ngoài trời. Các điểm kế tiếp mở khóa theo trình tự câu chuyện.
-- Các dấu chỉ địa điểm được đặt lên cùng một bản đồ rừng pixel chi tiết; cảnh ngoài trời được giữ liên tục thay vì thay ảnh ở từng bước di chuyển.
+## Lộ trình chính — 15 chặng (không thể bỏ qua)
 
-## Hành trình 10 chặng
+1. Bản đồ làng hoa: mẹ chuẩn bị đến trường.
+2. Mẹ đi bộ trên bản đồ đến cổng trường.
+3. **Cảnh sân trường**: trường học, cổng, hoa và đường lát đá.
+4. **Cảnh hành lang trường**: hành lang với cửa lớp và bảng chào 20/11.
+5. **Cảnh trong lớp**: bàn ghế, bảng phấn, học trò và 25 lời chúc.
+6. **Ra khỏi trường**: mẹ xuất hiện ngoài cổng sau khi tan lớp.
+7. **Đến xe và lên xe**: mẹ quay lại bản đồ, đi tới điểm đón xe, mở cảnh lên xe.
+8. **Xe chạy về nhà**: cảnh đường ô tô chạy qua làng hoa, có chuyển động.
+9. **Trước cửa nhà**: xe tới nhà, mẹ bước vào.
+10. **Tầng 1**: phòng khách và lời chúc của bố.
+11. **Cầu thang lên tầng 2**: cảnh cầu thang riêng.
+12. **Tầng 2 — Anh trai**: cảnh và lời chúc của con trai lớn.
+13. **Tầng 2 — Em trai**: cảnh và lời chúc của con trai nhỏ.
+14. **Cầu thang lên tầng 3**: chặng leo cầu thang cuối cùng.
+15. **Tầng cao nhất — cây điều ước**: sân vườn trên tầng 3 với 24 bông hoa tương tác.
 
-1. Mẹ xuất hiện bên cổng mây pixel.
-2. Khu vườn hoa đầy sắc màu.
-3. Con đường đến ngôi trường thân thương.
-4. Cổng trường Hoa Mây.
-5. Lớp học với đủ **25 lời chúc** từ học trò.
-6. Chuyến xe đưa mẹ về nhà.
-7. Tầng 1 — bố gửi lời chúc.
-8. Tầng 2 — lời chúc của anh trai.
-9. Tầng 2 — lời chúc của em trai.
-10. Cây điều ước nở hoa — **chạm vào từng hoa để đọc lời chúc**.
+**Cây điều ước không phải lối vào độc lập trên bản đồ.** Điểm này chỉ được mở sau khi mẹ đã về nhà, gặp gia đình và lên cầu thang tới tầng cao nhất.
 
-Các đoạn hội thoại, 25 lời chúc của học trò và 24 lời chúc trên cây đều được giữ từ phiên bản trước.
+## Hình ảnh của các cảnh
 
-## Công nghệ
+- **Bản đồ ngoài trời:** có trường ở giữa phía trên, nhà phía trái, xe ở giữa-phải, cối xay gió và cây điều ước phía phải. Có đường mòn, suối, rừng và vườn hoa.
+- **Sân trường:** ngôi trường với cửa sổ, lối vào, bảng tên, cổng hoa và sân.
+- **Hành lang:** nền gạch, cửa sổ, cửa lớp, banner 20/11.
+- **Lớp học:** bảng, bàn ghế và không gian đón lời chúc.
+- **Xe:** điểm đón và đường về được minh họa bằng hai cảnh khác nhau.
+- **Nhà:** mặt tiền, phòng khách tầng 1, không gian tầng 2, cầu thang và sân vườn trên tầng 3.
 
-- HTML / CSS / JavaScript ES Modules thuần.
-- Canvas 2D tại 768px chiều ngang; các nét raster chi tiết thường chỉ 1–3px, phóng to bằng image-rendering: pixelated.
-- Các cảnh chi tiết được vẽ một lần và lưu vào canvas tạm để giảm chi phí render mỗi khung hình.
-- Thẩm mỹ cozy fantasy / RPG pixel art nhỏ, không dùng ảnh photoreal hoặc khối pixel to.
-- Không thư viện ngoài, không tải texture, không cần npm hoặc bundler.
-- Hỗ trợ màn hình desktop và điện thoại, chuột và chạm.
-- Có tùy chọn giảm chuyển động theo hệ điều hành.
+Các hình ảnh này hiện được **vẽ trực tiếp bằng mã pixel art** (những hình raster nguyên gốc), không phải ảnh 3D hoặc bộ background PNG nhân bản từ ảnh tham chiếu. Độ chi tiết sẽ khác tranh pixel được vẽ thủ công.
+
+## Cách điều khiển
+
+- **Desktop:** mũi tên hoặc WASD để di chuyển trên bản đồ; phím E/Enter để vào địa điểm; nút nhiệm vụ giúp nhân vật tự đi theo lối.
+- **Điện thoại:** chạm bảng địa điểm, nút nhiệm vụ hoặc dùng bộ phím điều hướng ở góc dưới phải.
+- **Ở lớp học:** chọn Đọc 25 lời chúc rồi Tan lớp · Ra khỏi trường.
+- **Khi lên xe:** chọn Lên xe để xem cảnh xe chạy và tự tới nhà.
+- **Trong nhà:** chọn nút nhiệm vụ để gặp bố và các con, lên tầng tiếp theo.
+- **Ở cây điều ước:** chạm vào từng bông hoa để đọc 24 lời chúc, hoặc chơi lại.
+
+Góc trên phải có **Thành tích**, **Nhật ký** và **Cài đặt giảm chuyển động**.
+
+## Cấu trúc chính
+
+- index.html: giao diện RPG.
+- src/styles.css: giao diện giấy da, bảng chỉ đường, nút điều khiển và responsive.
+- src/pixel-game.js: state machine và lộ trình 15 chặng, thao tác bản đồ, chuyển cảnh.
+- src/fine-pixel-art.js: nền bản đồ, các cảnh riêng, nhân vật, hoa và đồ vật.
+- src/config.js: nội dung 25 thiệp, 24 hoa, thoại và danh sách nhiệm vụ.
 
 ## Chạy local
 
-Dùng một static server vì trò chơi import ES Modules:
+Do sử dụng ES Module, hãy chạy bằng server tĩnh:
 
     python -m http.server 8000
 
-Truy cập http://localhost:8000 trong trình duyệt, hoặc dùng VS Code Live Server.
+Mở http://localhost:8000. Không cần npm install.
 
-## Điều khiển
+## Xuất bản
 
-- Chạm/click địa điểm đang sáng trên bản đồ (Trường học → Đi bằng xe → Nhà của mẹ), hoặc bấm nút nhiệm vụ/phím mũi tên phải (→).
-- Khi đến trường, game chuyển sang cảnh riêng của trường và lớp học. Mở và đọc 25 tấm thiệp, sau đó chọn **Tan lớp · Về nhà**.
-- Ở nhà, tiếp tục gặp bố và hai con trước khi đến cây điều ước, chạm/bấm những bông hoa để hiện lời chúc.
-- Chọn **Chơi lại** để bắt đầu từ đầu.
-
-## Tùy chỉnh
-
-- Lời chúc và hội thoại: src/config.js.
-- Bản đồ ngoài trời, cây cối, nhà, xe, tuyến đường, cảnh riêng, nhân vật pixel và cây điều ước: src/fine-pixel-art.js.
-- Điều khiển map hub, đường di chuyển, mở khóa địa điểm, chuyển cảnh và hội thoại: src/pixel-game.js.
-- Màu sắc, giao diện pixel và responsive: src/styles.css.
-- Trang HTML: index.html.
-
-Những nguồn 3D cũ trong src/main.js, src/world-spec.mjs và tools/ chỉ được giữ làm tài liệu tham khảo; **không còn được chạy hoặc xuất bản**.
-
-## GitHub Pages
-
-Workflow .github/workflows/vendor-three.yml (tên tệp giữ lại để không làm mất workflow) giờ xuất bản bản **Pixel Art 2D** trực tiếp sang nhánh gh-pages khi cập nhật main. Nó xuất bản cả src/fine-pixel-art.js và dọn các asset 3D đã xuất bản, không tải model hay build Three.js nữa. Cần cài đặt Pages → **Deploy from a branch** → gh-pages / (root) nếu trang chưa bật.
+Workflow .github/workflows/vendor-three.yml (tên file giữ để tương thích với thiết lập cũ) publish các file HTML/CSS/JS cần thiết sang nhánh gh-pages khi đẩy code lên main. Bật GitHub Pages → Deploy from a branch → gh-pages / root.
 
 ---
 

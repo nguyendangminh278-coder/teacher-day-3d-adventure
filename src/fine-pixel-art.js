@@ -539,3 +539,356 @@ export function drawOverworldMap(context,width,height,t,avatar,carPosition=null,
       heart(avatar.x+25,avatar.y-60,.48,'#f2b9c9');
   }
 }
+
+
+// Story edition: one exterior world, illustrated rooms and a third-floor rooftop.
+const storyCache = new Map();
+const storyMapCache = new Map();
+const pixelPalette = ['#f8dd86','#eaa0a7','#f7f0ce','#a9d8aa','#b5b8e4'];
+const pick = arr => arr[Math.floor(rnd()*arr.length)];
+function storyGround(H){return Math.round(H*.72);}
+function floralBorder(x,y,w,n=11) {
+  for(let i=0;i<n;i++){
+    const fx=x+i*w/(n-1),fy=y+Math.sin(i*2.6)*4;
+    bush(fx,fy,.42+(i%3)*.05);
+    if(i%2===0)flower(fx-8,fy-6,.7,pick(pixelPalette));
+  }
+}
+function woodenSign(x,y,w,text) {
+  p(x-w/2-4,y-15,w+8,33,'#704e54');
+  p(x-w/2,y-11,w,25,'#f7ddab');
+  p(x-w/2+5,y-7,w-10,17,'#ffeac4');
+  label(text,x,y,13,'#71465a');
+  p(x-w/2+6,y-10,3,4,'#c99075');
+  p(x+w/2-9,y-10,3,4,'#c99075');
+}
+function gardenArch(x,y,sc=1){
+  p(x-55*sc,y-111*sc,12*sc,116*sc,'#875d53');
+  p(x+43*sc,y-111*sc,12*sc,116*sc,'#875d53');
+  p(x-59*sc,y-111*sc,118*sc,13*sc,'#9f745d');
+  p(x-53*sc,y-119*sc,105*sc,7*sc,'#e4b17a');
+  for(let i=0;i<9;i++) {
+    const fx=x+(-49+i*12)*sc;
+    foliage(fx,y-(113+(i%3)*4)*sc,10*sc,8*sc,
+      ['#347c5c','#599d6c','#8cc06b','#b3d27a'],.4);
+  }
+  flower(x-56*sc,y-87*sc,1*sc,'#f1a7b4');
+  flower(x+51*sc,y-73*sc,1*sc,'#eebad2');
+}
+function stairsIllustration(W,H){
+ const base=storyGround(H);
+ p(0,0,W,H,'#ead3ad');p(0,0,W,base+13,'#f2d9b2');
+ for(let i=0;i<1200;i++)p(rr(0,W),rr(0,base),rr(1,2),rr(1,2),'#f9e5c7');
+ p(0,base-5,W,H-base+5,'#a87769');
+ for(let i=0;i<24;i++){p(i*37,base,2,H-base,'#885d5e');p(0,base+i*19,W,2,'#ba8d72');}
+ // Perspective wall with open banister and the stair landing.
+ p(0,base-195,238,18,'#b67a6a');
+ p(22,base-193,14,193,'#8b6660');
+ p(204,base-193,14,193,'#8b6660');
+ p(38,base-185,164,154,'#c59f85');
+ p(46,base-178,148,140,'#8ca5a1');
+ p(54,base-170,132,124,'#b6d4c9');
+ p(54,base-102,132,5,'#f9e2b1');
+ p(120,base-170,5,124,'#f9e2b1');
+ cloud(124,base-128,.8);
+ for(let i=0;i<10;i++){
+   const yy=base+38-i*19;
+   const xx=270+i*24;
+   const w=280-i*13;
+   p(xx,yy,w,16,'#6c4d55');
+   p(xx+3,yy,w-6,11,'#bf8f76');
+   p(xx+6,yy+2,w-12,3,'#e4bb8f');
+   p(xx+w-9,yy-25,8,42,'#8f6b61');
+ }
+ stroke(271,base+37,527,base-148,'#8c6158',9);
+ stroke(277,base+30,532,base-151,'#e3af7d',4);
+ for(let i=0;i<11;i++){
+   const xx=283+i*22,yy=base+12-i*16;
+   stroke(xx,yy,xx,yy-28,'#75535a',3);
+ }
+ p(532,base-200,178,187,'#e7bb8d');p(544,base-192,154,164,'#9d6d65');
+ p(559,base-178,123,143,'#d5a579');
+ p(667,base-115,6,5,'#ffe5a1');
+ p(531,base-202,182,9,'#6e5256');
+ floralBorder(34,base+12,177,7);
+ floralBorder(593,base+9,134,5);
+}
+function schoolCorridor(W,H){
+ const base=storyGround(H);
+ p(0,0,W,H,'#f9ddba');
+ p(0,0,W,base-22,'#f3d7b0');
+ for(let i=0;i<2200;i++)p(rr(0,W),rr(0,base-25),rr(1,2),rr(1,2),rnd()<.5?'#f9e5c4':'#e9bd9b');
+ p(0,base-28,W,17,'#ba8172');
+ p(0,base-11,W,H-base+11,'#cfa783');
+ // Hallway perspective with highly visible classroom door.
+ for(let i=0;i<8;i++) {
+   const x=i*97+12;
+   p(x,base-245,6,236,'#e4b38d');
+   p(x+7,base-246,89,7,'#fff0d2');
+   p(x+7,base-82,89,4,'#d39880');
+   if(i<7) {
+     p(x+15,base-219,71,117,'#9b7970');
+     p(x+20,base-212,61,103,'#aed1cb');
+     p(x+25,base-206,51,93,'#cde2d4');
+     p(x+48,base-206,4,93,'#ebcead');
+     p(x+20,base-163,61,4,'#ebcead');
+   }
+ }
+ // Classroom is the scene's main focal point, with board inside the open doorway.
+ p(310,base-250,150,241,'#684e58');
+ p(321,base-240,128,231,'#a87b65');
+ p(330,base-231,113,222,'#dfb49a');
+ p(344,base-214,85,119,'#4b8071');
+ p(346,base-208,81,111,'#477766');
+ label('LỚP HỌC',387,base-158,18,'#ffefca');
+ label('20/11',387,base-132,13,'#ffe6bc');
+ p(337,base-98,101,14,'#ba9277');
+ p(336,base-61,106,11,'#a9796a');
+ p(446,base-214,7,230,'#805b5b');
+ p(452,base-214,29,232,'#cc977e');
+ p(457,base-208,17,220,'#f0c6a1');
+ for(let i=0;i<10;i++) {
+   const x=i*96+rr(0,15),y=base+rr(12,90);
+   p(x,y,rr(28,60),2,'#e0c0a0');
+ }
+ p(56,base-276,654,19,'#c78379');
+ p(63,base-274,643,14,'#f7d2a6');
+ label('CHÀO MỪNG NGÀY NHÀ GIÁO VIỆT NAM',385,base-267,18,'#9a5c68');
+ for(let i=0;i<14;i++)flower(24+i*55,base-18,1.1,i%2?'#ed91aa':'#f3df9c');
+}
+function schoolExterior(W,H,exitMode=false) {
+ const base=storyGround(H);
+ sky(H,base);
+ forestBack(base-10);
+ meadow(H,base);
+ for(let i=0;i<5;i++) oak(i%2?685-i*15:55+i*21,base-14,.53+(i%3)*.1,i===3);
+ school(381,base-15,1.3);
+ path(base+1,383,383);
+ p(58,base+9,W-116,6,'#c8ac8c');
+ fence(12,base+12,8,29);fence(537,base+12,8,29);
+ gardenArch(386,base+5,1);
+ for(let i=0;i<15;i++) {
+   const xx=55+i*47;
+   flower(xx,base+rr(10,55),.8,i%3===0?'#f5a1bc':'#fff1af');
+ }
+ woodenSign(380,base-257,210,'TRƯỜNG HOA MÂY');
+ if(exitMode) {
+   woodenSign(554,base+35,160,'TAN LỚP RỒI!');
+   p(505,base+27,18,11,'#e5b894');p(524,base+27,25,5,'#ce8f81');
+ }
+}
+function boardingScene(W,H) {
+ const base=storyGround(H);
+ sky(H,base-20); forestBack(base-15); meadow(H,base);
+ // Cobblestone roadside near the car, school visible in distance.
+ school(123,base-62,.47);
+ p(0,base+22,W,H-base-22,'#a48983');
+ p(0,base+24,W,9,'#7e7575');
+ for(let i=0;i<18;i++)p(i*48,base+64,25,4,'#f5dfaf');
+ for(let i=0;i<6;i++) oak(i*137+12,base-25,.38+(i%2)*.10,i===1);
+ fence(24,base+2,7,32);fence(560,base+3,6,31);
+ woodenSign(403,base-161,177,'XE ĐÓN MẸ');
+ bush(655,base+12,.78);
+}
+function drivingScene(W,H) {
+ const base=storyGround(H);
+ sky(H,base-27);
+ forestBack(base-36);
+ meadow(H,base-26);
+ // Long diagonal road with distant trees, mountain ridges and moving route.
+ p(0,base+2,W,H-base,'#756c7d');
+ p(0,base+7,W,H-base-7,'#9c8388');
+ p(0,base+10,W,16,'#b2a1a0');
+ p(0,H-22,W,9,'#b2a1a0');
+ for(let i=0;i<10;i++) {
+  const xx=i*90+11;
+  stone(xx,base-21,rr(9,15),rr(5,9));
+  flower(xx+11,base-33,.85,pick(pixelPalette));
+ }
+ for(let i=0;i<8;i++) oak(i*122-12,base-48,.41+(i%3)*.04,i%4===1);
+ cottage(675,base-52,.43);
+ woodenSign(372,base-120,215,'CON ĐƯỜNG VỀ NHÀ');
+}
+function homeExterior(W,H) {
+ const base=storyGround(H);
+ sky(H,base);
+ forestBack(base-9);
+ meadow(H,base);
+ for(let i=0;i<7;i++) oak(35+i*117,base-20,.42+(i%3)*.1,i===2);
+ path(base-11,381,377);
+ cottage(387,base-7,1.64);
+ fence(18,base+4,8,35); fence(511,base+5,7,35);
+ floralBorder(56,base+29,665,17);
+ woodenSign(384,base-294,193,'NHÀ CỦA MẸ');
+ gardenArch(388,base+20,1.05);
+}
+function roomOverlay(W,H,name){
+ const base=storyGround(H);
+ if(name==='floor1'){
+   woodenSign(W*.50,base-323,220,'TẦNG 1 · PHÒNG KHÁCH');
+   p(274,base-130,110,42,'#986f64');
+   p(283,base-126,91,35,'#dfc097');
+   p(285,base-118,27,22,'#ecd0a9');
+   p(317,base-118,27,22,'#e7bca7');
+   p(349,base-118,21,22,'#d4b0b6');
+ }else if(name==='floor2older'){
+   woodenSign(W*.50,base-323,252,'TẦNG 2 · GẶP ANH TRAI');
+   for(let i=0;i<9;i++) {
+     p(470+i*14,base-153,9,20+(i%3)*7,['#d09e77','#7fa5ad','#b7b19b'][i%3]);
+   }
+ }else if(name==='floor2younger'){
+   woodenSign(W*.50,base-323,252,'TẦNG 2 · GẶP EM TRAI');
+   for(let i=0;i<7;i++) {
+     const tx=474+i*21;
+     p(tx,base-132,15,14,['#9dafa4','#dd9e93','#d8c38e'][i%3]);
+     p(tx+3,base-136,9,4,'#fff1c1');
+   }
+ }
+}
+function rooftop(W,H){
+ const base=storyGround(H);
+ sky(H,base);
+ // Open sky and unmistakable top-floor roof terrace setting.
+ p(0,base-21,W,24,'#b78179');
+ p(0,base-22,W,8,'#e4ad89');
+ p(0,base+3,W,H-base,'#c7a084');
+ for(let i=0;i<24;i++){p(i*37,base+11,33,2,'#9e7a6d');p(i*37,base+32,2,H-base-31,'#a8796d');}
+ for(let i=0;i<23;i++) {
+   const xx=i*36-6;
+   p(xx,base-65,8,44,'#987c77');
+   p(xx-4,base-70,16,7,'#d2a890');
+ }
+ p(0,base-49,W,5,'#dcad91');
+ p(0,base-66,W,5,'#d2a890');
+ gardenArch(384,base-12,1.60);
+ ancientTree(448,base+12);
+ for(let i=0;i<16;i++){
+   const x=i*54+5;
+   bush(x,base+10,.60+(i%2)*.12);
+   if(i%2===0)flower(x+17,base+12,.9,'#f4bdc9');
+ }
+ woodenSign(379,base-335,242,'TẦNG 3 · CÂY ĐIỀU ƯỚC');
+ for(let i=0;i<18;i++)heart(82+i*36,base-89-(i%5)*13,.55,
+   i%2?'#ffe4bf':'#f4b2cb');
+}
+function storySceneStatic(id,W,H){
+ if(id==='school-front')schoolExterior(W,H,false);
+ else if(id==='school-hall')schoolCorridor(W,H);
+ else if(id==='school-exit')schoolExterior(W,H,true);
+ else if(id==='car-boarding')boardingScene(W,H);
+ else if(id==='car-driving')drivingScene(W,H);
+ else if(id==='home-front')homeExterior(W,H);
+ else if(id==='stairs')stairsIllustration(W,H);
+ else if(id==='wish-rooftop')rooftop(W,H);
+}
+export function drawStoryLocation(context,W,H,id,time,selectedFlower=-1,wishesCount=24,reduceMotion=false){
+ if(id==='classroom')return drawFinePixelScene(context,W,H,4,time,selectedFlower,wishesCount,reduceMotion);
+ if(id==='floor1'||id==='floor2older'||id==='floor2younger'){
+   const source=id==='floor1'?6:id==='floor2older'?7:8;
+   const hits=drawFinePixelScene(context,W,H,source,time,selectedFlower,wishesCount,reduceMotion);
+   g=context;seed=1137+source;
+   roomOverlay(W,H,id);
+   return hits;
+ }
+ const key=id+':'+W+':'+H;
+ let surface=storyCache.get(key);
+ if(!surface){
+   surface=document.createElement('canvas');
+   surface.width=W;surface.height=H;
+   g=surface.getContext('2d',{alpha:false});
+   g.imageSmoothingEnabled=false;
+   seed=493817+id.length*121;
+   storySceneStatic(id,W,H);
+   storyCache.set(key,surface);
+   if(storyCache.size>16)storyCache.delete(storyCache.keys().next().value);
+ }
+ context.drawImage(surface,0,0);
+ g=context;seed=13738+Math.floor(time*3);
+ const base=storyGround(H),bob=reduceMotion?0:Math.sin(time*2.5)*2;
+ let hits=[];
+ if(id==='school-front'||id==='school-exit'){
+   sprite(id==='school-exit'?500:384,base+54+bob,1.17,time,'mother',false);
+   for(let i=0;i<9;i++)flower(35+i*82,base+10+(i%3)*12,.85,i%2?'#fff0c5':'#f3aaba');
+ } else if(id==='school-hall') {
+   sprite(372,base+32+bob,1.29,time,'mother',false);
+ } else if(id==='car-boarding'){
+   mapCar(471,base+26,2.05);
+   sprite(322,base+43+bob,1.26,time,'mother',false);
+ } else if(id==='car-driving'){
+   // Car moves independently across the illustrated road.
+   const x=200+(reduceMotion?190:(time*63)%325);
+   mapCar(x,base+63,2.08);
+   for(let i=0;i<7;i++)p((x-102-i*17+W)%W,base+51+i%3*5,rr(2,6),2,'#e7d9c7');
+ } else if(id==='home-front'){
+   mapCar(610,base+59,1.04);
+   sprite(401,base+65+bob,1.26,time,'mother',false);
+ } else if(id==='stairs'){
+   sprite(542,base-47+bob,1.19,time,'mother',true);
+ } else if(id==='wish-rooftop'){
+   sprite(239,base+46+bob,1.19,time,'mother',false);
+   const arrival=window.__finePixelArrival||performance.now();
+   const progress=reduceMotion?1:Math.min(1,(performance.now()-arrival)/2600);
+   for(let i=0;i<wishesCount;i++){
+     const a=i*2.39996,r=17+(i%6)*17;
+     const x=pi(448+Math.cos(a)*r);
+     const y=pi(base-190+Math.sin(a)*r*.7);
+     if(progress<i*.025)continue;
+     flower(x,y,2.05,pixelPalette[i%pixelPalette.length]);
+     hits.push({x,y,index:i});
+     if(selectedFlower===i)heart(x,y-21,.95,'#fff3cc');
+   }
+   for(let i=0;i<11;i++){
+     const x=(64+i*73)%W,y=base-105-(i%5)*23+Math.sin(time+i)*4;
+     heart(x,y,.6,i%2?'#e9b0c5':'#fff2d0');
+   }
+ }
+ return hits;
+}
+export function drawRpgOverworld(context,W,H,time,avatar,carPosition=null,reduceMotion=false){
+ const base=storyGround(H),key=W+':'+H;
+ let surface=storyMapCache.get(key);
+ if(!surface){
+   surface=document.createElement('canvas');
+   surface.width=W;surface.height=H;
+   g=surface.getContext('2d',{alpha:false});
+   g.imageSmoothingEnabled=false;
+   seed=897112;
+   sky(H,base-25);
+   forestBack(base-39);
+   meadow(H,base-15);
+   for(let i=0;i<9;i++) {
+     const x=i*99-9,yy=base-rr(6,40);
+     oak(x,yy,.46+(i%3)*.11,i===5);
+   }
+   river(488,base-34);
+   path(base-19,330,388);
+   school(364,base-56,.73);
+   cottage(145,base+8,.71);
+   windmill(685,base-48,.61);
+   ancientTree(660,base+77);
+   // Stone paths and garden beds.
+   for(let i=0;i<125;i++){
+     const t=i/124;
+     const x=360+145*t,yy=base-13+41*t+Math.sin(t*8)*8;
+     stone(x+rr(-6,6),yy+rr(-4,4),rr(2,6),rr(1,3));
+   }
+   for(let i=0;i<90;i++){
+     const t=i/89,x=496-325*t,yy=base+23+12*t+Math.sin(t*6)*17;
+     stone(x+rr(-6,6),yy+rr(-4,4),rr(2,6),rr(1,3));
+   }
+   fence(9,base+7,8,22);
+   fence(587,base+9,7,25);
+   floralBorder(24,base+25,697,21);
+   for(let i=0;i<9;i++)bush(rr(5,760),base+rr(-2,61),rr(.38,.8));
+   storyMapCache.set(key,surface);
+   if(storyMapCache.size>4)storyMapCache.delete(storyMapCache.keys().next().value);
+ }
+ context.drawImage(surface,0,0);
+ g=context;seed=577919+Math.floor(time*2);
+ rotor(685,base-48-116*.61,.61,reduceMotion?0:time);
+ if(carPosition)mapCar(carPosition.x,carPosition.y,.94);
+ else mapCar(528,base+31,.94);
+ if(avatar&&avatar.visible!==false) {
+   sprite(avatar.x,avatar.y,1.07,time,'mother',Boolean(avatar.walking));
+ }
+}
