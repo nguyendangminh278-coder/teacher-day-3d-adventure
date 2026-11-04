@@ -36,6 +36,18 @@ jobs:
           path: site
           fetch-depth: 1
 
+      - name: Validate the illustrated 15-stage story
+        working-directory: source
+        run: |
+          node --input-type=module --check < src/config.js
+          node --input-type=module --check < src/fine-pixel-art.js
+          node --input-type=module --check < src/pixel-game.js
+          grep -q "school-exit" src/pixel-game.js
+          grep -q "car-boarding" src/pixel-game.js
+          grep -q "car-driving" src/pixel-game.js
+          grep -q "wish-rooftop" src/pixel-game.js
+          grep -q "Tầng 3" src/config.js
+
       - name: Replace 3D build with a static 2D pixel game
         run: |
           # Remove the old photoreal models, HDRIs, minified Three.js bundle
