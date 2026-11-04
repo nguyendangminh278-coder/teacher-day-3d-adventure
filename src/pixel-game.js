@@ -1,428 +1,166 @@
-import { CLASS_WISHES, TREE_WISHES, STAGES, DIALOGUES } from './config.js';
-import { drawStoryLocation, drawRpgOverworld } from './fine-pixel-art.js';
+import { CLASS_WISHES, TREE_WISHES, DIALOGUES } from './config.js';
+import { preparePixelWorld, renderScene, inspectWorld } from './pixel-world.js';
+import {ROUTE_POINTS,onFloor,heightAt,sampleRoute} from './scene-layout.js';
 
-/*
- * Teacher's Day 2D story. A real 15-step route:
- * map -> walk -> school exterior -> hallway -> class -> school exit
- * -> map/board car -> road trip -> home exterior -> dad on floor 1
- * -> stairs -> older son -> younger son -> final stairs -> wish tree on floor 3.
- *
- * All image scenes are custom detailed raster illustrations rendered by
- * fine-pixel-art.js, not text-only screens.
- */
-const canvas=document.getElementById('game');
-const ctx=canvas.getContext('2d',{alpha:false});
 const $=id=>document.getElementById(id);
-const ui={
- action:$('actionBtn'),actionLabel:$('actionLabel'),
- stageNumber:$('stageNumber'),stageTotal:$('stageTotal'),
- objectiveTitle:$('objectiveTitle'),objectiveText:$('objectiveText'),
- dialogue:$('dialogue'),dialogueName:$('dialogueName'),dialogueText:$('dialogueText'),
- classPanel:$('classroomPanel'),classWishes:$('classWishes'),
- dismissClass:$('dismissClass'),finalPanel:$('finalPanel'),treeWish:$('treeWish'),
- replay:$('replayBtn'),mapHotspots:$('mapHotspots'),mapHint:$('mapHint'),
- mapReturn:$('mapReturn'),mapFade:$('mapFade'),
- assetStatus:$('assetStatus'),loading:$('loading'),
- sceneBanner:$('sceneBanner'),sceneSubtitle:$('sceneSubtitle'),
- storyProgress:$('storyProgress'),controls:$('controlsPanel'),
- achievement:$('achievementBtn'),journal:$('journalBtn'),settings:$('settingsBtn'),
- infoPanel:$('infoPanel'),infoTitle:$('infoTitle'),infoBody:$('infoBody'),infoClose:$('infoClose'),
- motionButton:$('motionButton'),progressFill:$('progressFill')
-};
-const placeButtons=Object.fromEntries(
- [...document.querySelectorAll('[data-place]')].map(b=>[b.dataset.place,b])
-);
-const controlsButtons=[...document.querySelectorAll('[data-move]')];
-
-const SCENES={
- 2:{id:'school-front',tag:'TRƯỜNG HỌC HOA MÂY',sub:'Sân trường rực rỡ hoa ngày 20/11'},
- 3:{id:'school-hall',tag:'HÀNH LANG TRƯỜNG',sub:'Lối vào lớp học của mẹ'},
- 4:{id:'classroom',tag:'LỚP HỌC CỦA MẸ',sub:'25 lời chúc từ những học trò thân yêu'},
- 5:{id:'school-exit',tag:'TAN LỚP · RA CỔNG TRƯỜNG',sub:'Cùng mẹ ra khỏi trường để đón xe'},
- 6:{id:'car-boarding',tag:'ĐIỂM ĐÓN XE',sub:'Mẹ đã đến xe, chuẩn bị lên xe về nhà'},
- 7:{id:'car-driving',tag:'TRÊN ĐƯỜNG VỀ NHÀ',sub:'Chuyến xe êm đềm xuyên qua làng hoa'},
- 8:{id:'home-front',tag:'ĐÃ VỀ ĐẾN NHÀ',sub:'Ngôi nhà nhỏ ấm áp đang chờ mẹ'},
- 9:{id:'floor1',tag:'TẦNG 1 · BỐ CHÚC MẸ',sub:'Phòng khách ấm cúng của gia đình'},
- 10:{id:'stairs',tag:'CẦU THANG LÊN TẦNG 2',sub:'Mẹ bước lên từng bậc thang trong nhà'},
- 11:{id:'floor2older',tag:'TẦNG 2 · ANH TRAI',sub:'Một lời chúc từ người con trai lớn'},
- 12:{id:'floor2younger',tag:'TẦNG 2 · EM TRAI',sub:'Lời chúc ngọt ngào từ người con trai nhỏ'},
- 13:{id:'stairs',tag:'CẦU THANG LÊN TẦNG 3',sub:'Bí mật cuối cùng nằm ở tầng cao nhất'},
- 14:{id:'wish-rooftop',tag:'TẦNG 3 · CÂY ĐIỀU ƯỚC',sub:'Mỗi bông hoa là một điều ước dành cho mẹ'}
-};
-
-const PLACES={
- school:{x:364,dy:-14,label:'TRƯỜNG HỌC'},
- car:{x:527,dy:29,label:'ĐI BẰNG XE'},
- home:{x:158,dy:35,label:'NHÀ CỦA MẸ'},
- wish:{x:657,dy:71,label:'CÂY ĐIỀU ƯỚC'}
-};
-let W=768,H=432,stage=0,view='map',unlock='school';
-let actor={x:382,y:352,visible:true,walking:false};
-let traveling=null,vehicle=null,transitioning=false;
-let selectedBloom=-1,bloomHits=[],frameAt=0,frameClock=0;
-let dialogueTimer,driveTimer,finaleTimer,fadeTimer;
-let reduceMotion=Boolean(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-let infoMode='journal';
-let pressed=new Set();
-let lastTooltip='';
-let homeFloorReached=0;
-const getGround=()=>Math.round(H*.72);
-const target=place=>({x:PLACES[place].x,y:getGround()+PLACES[place].dy});
-function dismissInfo(){ui.infoPanel.classList.add('hidden');}
-function updateProgress() {
- ui.stageNumber.textContent=String(stage+1);
- ui.stageTotal.textContent=String(STAGES.length);
- ui.progressFill.style.width=((stage+1)/STAGES.length*100).toFixed(1)+'%';
+const canvas=$('game'),ctx=canvas.getContext('2d',{alpha:false});
+const W=1672,H=941;
+const intro={id:'flower-road',title:'Con đường hoa và mây',start:[.19,.84,165],path:[[.19,.84],[.45,.84],[.76,.84]],duration:8500};
+const activeScene=()=>stage<0?intro:scenes[stage];
+let transition=null,sceneEnteredAt=0;
+const scene=(id,title,text,action,time,chapter,start,path,duration=2800,speaker=null)=>({id,title,text,action,time,chapter,start,path,duration,speaker});
+// Each path is an actual action inside the current scene, before entering the next.
+const scenes=[
+ scene('school-front','Buổi sáng · Đến trường','Một ngày 20/11 bắt đầu trước cổng trường. Cùng mẹ bước vào nhé!','Bước qua cổng trường','07:00',0,[.50,.93,150],[[.50,.93,150],[.50,.70,120],[.52,.59,85]],3200),
+ scene('school-hall','Đi qua hành lang','Theo mẹ qua hành lang, đi đến cửa lớp học.','Đi vào lớp học','07:10',0,[.28,.91,170],[[.28,.91,170],[.50,.70,130],[.77,.63,110]],3200),
+ scene('classroom','Trong lớp · Những lời chúc','Học trò có 25 tấm thiệp dành tặng cô nhân ngày 20/11.','Đọc lời chúc của học trò','08:00',0,[.65,.73,220],[[.65,.73,220],[.78,.69,180],[.94,.62,140]],3000,DIALOGUES.classroom),
+ scene('school-exit','Tan trường · Ra cổng','Giờ học đã kết thúc. Mẹ bước ra cổng để đến xe.','Đi ra điểm đón xe','11:30',1,[.52,.59,85],[[.52,.59,85],[.50,.69,120],[.69,.94,150]],3200,DIALOGUES.afterClass),
+ scene('car-boarding','Bước lên xe','Xe đã chờ bên lề đường. Mẹ đi đến cửa, ngồi vào xe rồi về nhà.','Mở cửa và lên xe','11:40',1,[.21,.87,165],[[.21,.87,165],[.46,.87,165],[.56,.81,140]],3200),
+ scene('car-driving','Chuyến xe về nhà','Xe đang đưa mẹ qua những con phố để trở về cùng gia đình.','Đang đi xe về nhà…','12:00',2,[.5,.8,1],[],6500),
+ scene('home-front','Đã về đến nhà','Mẹ bước xuống xe và đi qua cửa nhà.','Bước vào nhà','12:15',3,[.65,.94,170],[[.65,.94,170],[.55,.85,145],[.51,.77,100]],3400,DIALOGUES.home),
+ scene('floor1','Tầng 1 · Lời chúc của bố','Trong phòng khách, bố đang đợi để gửi mẹ một lời chúc.','Đi đến cầu thang','12:20',3,[.32,.92,230],[[.32,.92,230],[.66,.89,200],[.84,.78,175]],3200,DIALOGUES.father),
+ scene('stairs','Cầu thang · Lên tầng 2','Mẹ bước lên từng bậc thang, đến với hai con.','Bước lên tầng 2','12:25',3,[.23,.94,150],[[.23,.94,150],[.39,.65,140],[.58,.28,115]],4000),
+ scene('floor2older','Tầng 2 · Lời chúc của anh trai','Anh trai gửi mẹ lời chúc từ trái tim.','Đến bên em trai','12:30',3,[.74,.92,230],[[.74,.92,230],[.65,.88,220]],2400,DIALOGUES.olderBrother),
+ scene('floor2younger','Tầng 2 · Lời chúc của em trai','Em trai cũng có điều muốn nói với mẹ.','Đi lên tầng cao nhất','12:35',3,[.65,.88,220],[[.65,.88,220],[.81,.81,190],[.88,.62,150]],3000,DIALOGUES.youngerBrother),
+ scene('stairs','Cầu thang · Lên tầng 3','Điều bất ngờ cuối cùng đang ở tầng trên cùng.','Bước lên sân thượng','12:40',4,[.23,.94,150],[[.23,.94,150],[.39,.65,140],[.58,.28,115]],4000,DIALOGUES.upstairs),
+ scene('wish-rooftop','Tầng 3 · Cây điều ước','Mỗi bông hoa là một điều ước dành riêng cho mẹ.','Đọc những điều ước','12:45',4,[.25,.91,160],[],0,DIALOGUES.finale),
+];
+for(const [i,points] of Object.entries(ROUTE_POINTS)){
+ const s=scenes[Number(i)];s.path=points.map(([x,y])=>[x,y,heightAt(s.id,y)]);s.start=s.path[0];
 }
-CLASS_WISHES.forEach((wish,i)=>{
- const card=document.createElement('div');
- card.className='wish-card';
- const label=document.createElement('span');
- label.className='wish-number';
- label.textContent=String(i+1).padStart(2,'0');
- const content=document.createElement('span');content.textContent=wish;
- card.append(label,content);ui.classWishes.append(card);
-});
-
-function placeMarkers(){
- for(const [key,button] of Object.entries(placeButtons)){
-  const p=target(key);
-  button.style.left=(p.x/W*100).toFixed(3)+'%';
-  button.style.top=(Math.min(H-12,p.y-28)/H*100).toFixed(3)+'%';
- }
+let stage=-1,actor={},motion=null,loaded=false,paused=false,clock=0,prev=0,bloomHits=[];
+let selectedBloom=-1,classRead=false,calm=false;
+const keys=new Set();
+for(const [i,wish] of CLASS_WISHES.entries()){
+ const e=document.createElement('article');e.className='wish-card';e.textContent=`${String(i+1).padStart(2,'0')} · ${wish}`;$('classWishes').append(e);
 }
 function resize(){
- const oldGround=getGround();
- W=768;H=Math.max(432,Math.min(1550,Math.round(W*innerHeight/Math.max(1,innerWidth))));
- canvas.width=W;canvas.height=H;ctx.imageSmoothingEnabled=false;
- const diff=getGround()-oldGround;
- actor.y+=diff;
- if(vehicle)vehicle.y+=diff;
- if(traveling)traveling.points.forEach(pt=>pt.y+=diff);
- placeMarkers();
+ const k=Math.min(innerWidth/W,innerHeight/H);
+ canvas.width=836;canvas.height=470;ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0);ctx.imageSmoothingEnabled=false;
+ Object.assign(canvas.style,{width:W*k+'px',height:H*k+'px',left:(innerWidth-W*k)/2+'px',top:(innerHeight-H*k)/2+'px'});
 }
-window.addEventListener('resize',resize);
-resize();
-actor={x:385,y:getGround()+55,visible:true,walking:false};
+window.addEventListener('resize',resize);resize();
+function blocked(){return !$('infoPanel').hidden||!$('classroomPanel').hidden;}
+function update(){
+ const s=activeScene();
+ $('actionLabel').textContent=s.action||'';
+ $('actionBtn').disabled=!!motion||!!transition||!loaded||blocked()||stage===5;
+ $('actionBtn').hidden=stage<0||stage===12||!!motion||!!transition;
+ $('finalPanel').hidden=stage!==12;
+ $('dialogue').hidden=!s.speaker||stage===12;
+ if(s.speaker){$('dialogueName').textContent=s.speaker.name;$('dialogueText').textContent=s.speaker.text;}
+ $('sceneStatus').textContent=s.title;
+ document.body.dataset.scene=s.id;
+ document.body.dataset.stage=String(stage);
+}
+function enter(n){
+ stage=n;motion=null;transition=null;sceneEnteredAt=clock;const s=activeScene(),[x,y,size]=s.start;
+ actor={x:x*W,y:y*H,size,walking:false,direction:'south',visible:true,stride:0};
+ if(n===5)motion={elapsed:0,duration:s.duration,driving:true};
+ if(n<0){actor.walking=true;actor.direction='east';motion={elapsed:0,duration:s.duration,path:s.path};}
+ update();
+}
+function beginAction(){
+ if(!loaded||motion||transition||blocked()||stage===12||stage<0)return;
+ if(stage===2&&!classRead){$('classroomPanel').hidden=false;update();$('dismissClass').focus();return;}
+ if(stage===5)return;
+ motion={elapsed:0,duration:calm?Math.min(1800,scenes[stage].duration):scenes[stage].duration,path:[[actor.x/W,actor.y/H,actor.size],...scenes[stage].path.slice(1)]};
+ actor.walking=true;keys.clear();update();
+}
+$('actionBtn').addEventListener('click',beginAction);
+$('dismissClass').addEventListener('click',()=>{classRead=true;$('classroomPanel').hidden=true;beginAction();});
+function openInfo(mode){
+ $('infoPanel').hidden=false;$('motionButton').hidden=mode!=='settings';
+ if(mode==='journal'){
+  $('infoTitle').textContent='Nhật ký hành trình';
+  $('infoBody').textContent=scenes.slice(0,stage+1).map(s=>s.time+' · '+s.title).join('\n\n');
+ }else if(mode==='wishes'){
+  $('infoTitle').textContent='24 điều ước dành cho mẹ';$('infoBody').textContent=TREE_WISHES.map((w,i)=>(i+1)+'. '+w).join('\n\n');
+ }else if(mode==='achievement'){
+  $('infoTitle').textContent='Những yêu thương đã nhận';$('infoBody').textContent=`Đã đến ${stage+1} / ${scenes.length} chặng.\n\n${classRead?'Đã nhận 25 lời chúc của học trò.':'Những lời chúc của học trò đang chờ mẹ.'}\n\n${stage===12?'Đã đến cây điều ước trên tầng cao nhất.':'Cây điều ước chờ ở tầng 3 của ngôi nhà.'}`;
+ }else{
+  $('infoTitle').textContent='Cài đặt';$('infoBody').textContent='Không có chớp sáng hay hiệu ứng nhấp nháy. Nhân vật vẫn thực hiện các hành động bước vào cửa, lên xe và leo cầu thang. Chọn chuyển động ngắn hơn nếu muốn.';
+ }
+ keys.clear();update();$('infoClose').focus();
+}
+function closeInfo(){ $('infoPanel').hidden=true;update(); }
+$('infoClose').addEventListener('click',closeInfo);
 
-function showDialogue(d,ms=6000){
- clearTimeout(dialogueTimer);
- if(!d){ui.dialogue.classList.add('hidden');return;}
- ui.dialogueName.textContent=d.name;
- ui.dialogueText.textContent=d.text;
- ui.dialogue.classList.remove('hidden');
- dialogueTimer=setTimeout(()=>ui.dialogue.classList.add('hidden'),ms);
-}
-function updateControls(){
- const map=view==='map';
- ui.mapHotspots.classList.toggle('hidden',!map);
- ui.controls.classList.toggle('hidden',!map);
- ui.mapHint.classList.toggle('hidden',!map);
- ui.mapReturn.classList.toggle('hidden',map||![2,3,5].includes(stage));
- ui.sceneBanner.classList.toggle('hidden',map);
- ui.action.classList.toggle('hidden',stage===14||stage===4&&!ui.classPanel.classList.contains('hidden'));
- ui.action.disabled=Boolean(traveling||transitioning);
- const current=map && (stage===0||stage===1)?'school':map&&stage===5?'car':null;
- for(const [key,b] of Object.entries(placeButtons)){
-  const open=map && key===current && !traveling && !transitioning;
-  b.disabled=!open;
-  b.classList.toggle('is-active',open);
-  b.classList.toggle('is-locked',!open);
-  b.setAttribute('aria-label',open?'Đi tới '+PLACES[key].label:PLACES[key].label+' (chưa mở khóa)');
- }
- const actionLabels={
-  0:'ĐI ĐẾN TRƯỜNG',1:'ĐANG ĐI ĐẾN TRƯỜNG...',
-  2:'VÀO TRƯỜNG',3:'VÀO LỚP HỌC',4:'ĐỌC 25 LỜI CHÚC',
-  5:map?'ĐẾN XE':'RA KHỎI TRƯỜNG',6:'LÊN XE',
-  7:'TIẾP TỤC VỀ NHÀ',8:'VÀO NHÀ',
-  9:'LÊN CẦU THANG',10:'LÊN TẦNG 2',
-  11:'GẶP EM TRAI',12:'LÊN TẦNG TRÊN CÙNG',
-  13:'MỞ CÂY ĐIỀU ƯỚC'
- };
- ui.actionLabel.textContent=actionLabels[stage]||'TIẾP TỤC';
- ui.mapHint.textContent=map
-  ? stage<2?'✦ Đến Trường học bằng phím ↑ ↓ ← → / WASD, nút di chuyển hoặc chạm địa điểm.'
-   :'✦ Tan lớp rồi! Hãy di chuyển đến xe và nhấn E, hoặc bấm ĐẾN XE.'
-  :'';
- ui.sceneBanner.querySelector('strong').textContent=SCENES[stage]?.tag||'HÀNH TRÌNH 20/11';
- ui.sceneSubtitle.textContent=SCENES[stage]?.sub||'';
- ui.assetStatus.textContent=map?'BẢN ĐỒ LÀNG HOA · PIXEL ART RPG':SCENES[stage]?.tag||'HÀNH TRÌNH';
-}
-function setStage(n){
- clearTimeout(driveTimer);
- clearTimeout(finaleTimer);
- stage=n;
- window.__finePixelArrival=performance.now();
- updateProgress();
- ui.objectiveTitle.textContent=STAGES[n].title;
- ui.objectiveText.textContent=STAGES[n].text;
- ui.classPanel.classList.add('hidden');
- if(n!==14){
-  document.body.classList.remove('finale-ui');
-  ui.finalPanel.classList.add('hidden');
- }
- if(n===2)showDialogue(DIALOGUES.school,6200);
- if(n===3)showDialogue({name:'Mẹ',text:'Hành lang thật thân quen. Mẹ cùng vào lớp nhé!'},5400);
- if(n===4)showDialogue(DIALOGUES.classroom,7600);
- if(n===5)showDialogue(DIALOGUES.afterClass,7000);
- if(n===6)showDialogue({name:'Mẹ',text:'Xe đến rồi! Mình lên xe về nhà thôi.'},5200);
- if(n===8)showDialogue(DIALOGUES.home,6200);
- if(n===9)showDialogue(DIALOGUES.father,9000);
- if(n===11)showDialogue(DIALOGUES.olderBrother,8500);
- if(n===12)showDialogue(DIALOGUES.youngerBrother,8500);
- if(n===13)showDialogue(DIALOGUES.upstairs,5600);
- if(n===14){
-  document.body.classList.add('finale-ui');
-  showDialogue(DIALOGUES.finale,6800);
-  finaleTimer=setTimeout(()=>ui.finalPanel.classList.remove('hidden'),reduceMotion?100:1700);
- }
- if(n===7){
-  // The journey is visible, not an instant teleport from school to home.
-  driveTimer=setTimeout(()=>sceneTransition(8),reduceMotion?750:4400);
- }
- updateControls();
-}
-function sceneTransition(next) {
- if(transitioning)return;
- transitioning=true;
- ui.dialogue.classList.add('hidden');
- ui.mapFade.classList.add('on');
- updateControls();
- clearTimeout(fadeTimer);
- fadeTimer=setTimeout(()=>{
-  view='scene';
-  transitioning=false;
-  ui.mapFade.classList.remove('on');
-  setStage(next);
- },reduceMotion?10:300);
-}
-function returnToOverworld(){
- if(transitioning)return;
- transitioning=true;
- ui.mapFade.classList.add('on');
- fadeTimer=setTimeout(()=>{
-  view='map';transitioning=false;
-  ui.mapFade.classList.remove('on');
-  actor.walking=false;actor.visible=true;
-  if(stage<5){
-   actor=Object.assign(actor,target('school'));
-   setStage(0);
-  }else{
-   actor=Object.assign(actor,target('school'));
-   setStage(5);
-  }
-  updateControls();
- },reduceMotion?10:300);
-}
-function linearAlong(points,t) {
- let full=0;const lengths=[];
- for(let i=1;i<points.length;i++){
-  const len=Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);
-  lengths.push(len);full+=len;
- }
- let distance=Math.max(0,Math.min(1,t))*full;
- for(let i=0;i<lengths.length;i++){
-  if(distance<=lengths[i]||i===lengths.length-1){
-   const r=lengths[i]?Math.min(1,distance/lengths[i]):1;
-   return{x:points[i].x+(points[i+1].x-points[i].x)*r,
-          y:points[i].y+(points[i+1].y-points[i].y)*r};
-  }
-  distance-=lengths[i];
- }
- return points[points.length-1];
-}
-function startWalk(place,done){
- if(traveling||transitioning||view!=='map')return;
- const finish=target(place),base=getGround();
- const points=place==='school'
-  ?[{x:actor.x,y:actor.y},{x:382,y:base+33},{x:365,y:base+3},finish]
-  :[{x:actor.x,y:actor.y},{x:374,y:base+40},{x:446,y:base+37},finish];
- const len=points.reduce((sum,p,i)=>i?sum+Math.hypot(p.x-points[i-1].x,p.y-points[i-1].y):0,0);
- traveling={points,started:performance.now(),duration:reduceMotion?190:Math.max(1300,Math.min(3500,len/65*1000)),onDone:done};
- actor.walking=true;
- if(place==='school')setStage(1);
- updateControls();
-}
-function finishWalk(now){
- if(!traveling)return;
- const t=Math.max(0,Math.min(1,(now-traveling.started)/traveling.duration));
- Object.assign(actor,linearAlong(traveling.points,t));
- if(t>=1){
-  const done=traveling.onDone;
-  traveling=null;actor.walking=false;
-  done?.();updateControls();
- }
-}
-function arrivedAtPlace(place) {
- if(place==='school')sceneTransition(2);
- if(place==='car')sceneTransition(6);
-}
-function selectPlace(place){
- if(view!=='map'||traveling||transitioning)return;
- const eligible=(stage<=1&&place==='school')||(stage===5&&place==='car');
- if(!eligible)return;
- const p=target(place);
- if(Math.hypot(p.x-actor.x,p.y-actor.y)<53)arrivedAtPlace(place);
- else startWalk(place,()=>arrivedAtPlace(place));
-}
-Object.entries(placeButtons).forEach(([place,button])=>button.addEventListener('click',()=>selectPlace(place)));
 
-function action() {
- if(traveling||transitioning)return;
- if(view==='map')return selectPlace(stage<2?'school':'car');
- if(stage===2)sceneTransition(3);
- else if(stage===3)sceneTransition(4);
- else if(stage===4) {
-  ui.classPanel.classList.remove('hidden');
-  showDialogue(DIALOGUES.classroom,8200);
-  updateControls();
- }
- else if(stage===5)returnToOverworld();
- else if(stage===6)sceneTransition(7);
- else if(stage===7){clearTimeout(driveTimer);sceneTransition(8);}
- else if(stage===8)sceneTransition(9);
- else if(stage===9)sceneTransition(10);
- else if(stage===10)sceneTransition(11);
- else if(stage===11)sceneTransition(12);
- else if(stage===12)sceneTransition(13);
- else if(stage===13)sceneTransition(14);
-}
-ui.action.addEventListener('click',action);
-ui.dismissClass.addEventListener('click',()=>{
- ui.classPanel.classList.add('hidden');
- sceneTransition(5); // Explicitly show mother walking OUT OF the school.
-});
-ui.mapReturn.addEventListener('click',()=>{
- if(view!=='scene'||traveling||transitioning||stage===14)return;
- if([2,3,5].includes(stage))returnToOverworld();
-});
-ui.replay.addEventListener('click',()=>{
- clearTimeout(driveTimer);clearTimeout(dialogueTimer);clearTimeout(finaleTimer);clearTimeout(fadeTimer);
- view='map';stage=0;unlock='school';traveling=null;vehicle=null;transitioning=false;
- pressed.clear();selectedBloom=-1;bloomHits=[];homeFloorReached=0;
- actor={x:383,y:getGround()+53,visible:true,walking:false};
- ui.classPanel.classList.add('hidden');ui.finalPanel.classList.add('hidden');
- ui.mapFade.classList.remove('on');
- setStage(0);showDialogue(DIALOGUES.intro,8000);
-});
 
-function revealWish(index){
- selectedBloom=index;
- ui.treeWish.textContent='✿ '+TREE_WISHES[index];
-}
-canvas.addEventListener('pointerdown',e=>{
- if(transitioning||traveling)return;
- const b=canvas.getBoundingClientRect();
- const x=(e.clientX-b.left)/Math.max(1,b.width)*W;
- const y=(e.clientY-b.top)/Math.max(1,b.height)*H;
- if(view==='map'){
-  const name=stage<2?'school':'car',pt=target(name);
-  if(Math.hypot(x-pt.x,y-pt.y)<68)selectPlace(name);
- }else if(stage===14){
-  let nearest=null,dist=28*28;
-  for(const hit of bloomHits) {
-   const d=(hit.x-x)**2+(hit.y-y)**2;
-   if(d<dist){nearest=hit;dist=d;}
-  }
-  if(nearest)revealWish(nearest.index);
- }
-});
-function handleManualMove(dx,dy,dt) {
- if(view!=='map'||traveling||transitioning)return;
- if(stage!==0&&stage!==5)return;
- if(!dx&&!dy){actor.walking=false;return;}
- const mag=Math.hypot(dx,dy);
- const speed=reduceMotion?120:122;
- actor.x=Math.max(25,Math.min(W-25,actor.x+dx/mag*speed*dt));
- actor.y=Math.max(getGround()-52,Math.min(H-12,actor.y+dy/mag*speed*dt));
- actor.walking=true;
-}
-function keyDirection(){
- let dx=0,dy=0;
- if(pressed.has('ArrowLeft')||pressed.has('a'))dx--;
- if(pressed.has('ArrowRight')||pressed.has('d'))dx++;
- if(pressed.has('ArrowUp')||pressed.has('w'))dy--;
- if(pressed.has('ArrowDown')||pressed.has('s'))dy++;
- return [dx,dy];
-}
+$('allWishesBtn').addEventListener('click',()=>openInfo('wishes'));
+$('motionButton').addEventListener('click',()=>{calm=!calm;$('motionButton').textContent=calm?'Dùng thời lượng thông thường':'Rút ngắn chuyển động';});
+$('replayBtn').addEventListener('click',()=>{classRead=false;selectedBloom=-1;clock=0;enter(-1);});
 window.addEventListener('keydown',e=>{
- if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' ','e','E'].includes(e.key))e.preventDefault();
- if(e.key==='Escape'){
-  dismissInfo();if(!ui.classPanel.classList.contains('hidden'))ui.classPanel.classList.add('hidden');
+ const k=e.key.toLowerCase();
+ if(['arrowup','arrowdown','arrowleft','arrowright',' ','e','enter'].includes(k))e.preventDefault();
+ if(k==='escape'){
+  if(!$('infoPanel').hidden)closeInfo();
+  else if(!$('classroomPanel').hidden){$('classroomPanel').hidden=true;update();}
   return;
  }
- const name=e.key.length===1?e.key.toLowerCase():e.key;
- if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(name))pressed.add(name);
- if(e.repeat)return;
- if(name==='e'||name==='Enter'||name===' '){
-  if(!ui.infoPanel.classList.contains('hidden')){dismissInfo();return;}
-  if(view==='map') {
-   const pt=target(stage<2?'school':'car');
-   if(Math.hypot(pt.x-actor.x,pt.y-actor.y)<74)selectPlace(stage<2?'school':'car');
-   else action();
-  }else action();
- }
+ if(blocked())return;
+ if(['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(k))keys.add(k);
+ if(!e.repeat&&['e','enter',' '].includes(k))beginAction();
 });
-window.addEventListener('keyup',e=>pressed.delete(e.key.length===1?e.key.toLowerCase():e.key));
-window.addEventListener('blur',()=>pressed.clear());
-controlsButtons.forEach(button=>{
- const direction=button.dataset.move;
- const down=e=>{e.preventDefault();pressed.add(direction);button.setPointerCapture?.(e.pointerId);};
- const up=()=>pressed.delete(direction);
- button.addEventListener('pointerdown',down);
- button.addEventListener('pointerup',up);
- button.addEventListener('pointercancel',up);
- button.addEventListener('lostpointercapture',up);
-});
-$('enterBtn').addEventListener('click',()=>{
- if(view==='map'){
-  const place=stage<2?'school':'car';
-  const pt=target(place);
-  if(Math.hypot(pt.x-actor.x,pt.y-actor.y)<74)selectPlace(place);
-  else action();
- }else action();
-});
-function openInfo(mode){
- infoMode=mode;
- ui.infoPanel.classList.remove('hidden');
- ui.motionButton.classList.toggle('hidden',mode!=='settings');
- if(mode==='journal'){
-  ui.infoTitle.textContent='📖 HÀNH TRÌNH CỦA MẸ';
-  ui.infoBody.textContent='Trường học → Hành lang → Lớp học (25 lời chúc) → Ra khỏi trường → Lên xe → Đi xe về nhà → Tầng 1 gặp Bố → Cầu thang → Tầng 2 gặp Anh trai và Em trai → Lên tầng 3 → Cây điều ước.';
- }else if(mode==='achievement'){
-  ui.infoTitle.textContent='🏆 THÀNH TÍCH';
-  ui.infoBody.textContent='Đã đi '+(stage+1)+' / '+STAGES.length+' chặng. 25 tấm thiệp của học trò và '+TREE_WISHES.length+' bông hoa điều ước đang chờ mẹ!';
- }else{
-  ui.infoTitle.textContent='⚙️ TÙY CHỈNH';
-  ui.infoBody.textContent='Bạn có thể tắt hoặc bật hiệu ứng chuyển động. Game vẫn hoạt động bằng phím mũi tên, WASD, E hoặc các nút trên màn hình.';
- }
-}
-ui.achievement.addEventListener('click',()=>openInfo('achievement'));
-ui.journal.addEventListener('click',()=>openInfo('journal'));
-ui.settings.addEventListener('click',()=>openInfo('settings'));
-ui.infoClose.addEventListener('click',dismissInfo);
-ui.motionButton.addEventListener('click',()=>{
- reduceMotion=!reduceMotion;
- ui.motionButton.textContent=reduceMotion?'BẬT HIỆU ỨNG':'GIẢM CHUYỂN ĐỘNG';
-});
-let previousFrame=0;
-function loop(now){
- requestAnimationFrame(loop);
- if(now-frameAt<28)return;
- const dt=Math.min(.05,previousFrame?(now-previousFrame)/1000:.03);
- frameAt=now;previousFrame=now;
- if(view==='map') {
-  handleManualMove(...keyDirection(),dt);
-  finishWalk(now);
-  drawRpgOverworld(ctx,W,H,reduceMotion?0:now/1000,actor,vehicle,reduceMotion);
- }else{
-  bloomHits=drawStoryLocation(ctx,W,H,SCENES[stage].id,
-    reduceMotion?0:now/1000,selectedBloom,TREE_WISHES.length,reduceMotion);
- }
+window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
+window.addEventListener('blur',()=>{keys.clear();paused=true;});
+window.addEventListener('focus',()=>{paused=false;prev=0;});
+for(const b of document.querySelectorAll('[data-move]')){
+ const key=b.dataset.move;
+ b.addEventListener('pointerdown',e=>{e.preventDefault();keys.add(key);b.setPointerCapture(e.pointerId);});
+ for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(key));
 }
 
-ui.loading.classList.add('done');
-window.__APP_READY__=true;
-setStage(0);
-showDialogue(DIALOGUES.intro,7400);
-requestAnimationFrame(loop);
+canvas.addEventListener('pointerdown',e=>{
+ if(blocked())return;
+ if(stage!==12){beginAction();return;}
+ const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*W,y=(e.clientY-r.top)/r.height*H;
+ const nearest=bloomHits.reduce((best,h)=>Math.hypot(h.x-x,h.y-y)<Math.hypot(best.x-x,best.y-y)?h:best,{x:Infinity,y:Infinity});
+ if(Math.hypot(nearest.x-x,nearest.y-y)<48){selectedBloom=nearest.index;$('treeWish').textContent=TREE_WISHES[selectedBloom];}
+});
+function followPath(path,t){
+ const p=sampleRoute(path,t);
+ const nx=p.x*W,ny=p.y*H;actor.stride+=Math.hypot(nx-actor.x,ny-actor.y);
+ actor.x=nx;actor.y=ny;actor.size=stage<0?165:heightAt(scenes[stage].id,p.y);
+ actor.direction=Math.abs(p.dx)*W>Math.abs(p.dy)*H?(p.dx>0?'east':'west'):(p.dy>0?'south':'north');
+}
+function frame(now){
+ requestAnimationFrame(frame);
+ const dt=prev?Math.min(50,now-prev):0;prev=now;
+ if(!paused&&!blocked()){
+  clock+=dt;
+  if(transition){
+   transition.elapsed=Math.min(transition.duration,transition.elapsed+dt);
+   if(transition.elapsed>=transition.duration)enter(0);
+  }else if(motion){
+   motion.elapsed=Math.min(motion.duration,motion.elapsed+dt);
+   if(motion.path?.length>1)followPath(motion.path,motion.elapsed/motion.duration);
+   if(motion.elapsed>=motion.duration){
+    if(stage<0){motion=null;actor.walking=false;transition={elapsed:0,duration:2200};update();}
+    else enter(stage+1);
+   }
+  }else if(stage!==12){
+   const dx=Number(keys.has('arrowright')||keys.has('d'))-Number(keys.has('arrowleft')||keys.has('a'));
+   const dy=Number(keys.has('arrowdown')||keys.has('s'))-Number(keys.has('arrowup')||keys.has('w'));
+   actor.walking=!!(dx||dy);
+   if(actor.walking){
+    actor.direction=dx>0?'east':dx<0?'west':dy<0?'north':'south';
+    const nx=actor.x+dx*dt*.22,ny=actor.y+dy*dt*.22;
+    if(onFloor(scenes[stage].id,nx/W,ny/H)){actor.stride+=Math.hypot(nx-actor.x,ny-actor.y);actor.x=nx;actor.y=ny;actor.size=heightAt(scenes[stage].id,ny/H);}
+   }
+  }
+ }
+ const progress=motion?motion.elapsed/motion.duration:0;
+ bloomHits=renderScene(ctx,W,H,activeScene().id,actor,{clock,progress,moving:!!motion,selectedBloom,calm,stage,sceneAge:clock-sceneEnteredAt});
+ if(transition){
+  const k=transition.elapsed/transition.duration;ctx.save();ctx.globalAlpha=k*k*(3-2*k);
+  const [x,y,size]=scenes[0].start;
+  renderScene(ctx,W,H,'school-front',{x:x*W,y:y*H,size,visible:true,walking:false,direction:'south'}, {clock,progress:0,moving:false,selectedBloom,sceneAge:0});ctx.restore();
+ }
+ if(location.search.includes('qa=1'))window.__STORY_STATE__={stage,scene:activeScene().id,moving:!!motion,transition:transition?transition.elapsed/transition.duration:null,progress,actor:{...actor},world:inspectWorld(activeScene().id),spriteFrame:Math.floor((actor.stride||0)/(actor.size*.22))%4};
+}
+try{
+ await Promise.all([preparePixelWorld(),document.fonts.ready]);loaded=true;$('loading').hidden=true;enter(-1);requestAnimationFrame(frame);
+}catch(e){$('loadingText').textContent=e.message;$('retryBtn').hidden=false;}
+$('retryBtn').addEventListener('click',()=>location.reload());

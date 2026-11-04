@@ -7,10 +7,21 @@ on:
       - "index.html"
       - "src/pixel-game.js"
       - "src/fine-pixel-art.js"
+      - "src/illustrated-scenes.js"
+      - "src/pixel-world.js"
+      - "src/scene-layout.js"
+      - "assets/illustrations/**"
+      - "assets/fonts/**"
+      - "tests/**"
+      - "package*.json"
+      - "playwright.config.js"
+      - "tools/serve.mjs"
       - "src/config.js"
       - "src/styles.css"
       - "README.md"
       - ".github/workflows/vendor-three.yml"
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -36,11 +47,23 @@ jobs:
           path: site
           fetch-depth: 1
 
-      - name: Validate the illustrated 15-stage story
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: source/package-lock.json
+      - name: Test the full illustrated journey
+        working-directory: source
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm test
+
+      - name: Validate the chronological story
         working-directory: source
         run: |
           node --input-type=module --check < src/config.js
-          node --input-type=module --check < src/fine-pixel-art.js
+          node --input-type=module --check < src/pixel-world.js
           node --input-type=module --check < src/pixel-game.js
           grep -q "school-exit" src/pixel-game.js
           grep -q "car-boarding" src/pixel-game.js
@@ -48,7 +71,14 @@ jobs:
           grep -q "wish-rooftop" src/pixel-game.js
           grep -q "Tầng 3" src/config.js
 
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: illustrated-journey-screenshots
+          path: source/test-results
+          retention-days: 7
       - name: Replace 3D build with a static 2D pixel game
+        if: github.event_name != 'pull_request'
         run: |
           # Remove the old photoreal models, HDRIs, minified Three.js bundle
           # and legacy screenshots from the published site.
@@ -59,6 +89,11 @@ jobs:
           cp source/src/pixel-game.js site/src/pixel-game.js
           cp source/src/fine-pixel-art.js site/src/fine-pixel-art.js
           cp source/src/styles.css site/src/styles.css
+          cp source/src/pixel-world.js site/src/pixel-world.js
+          cp source/src/scene-layout.js site/src/scene-layout.js
+          mkdir -p site/assets
+          # The game draws all art in code; only fonts are shipped.
+          cp -r source/assets/fonts site/assets/fonts
           cp source/README.md site/README.md
           touch site/.nojekyll
           test -s site/index.html
@@ -68,6 +103,7 @@ jobs:
           ! grep -qi 'three' site/index.html
 
       - name: Publish clean pixel-art site to gh-pages
+        if: github.event_name != 'pull_request'
         working-directory: site
         run: |
           git config user.name "github-actions[bot]"

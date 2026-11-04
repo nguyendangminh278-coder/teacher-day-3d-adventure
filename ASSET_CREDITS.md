@@ -52,3 +52,23 @@ V17 also uses Three.js physically based glass, soft contact shadows, high-qualit
 
 ## Runtime
 Three.js and GLTFLoader are bundled into the local `dist/game.min.js` during GitHub Actions. The public site does not require a third-party JavaScript CDN at runtime. Nature, furniture, HDRI, PBR textures and V17 model assets are stored locally in the deployed `gh-pages` build.
+
+
+## Illustrated pixel edition (2026-11-04)
+
+The local PNG assets in `assets/illustrations/` were generated with the built-in image_gen tool, using the user-supplied reference image for visual direction. See `docs/ILLUSTRATED_ASSETS.md` for the prompt set and scene mapping. The reference is not loaded at runtime. Earlier model credits below/above apply only to legacy source, not the current 2D game.
+
+
+## Chronological edition
+Local font Be Vietnam Pro from Google Fonts (SIL Open Font License 1.1, included at assets/fonts/OFL.txt). School/house artworks are generated architectural interpretations of the user-provided reference, not redistributed Street View photos. New motion assets and prompts documented in docs/ILLUSTRATED_ASSETS.md.
+
+
+## Latest family reference revision
+Five new runtime PNGs generated with built-in image_gen using the user-provided photos: family-v2, mother-walk-v2, vios-action, vios-rear and home-rooms-v2. Raw family/car photos are not included in source. family-v2 was regenerated once to remove background glow and align standing/walking proportions. See docs/ILLUSTRATED_ASSETS.md for prompt summaries.
+
+
+Flower opening revision: flower-cloud-road.png and mother-walk-v3.png generated with built-in image_gen. Prompts and runtime animation notes are recorded in docs/ILLUSTRATED_ASSETS.md.
+
+
+## Current procedural runtime
+All active scenery, characters, students and vehicles are drawn by original Canvas code in src/pixel-world.js. Runtime visuals require no image assets. The generated-image credits above apply to archived versions. Be Vietnam Pro remains the local font dependency.
